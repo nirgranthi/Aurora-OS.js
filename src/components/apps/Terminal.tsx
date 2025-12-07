@@ -1,11 +1,12 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, ReactNode } from 'react';
 import { useFileSystem } from '../FileSystemContext';
 import { useAppContext } from '../AppContext';
 import { AppTemplate } from './AppTemplate';
+import { FileIcon } from '../ui/FileIcon';
 
 interface CommandHistory {
   command: string;
-  output: string[];
+  output: (string | ReactNode)[];
   error?: boolean;
 }
 
@@ -162,7 +163,7 @@ export function Terminal({ onLaunchApp }: TerminalProps) {
     const command = parts[0];
     const args = parts.slice(1);
 
-    let output: string[] = [];
+    let output: (string | ReactNode)[] = [];
     let error = false;
 
     // 1. Check Built-ins
@@ -209,9 +210,14 @@ export function Terminal({ onLaunchApp }: TerminalProps) {
             });
           } else {
             output = filteredContents.map(node => {
-              const icon = node.type === 'directory' ? '📁' : '📄';
-              const name = node.type === 'directory' ? node.name + '/' : node.name;
-              return `${icon} ${name}`;
+              return (
+                <div key={node.id} className="flex items-center gap-2">
+                  <div className="w-4 h-4 shrink-0 inline-flex items-center justify-center">
+                    <FileIcon name={node.name} type={node.type} accentColor={accentColor} />
+                  </div>
+                  <span>{node.type === 'directory' ? node.name + '/' : node.name}</span>
+                </div>
+              );
             });
           }
         } else {

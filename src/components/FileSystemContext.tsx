@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 
 export interface FileNode {
+  id: string;
   name: string;
   type: 'file' | 'directory';
   content?: string;
@@ -15,6 +16,7 @@ export interface FileNode {
 // Efficient deep clone function for FileNode
 function deepCloneFileNode(node: FileNode): FileNode {
   const cloned: FileNode = {
+    id: node.id,
     name: node.name,
     type: node.type,
     content: node.content,
@@ -32,13 +34,27 @@ function deepCloneFileNode(node: FileNode): FileNode {
   return cloned;
 }
 
-// Efficient deep clone for entire file system
+// Ensure every node has an ID (recursive)
+function ensureIds(node: any): FileNode {
+  if (!node.id) {
+    node.id = crypto.randomUUID();
+  }
+
+  if (node.children) {
+    node.children.forEach((child: any) => ensureIds(child));
+  }
+
+  return node as FileNode;
+}
+
+// Efficient deep clone for entire file system with ID assurance
 function deepCloneFileSystem(root: FileNode): FileNode {
-  return deepCloneFileNode(root);
+  const cloned = deepCloneFileNode(root);
+  return ensureIds(cloned);
 }
 
 // Helper to create a user home directory structure (macOS-inspired)
-function createUserHome(username: string): FileNode {
+function createUserHome(username: string): any {
   return {
     name: username,
     type: 'directory',
@@ -71,6 +87,7 @@ interface FileSystemContextType {
   readFile: (path: string) => string | null;
   listDirectory: (path: string) => FileNode[] | null;
   moveNode: (fromPath: string, toPath: string) => boolean;
+  moveNodeById: (id: string, destParentPath: string) => boolean;
   resolvePath: (path: string) => string;
   resetFileSystem: () => void;
 }
@@ -78,7 +95,8 @@ interface FileSystemContextType {
 const STORAGE_KEY = 'aurora-filesystem';
 
 // Grey Hack / Linux inspired file system hierarchy
-const initialFileSystem: FileNode = {
+// Note: IDs will be injected by ensureIds on load
+const initialFileSystem: any = {
   name: '/',
   type: 'directory',
   permissions: 'drwxr-xr-x',
@@ -329,7 +347,9 @@ function loadFileSystem(): FileNode {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      return JSON.parse(stored);
+      const parsed = JSON.parse(stored);
+      // Ensure IDs exist on stored data (migration)
+      return ensureIds(parsed);
     }
   } catch (e) {
     console.warn('Failed to load filesystem from storage:', e);
@@ -361,6 +381,15 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
   const resolvePath = useCallback((path: string): string => {
     // Handle home shortcut
     let resolved = path.replace(/^~/, homePath);
+
+    // Map top-level user directories for better UX (Desktop OS feel)
+    const userDirs = ['Desktop', 'Documents', 'Downloads', 'Pictures', 'Music', 'Videos'];
+    for (const dir of userDirs) {
+      if (resolved.startsWith(`/${dir}`)) {
+        resolved = resolved.replace(`/${dir}`, `${homePath}/${dir}`);
+        break;
+      }
+    }
 
     // Handle relative paths
     if (!resolved.startsWith('/')) {
@@ -446,6 +475,7 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
     return true;
   }, [resolvePath]);
 
+  // Re-implemented moveNode with strict name check feature
   const moveNode = useCallback((fromPath: string, toPath: string): boolean => {
     const resolvedFrom = resolvePath(fromPath);
     const resolvedTo = resolvePath(toPath);
@@ -456,16 +486,24 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
     // Clone the node to move
     const nodeToMove = deepCloneFileNode(node);
 
-    // Delete from original location
-    const deleteSuccess = deleteNode(resolvedFrom);
-    if (!deleteSuccess) return false;
-
     // Get parent directory of destination
     const toParts = resolvedTo.split('/').filter(p => p);
     const newName = toParts.pop();
     const parentPath = '/' + toParts.join('/');
 
     if (!newName) return false;
+
+    const destParent = getNodeAtPath(parentPath);
+    if (!destParent || destParent.type !== 'directory' || !destParent.children) return false;
+
+    // Check for collision at destination
+    if (destParent.children.some(child => child.name === newName)) {
+      return false;
+    }
+
+    // Delete from original location
+    const deleteSuccess = deleteNode(resolvedFrom);
+    if (!deleteSuccess) return false;
 
     // Update name if moving to different location
     nodeToMove.name = newName;
@@ -490,14 +528,95 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
     });
 
     return true;
-  }, [getNodeAtPath, deleteNode, resolvePath]);
+  }, [getNodeAtPath, deleteNode, resolvePath, fileSystem]);
+
+  // Helper to find node and its parent by ID
+  const findNodeAndParent = useCallback((root: FileNode, targetId: string): { node: FileNode, parent: FileNode } | null => {
+    if (root.children) {
+      for (const child of root.children) {
+        if (child.id === targetId) {
+          return { node: child, parent: root };
+        }
+        if (child.type === 'directory') {
+          const result = findNodeAndParent(child, targetId);
+          if (result) return result;
+        }
+      }
+    }
+    return null;
+  }, []);
+
+  const moveNodeById = useCallback((id: string, destParentPath: string): boolean => {
+    // 1. Find the source node and its parent using ID
+    const result = findNodeAndParent(fileSystem, id);
+    if (!result) return false;
+
+    const { node: nodeToMove } = result;
+    const destParent = getNodeAtPath(resolvePath(destParentPath));
+
+    // 2. Validate destination
+    if (!destParent || destParent.type !== 'directory' || !destParent.children) return false;
+
+    // 3. Collision Check: Don't overwrite existing name at destination
+    if (destParent.children.some(child => child.name === nodeToMove.name)) {
+      return false;
+    }
+
+    // 4. Perform Move
+    setFileSystem(prevFS => {
+      const newFS = deepCloneFileSystem(prevFS);
+
+      const findInClone = (root: FileNode): { node: FileNode, parent: FileNode } | null => {
+        if (root.children) {
+          for (const child of root.children) {
+            if (child.id === id) return { node: child, parent: root };
+            if (child.type === 'directory') {
+              const res = findInClone(child);
+              if (res) return res;
+            }
+          }
+        }
+        return null;
+      };
+
+      const sourceRes = findInClone(newFS);
+      if (!sourceRes) return newFS;
+
+      const { node: cloneNode, parent: cloneSourceParent } = sourceRes;
+
+      const destResolved = resolvePath(destParentPath);
+      const destParts = destResolved.split('/').filter(p => p);
+      let cloneDestParent = newFS;
+      for (const part of destParts) {
+        if (cloneDestParent.children) {
+          const found = cloneDestParent.children.find(c => c.name === part);
+          if (found) cloneDestParent = found;
+        }
+      }
+
+      if (!cloneDestParent.children) return newFS;
+
+      cloneSourceParent.children = cloneSourceParent.children!.filter(c => c.id !== id);
+      cloneDestParent.children.push(cloneNode);
+
+      return newFS;
+    });
+
+    return true;
+  }, [fileSystem, resolvePath, getNodeAtPath, findNodeAndParent]);
 
   const createFile = useCallback((path: string, name: string, content: string = ''): boolean => {
     const resolved = resolvePath(path);
     const node = getNodeAtPath(resolved);
-    if (!node || node.type !== 'directory') return false;
+    if (!node || node.type !== 'directory' || !node.children) return false;
+
+    // Check for existing node (file OR directory) with same name
+    if (node.children.some(child => child.name === name)) {
+      return false;
+    }
 
     const newFile: FileNode = {
+      id: crypto.randomUUID(),
       name,
       type: 'file',
       content,
@@ -530,9 +649,15 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
   const createDirectory = useCallback((path: string, name: string): boolean => {
     const resolved = resolvePath(path);
     const node = getNodeAtPath(resolved);
-    if (!node || node.type !== 'directory') return false;
+    if (!node || node.type !== 'directory' || !node.children) return false;
+
+    // Check for existing node (file OR directory) with same name
+    if (node.children.some(child => child.name === name)) {
+      return false;
+    }
 
     const newDir: FileNode = {
+      id: crypto.randomUUID(),
       name,
       type: 'directory',
       children: [],
@@ -548,7 +673,7 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
 
       for (const part of parts) {
         if (current.children) {
-          current = current.children.find((child: FileNode) => child.name === part)!;
+          current = current.children.find(child => child.name === part)!;
         }
       }
 
@@ -591,7 +716,6 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
     return true;
   }, [resolvePath]);
 
-
   return (
     <FileSystemContext.Provider
       value={{
@@ -608,6 +732,7 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
         readFile,
         listDirectory,
         moveNode,
+        moveNodeById,
         resolvePath,
         resetFileSystem,
       }}
@@ -624,4 +749,3 @@ export function useFileSystem() {
   }
   return context;
 }
-

@@ -10,25 +10,27 @@ import {
   Grid3x3,
   List,
   Monitor,
-  File,
   Music,
   Image,
-  Film,
   Trash2,
   Settings,
   Home
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { useAppContext } from './AppContext';
-import { lightenColor } from '../utils/colors';
 import { AppTemplate } from './apps/AppTemplate';
 import { ResponsiveGrid } from './ui/ResponsiveGrid';
 import { useFileSystem, FileNode } from './FileSystemContext';
 import { useAppStorage } from '../hooks/useAppStorage';
 import { useElementSize } from '../hooks/useElementSize';
+import { FileIcon } from './ui/FileIcon';
 
 export function FileManager({ initialPath }: { initialPath?: string }) {
   const { accentColor } = useAppContext();
-  const { listDirectory, homePath } = useFileSystem();
+  // Drag and Drop Logic
+  const [dragTargetId, setDragTargetId] = useState<string | null>(null);
+  const { listDirectory, homePath, moveNodeById } = useFileSystem();
+
   const [containerRef, { width }] = useElementSize();
   const isMobile = width < 450;
 
@@ -55,13 +57,10 @@ export function FileManager({ initialPath }: { initialPath?: string }) {
         if (a.type !== 'directory' && b.type === 'directory') return 1;
         return a.name.localeCompare(b.name);
       });
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- Data fetching pattern
       setItems(sorted);
     } else {
-
       setItems([]);
     }
-
     setSelectedItem(null);
   }, [currentPath, listDirectory]);
 
@@ -106,50 +105,82 @@ export function FileManager({ initialPath }: { initialPath?: string }) {
     return parts[parts.length - 1] || '/';
   };
 
-  // Get icon for file type
-  const getFileIcon = (item: FileNode) => {
+  const handleDragStart = (e: React.DragEvent, item: FileNode) => {
+    e.dataTransfer.setData('application/json', JSON.stringify({
+      id: item.id,
+      name: item.name,
+      type: item.type
+    }));
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, item: FileNode) => {
+    e.preventDefault(); // allow drop
     if (item.type === 'directory') {
-      // Special folder icons
-      if (item.name === '.Trash') return <Trash2 className="w-8 h-8" style={{ color: accentColor }} />;
-      if (item.name === 'Config') return <Settings className="w-8 h-8" style={{ color: accentColor }} />;
-      return null; // Use folder SVG
+      e.dataTransfer.dropEffect = 'move';
+      setDragTargetId(item.id);
+    } else {
+      e.dataTransfer.dropEffect = 'none';
+      setDragTargetId(null);
     }
-
-    // File type icons based on extension or name
-    const name = item.name.toLowerCase();
-    if (name.endsWith('.mp3') || name.endsWith('.wav') || name.endsWith('.flac')) {
-      return <Music className="w-8 h-8 text-pink-400" />;
-    }
-    if (name.endsWith('.jpg') || name.endsWith('.png') || name.endsWith('.gif') || name.endsWith('.webp')) {
-      return <Image className="w-8 h-8 text-green-400" />;
-    }
-    if (name.endsWith('.mp4') || name.endsWith('.mov') || name.endsWith('.avi')) {
-      return <Film className="w-8 h-8 text-purple-400" />;
-    }
-    if (name.endsWith('.pdf')) {
-      return <FileText className="w-8 h-8 text-red-400" />;
-    }
-    return <File className="w-8 h-8 text-white/60" />;
   };
 
-  const getFolderIcon = () => {
-    const lightAccent = lightenColor(accentColor, 20);
-
-    return (
-      <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M12 18C12 15.7909 13.7909 14 16 14H32L37 21H64C66.2091 21 68 22.7909 68 25V62C68 64.2091 66.2091 66 64 66H16C13.7909 66 12 64.2091 12 62V18Z"
-          fill="url(#folder-gradient)"
-        />
-        <defs>
-          <linearGradient id="folder-gradient" x1="40" y1="14" x2="40" y2="66" gradientUnits="userSpaceOnUse">
-            <stop stopColor={lightAccent} />
-            <stop offset="1" stopColor={accentColor} />
-          </linearGradient>
-        </defs>
-      </svg>
-    );
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragTargetId(null);
   };
+
+  const handleDrop = (e: React.DragEvent, targetItem: FileNode) => {
+    e.preventDefault();
+    setDragTargetId(null);
+
+    if (targetItem.type !== 'directory') return;
+
+    try {
+      const data = JSON.parse(e.dataTransfer.getData('application/json'));
+      if (data.id && data.id !== targetItem.id) {
+        // Resolve destination path (currentPath + targetName)
+        const destPath = currentPath === '/'
+          ? `/${targetItem.name}`
+          : `${currentPath}/${targetItem.name}`;
+
+        // Execute robust ID-based move
+        moveNodeById(data.id, destPath);
+      }
+    } catch (err) {
+      console.error('Failed to parse drag data', err);
+    }
+  };
+
+  // Sidebar Drop Logic
+  const handleSidebarDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleSidebarDrop = (e: React.DragEvent, targetPath: string) => {
+    e.preventDefault();
+    try {
+      const data = JSON.parse(e.dataTransfer.getData('application/json'));
+      if (data.id) {
+        const success = moveNodeById(data.id, targetPath);
+        if (success) {
+          toast.success(`Moved to ${targetPath.split('/').pop()}`);
+        } else {
+          toast.error(`Could not move to ${targetPath.split('/').pop()}`);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to drop on sidebar', err);
+      toast.error('Failed to process drop');
+    }
+  };
+
+  // Helper to create sidebar action props
+  const sidebarDropProps = (path: string) => ({
+    onDragOver: handleSidebarDragOver,
+    onDrop: (e: React.DragEvent) => handleSidebarDrop(e, path)
+  });
 
   // Sidebar configuration
   const fileManagerSidebar = {
@@ -157,26 +188,86 @@ export function FileManager({ initialPath }: { initialPath?: string }) {
       {
         title: 'Favourites',
         items: [
-          { id: 'home', icon: Home, label: 'Home', action: () => navigateTo(homePath) },
-          { id: 'desktop', icon: Monitor, label: 'Desktop', action: () => navigateTo(`${homePath}/Desktop`) },
-          { id: 'documents', icon: FileText, label: 'Documents', action: () => navigateTo(`${homePath}/Documents`) },
-          { id: 'downloads', icon: Download, label: 'Downloads', action: () => navigateTo(`${homePath}/Downloads`) },
-          { id: 'pictures', icon: Image, label: 'Pictures', action: () => navigateTo(`${homePath}/Pictures`) },
-          { id: 'music', icon: Music, label: 'Music', action: () => navigateTo(`${homePath}/Music`) },
+          {
+            id: 'home',
+            icon: Home,
+            label: 'Home',
+            action: () => navigateTo(homePath),
+            ...sidebarDropProps(homePath)
+          },
+          {
+            id: 'desktop',
+            icon: Monitor,
+            label: 'Desktop',
+            action: () => navigateTo(`${homePath}/Desktop`),
+            ...sidebarDropProps(`${homePath}/Desktop`)
+          },
+          {
+            id: 'documents',
+            icon: FileText,
+            label: 'Documents',
+            action: () => navigateTo(`${homePath}/Documents`),
+            ...sidebarDropProps(`${homePath}/Documents`)
+          },
+          {
+            id: 'downloads',
+            icon: Download,
+            label: 'Downloads',
+            action: () => navigateTo(`${homePath}/Downloads`),
+            ...sidebarDropProps(`${homePath}/Downloads`)
+          },
+          {
+            id: 'pictures',
+            icon: Image,
+            label: 'Pictures',
+            action: () => navigateTo(`${homePath}/Pictures`),
+            ...sidebarDropProps(`${homePath}/Pictures`)
+          },
+          {
+            id: 'music',
+            icon: Music,
+            label: 'Music',
+            action: () => navigateTo(`${homePath}/Music`),
+            ...sidebarDropProps(`${homePath}/Music`)
+          },
         ]
       },
       {
         title: 'System',
         items: [
-          { id: 'root', icon: HardDrive, label: '/', action: () => navigateTo('/') },
-          { id: 'usr', icon: FolderOpen, label: '/usr', action: () => navigateTo('/usr') },
-          { id: 'etc', icon: Settings, label: '/etc', action: () => navigateTo('/etc') },
+          {
+            id: 'root',
+            icon: HardDrive,
+            label: '/',
+            action: () => navigateTo('/'),
+            ...sidebarDropProps('/')
+          },
+          {
+            id: 'usr',
+            icon: FolderOpen,
+            label: '/usr',
+            action: () => navigateTo('/usr'),
+            ...sidebarDropProps('/usr')
+          },
+          {
+            id: 'etc',
+            icon: Settings,
+            label: '/etc',
+            action: () => navigateTo('/etc'),
+            ...sidebarDropProps('/etc')
+          },
         ]
       },
       {
         title: 'Locations',
         items: [
-          { id: 'trash', icon: Trash2, label: 'Trash', action: () => navigateTo(`${homePath}/.Trash`) },
+          {
+            id: 'trash',
+            icon: Trash2,
+            label: 'Trash',
+            action: () => navigateTo(`${homePath}/.Trash`),
+            ...sidebarDropProps(`${homePath}/.Trash`)
+          },
         ]
       },
     ]
@@ -239,21 +330,23 @@ export function FileManager({ initialPath }: { initialPath?: string }) {
         <ResponsiveGrid minItemWidth={110} className="gap-6">
           {items.map((item) => (
             <button
-              key={item.name}
-              onClick={() => setSelectedItem(item.name)}
+              key={item.id}
+              onClick={() => setSelectedItem(item.id)}
               onDoubleClick={() => handleItemDoubleClick(item)}
-              className={`flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-white/5 transition-colors group ${selectedItem === item.name ? 'bg-white/10' : ''
-                }`}
+              draggable
+              onDragStart={(e) => handleDragStart(e, item)}
+              onDragOver={(e) => handleDragOver(e, item)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, item)}
+              className={`flex flex-col items-center gap-2 p-3 rounded-lg transition-colors group relative
+              ${selectedItem === item.id ? 'bg-white/10' : 'hover:bg-white/5'}
+              ${dragTargetId === item.id ? 'bg-blue-500/20 ring-2 ring-blue-500' : ''}`}
             >
-              <div className="w-20 h-20 flex items-center justify-center">
-                {item.type === 'directory' ? (
-                  getFileIcon(item) || getFolderIcon()
-                ) : (
-                  getFileIcon(item)
-                )}
+              <div className="w-20 h-20 flex items-center justify-center pointer-events-none">
+                <FileIcon name={item.name} type={item.type} accentColor={accentColor} />
               </div>
-              <div className="w-full text-center">
-                <div className="text-sm text-white/90 truncate px-1">
+              <div className="w-full text-center pointer-events-none">
+                <div className="text-sm text-white/90 truncate px-1 w-full">
                   {item.name}
                 </div>
                 {item.type === 'directory' && item.children && (
@@ -269,29 +362,31 @@ export function FileManager({ initialPath }: { initialPath?: string }) {
         <div className="flex flex-col gap-1">
           {items.map((item) => (
             <button
-              key={item.name}
-              onClick={() => setSelectedItem(item.name)}
+              key={item.id}
+              onClick={() => setSelectedItem(item.id)}
               onDoubleClick={() => handleItemDoubleClick(item)}
-              className={`flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors ${selectedItem === item.name ? 'bg-white/10' : ''
-                }`}
+              draggable
+              onDragStart={(e) => handleDragStart(e, item)}
+              onDragOver={(e) => handleDragOver(e, item)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, item)}
+              className={`flex items-center gap-3 p-2 rounded-lg transition-colors 
+              ${selectedItem === item.id ? 'bg-white/10' : 'hover:bg-white/5'}
+              ${dragTargetId === item.id ? 'bg-blue-500/20 ring-1 ring-blue-500' : ''}`}
             >
-              <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                {item.type === 'directory' ? (
-                  <FolderOpen className="w-5 h-5" style={{ color: accentColor }} />
-                ) : (
-                  getFileIcon(item)
-                )}
+              <div className="w-8 h-8 flex items-center justify-center shrink-0 pointer-events-none">
+                <FileIcon name={item.name} type={item.type} accentColor={accentColor} />
               </div>
-              <div className="flex-1 text-left min-w-0">
+              <div className="flex-1 text-left min-w-0 pointer-events-none">
                 <div className="text-sm text-white/90 truncate">{item.name}</div>
               </div>
-              <div className="text-xs text-white/40 shrink-0">
+              <div className="text-xs text-white/40 shrink-0 pointer-events-none">
                 {item.type === 'directory'
                   ? `${item.children?.length || 0} items`
                   : item.size ? `${item.size} bytes` : ''}
               </div>
               {item.permissions && !isMobile && (
-                <div className="text-xs text-white/50 font-mono shrink-0 whitespace-nowrap text-right min-w-[90px]">
+                <div className="text-xs text-white/50 font-mono shrink-0 whitespace-nowrap text-right min-w-[90px] pointer-events-none">
                   {item.permissions}
                 </div>
               )}

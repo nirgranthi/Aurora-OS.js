@@ -15,6 +15,7 @@ import { PlaceholderApp } from './components/apps/PlaceholderApp';
 import { AppProvider } from './components/AppContext';
 import { FileSystemProvider, useFileSystem } from './components/FileSystemContext';
 import { Toaster } from './components/ui/sonner';
+import { getGridConfig, gridToPixel, pixelToGrid, findNextFreeCell, gridPosToKey, rearrangeGrid, type GridPosition } from './utils/gridSystem';
 
 export interface WindowState {
   id: string;
@@ -35,24 +36,25 @@ export interface DesktopIcon {
 }
 
 const POSITIONS_STORAGE_KEY = 'aurora-os-desktop-positions';
-const LEGACY_ICONS_KEY = 'aurora-os-desktop-icons';
 
-function loadIconPositions(): Record<string, { x: number; y: number }> {
+// Load icon positions (supports both pixel and grid formats with migration)
+function loadIconPositions(): Record<string, GridPosition> {
   try {
     const stored = localStorage.getItem(POSITIONS_STORAGE_KEY);
     if (stored) {
-      return JSON.parse(stored);
-    }
+      const data = JSON.parse(stored);
+      const firstKey = Object.keys(data)[0];
 
-    // Migration from old array format
-    const legacy = localStorage.getItem(LEGACY_ICONS_KEY);
-    if (legacy) {
-      const icons = JSON.parse(legacy);
-      const positions: Record<string, { x: number; y: number }> = {};
-      icons.forEach((icon: { name: string; position: { x: number; y: number } }) => {
-        positions[icon.name] = icon.position;
-      });
-      return positions;
+      // Check if data is in old pixel format and convert
+      if (firstKey && data[firstKey] && typeof data[firstKey].x === 'number') {
+        const config = getGridConfig(window.innerWidth, window.innerHeight);
+        const gridPositions: Record<string, GridPosition> = {};
+        Object.entries(data).forEach(([key, pos]: [string, any]) => {
+          gridPositions[key] = pixelToGrid(pos.x, pos.y, config);
+        });
+        return gridPositions;
+      }
+      return data;
     }
   } catch (e) {
     console.warn('Failed to load desktop positions:', e);
@@ -61,41 +63,76 @@ function loadIconPositions(): Record<string, { x: number; y: number }> {
 }
 
 function OS() {
-  // Windows reset on refresh (not persisted)
   const [windows, setWindows] = useState<WindowState[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const topZIndexRef = useRef(100);
 
-  // FileSystem Integration
-  const { listDirectory, resolvePath, getNodeAtPath } = useFileSystem();
+  // Track window size for responsive icon positioning
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight
+  });
 
-  // Icon Positions State
-  const [iconPositions, setIconPositions] = useState<Record<string, { x: number; y: number }>>(loadIconPositions);
-
-  // Save positions when they change
+  // Update window size on resize
   useEffect(() => {
-    localStorage.setItem(POSITIONS_STORAGE_KEY, JSON.stringify(iconPositions));
-  }, [iconPositions]);
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
-  // Derive desktop icons from filesystem + positions
+  const { listDirectory, resolvePath, getNodeAtPath, moveNode, moveNodeById } = useFileSystem();
+
+  // Grid-based Icon Positions State
+  const [iconGridPositions, setIconGridPositions] = useState<Record<string, GridPosition>>(loadIconPositions);
+
+  // Save grid positions when they change
+  useEffect(() => {
+    localStorage.setItem(POSITIONS_STORAGE_KEY, JSON.stringify(iconGridPositions));
+  }, [iconGridPositions]);
+
+  // Derive desktop icons from filesystem + grid positions
   const desktopIcons = useMemo(() => {
     const desktopPath = resolvePath('~/Desktop');
     const files = listDirectory(desktopPath) || [];
+    const config = getGridConfig(windowSize.width, windowSize.height);
 
-    return files.map((file, index) => {
-      const storedPos = iconPositions[file.name];
-      const defaultPos = { x: 100, y: 80 + index * 120 }; // Simple vertical layout
+    const icons: DesktopIcon[] = [];
+    const occupiedCells = new Set<string>();
+    const newPositions: Record<string, GridPosition> = {};
 
-      return {
-        id: file.name, // Use filename as ID
+    // Process all files - use existing grid positions or find new ones
+    files.forEach(file => {
+      let gridPos = iconGridPositions[file.id];
+
+      if (!gridPos) {
+        // Find next free cell for new icons
+        gridPos = findNextFreeCell(occupiedCells, config, windowSize.height);
+        newPositions[file.id] = gridPos;
+      }
+
+      // Convert grid to pixel for rendering
+      const pixelPos = gridToPixel(gridPos, config);
+
+      icons.push({
+        id: file.id,
         name: file.name,
         type: file.type === 'directory' ? 'folder' : 'file',
-        position: storedPos || defaultPos,
-      } as DesktopIcon;
-    });
-  }, [listDirectory, resolvePath, iconPositions]);
+        position: pixelPos
+      });
 
-  // Ref to break circular dependency in openWindow (Terminal calling openWindow)
+      occupiedCells.add(gridPosToKey(gridPos));
+    });
+
+    // Save any new positions
+    if (Object.keys(newPositions).length > 0) {
+      setIconGridPositions(prev => ({ ...prev, ...newPositions }));
+    }
+
+    return icons;
+  }, [listDirectory, resolvePath, iconGridPositions, windowSize]);
+
   const openWindowRef = useRef<(type: string, data?: { path?: string }) => void>(() => { });
 
   const openWindow = useCallback((type: string, data?: { path?: string }) => {
@@ -129,7 +166,6 @@ function OS() {
         break;
       case 'terminal':
         title = 'Terminal';
-        // Use ref to avoid circular dependency in useCallback
         content = <Terminal onLaunchApp={(id, args) => openWindowRef.current(id, { path: args?.[0] })} />;
         break;
       default:
@@ -152,9 +188,8 @@ function OS() {
       };
       return [...prevWindows, newWindow];
     });
-  }, []); // Stable dependency
+  }, []);
 
-  // Update ref
   useEffect(() => {
     openWindowRef.current = openWindow;
   }, [openWindow]);
@@ -183,7 +218,7 @@ function OS() {
 
       return updated;
     });
-  }, []); // topZIndexRef is stable
+  }, []);
 
   const maximizeWindow = useCallback((id: string) => {
     setWindows(prevWindows => prevWindows.map(w =>
@@ -208,28 +243,86 @@ function OS() {
   }, []);
 
   const updateIconPosition = useCallback((id: string, position: { x: number; y: number }) => {
-    setIconPositions(prev => ({
-      ...prev,
-      [id]: position
-    }));
-  }, []);
+    const config = getGridConfig(window.innerWidth, window.innerHeight);
+    const targetGridPos = pixelToGrid(position.x, position.y, config);
+    const targetCellKey = gridPosToKey(targetGridPos);
+
+    // Check if another icon occupies this grid cell
+    const conflictingIcon = desktopIcons.find(icon => {
+      const iconGridPos = iconGridPositions[icon.id];
+      // Check if grid positions match (excluding self)
+      return icon.id !== id && iconGridPos && gridPosToKey(iconGridPos) === targetCellKey;
+    });
+
+    if (conflictingIcon) {
+      // Check if conflicting item is a folder AND we are strictly overlapping the icon graphic
+      if (conflictingIcon.type === 'folder') {
+        const targetPixelPos = gridToPixel(iconGridPositions[conflictingIcon.id], config);
+
+        // Calculate centers
+        // Icon graphic is roughly centered in 100x120 cell, ~50px down
+        const targetCenter = { x: targetPixelPos.x + 50, y: targetPixelPos.y + 50 };
+        const dragCenter = { x: position.x + 50, y: position.y + 50 };
+
+        const dx = targetCenter.x - dragCenter.x;
+        const dy = targetCenter.y - dragCenter.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        // If dropped close to center of folder (within 35px radius), move IT IN
+        if (distance < 35) {
+          const sourceIcon = desktopIcons.find(i => i.id === id);
+          if (sourceIcon) {
+            // Use ID-based move for robustness (avoids name ambiguity)
+            const destParentPath = resolvePath(`~/Desktop/${conflictingIcon.name}`);
+
+            moveNodeById(id, destParentPath);
+
+            // Clean up grid position for moved item safely
+            setIconGridPositions(prev => {
+              const next = { ...prev };
+              delete next[id];
+              return next;
+            });
+            return; // Done
+          }
+        }
+      }
+
+      // Auto-rearrange: grid conflict detected but not moving into folder
+      const allIconIds = desktopIcons.map(i => i.id);
+      const newPositions = rearrangeGrid(
+        allIconIds,
+        iconGridPositions,
+        id,
+        targetGridPos,
+        windowSize.height,
+        config
+      );
+      setIconGridPositions(newPositions);
+    } else {
+      // No conflict - just update the position
+      setIconGridPositions(prev => ({
+        ...prev,
+        [id]: targetGridPos
+      }));
+    }
+  }, [desktopIcons, iconGridPositions, windowSize, resolvePath, moveNode, moveNodeById]);
 
   const toggleNotifications = useCallback(() => {
     setShowNotifications(prev => !prev);
   }, []);
 
-  const handleIconDoubleClick = useCallback((id: string) => {
-    // Check if item is a folder to open path
-    const path = resolvePath(`~/Desktop/${id}`);
+  const handleIconDoubleClick = useCallback((iconId: string) => {
+    const icon = desktopIcons.find(i => i.id === iconId);
+    if (!icon) return;
+
+    const path = resolvePath(`~/Desktop/${icon.name}`);
     const node = getNodeAtPath(path);
 
     if (node?.type === 'directory') {
       openWindow('finder', { path });
-    } else {
-      // For now, doing nothing for files, or could open Finder at desktop
-      // Future: Open file with appropriate app
     }
-  }, [resolvePath, getNodeAtPath, openWindow]);
+  }, [desktopIcons, resolvePath, getNodeAtPath, openWindow]);
 
   const focusedWindowId = useMemo(() => {
     if (windows.length === 0) return null;

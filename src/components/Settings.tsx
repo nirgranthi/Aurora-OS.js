@@ -55,7 +55,9 @@ export function Settings() {
     reduceMotion,
     setReduceMotion,
     disableShadows,
-    setDisableShadows
+    setDisableShadows,
+    disableGradients,
+    setDisableGradients
   } = useAppContext();
   const [customColor, setCustomColor] = useState(accentColor);
 
@@ -297,7 +299,7 @@ export function Settings() {
           </div>
 
           {/* Disable Shadows Toggle */}
-          <div className="bg-black/20 rounded-xl p-6 border border-white/5">
+          <div className="bg-black/20 rounded-xl p-6 border border-white/5 mb-6">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg text-white mb-1">Disable Shadows</h3>
@@ -308,6 +310,22 @@ export function Settings() {
               <Checkbox
                 checked={disableShadows}
                 onCheckedChange={(checked) => setDisableShadows(checked === true)}
+              />
+            </div>
+          </div>
+
+          {/* Disable Gradients Toggle */}
+          <div className="bg-black/20 rounded-xl p-6 border border-white/5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg text-white mb-1">Disable Gradients</h3>
+                <p className="text-sm text-white/60">
+                  Use solid colors instead of gradients for icons
+                </p>
+              </div>
+              <Checkbox
+                checked={disableGradients}
+                onCheckedChange={(checked) => setDisableGradients(checked === true)}
               />
             </div>
           </div>

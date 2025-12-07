@@ -13,6 +13,8 @@ interface AppContextType {
   setReduceMotion: (enabled: boolean) => void;
   disableShadows: boolean;
   setDisableShadows: (enabled: boolean) => void;
+  disableGradients: boolean;
+  setDisableGradients: (enabled: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -25,6 +27,7 @@ interface StoredSettings {
   blurEnabled: boolean;
   reduceMotion: boolean;
   disableShadows: boolean;
+  disableGradients: boolean;
 }
 
 function loadSettings(): StoredSettings {
@@ -43,6 +46,7 @@ function loadSettings(): StoredSettings {
     blurEnabled: true,
     reduceMotion: false,
     disableShadows: false,
+    disableGradients: false,
   };
 }
 
@@ -57,7 +61,7 @@ function saveSettings(settings: StoredSettings) {
 export function AppProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<StoredSettings>(() => loadSettings());
 
-  const { accentColor, themeMode, blurEnabled, reduceMotion, disableShadows } = settings;
+  const { accentColor, themeMode, blurEnabled, reduceMotion, disableShadows, disableGradients } = settings;
 
   // Save settings whenever they change
   useEffect(() => {
@@ -69,6 +73,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const setBlurEnabled = (enabled: boolean) => setSettings(s => ({ ...s, blurEnabled: enabled }));
   const setReduceMotion = (enabled: boolean) => setSettings(s => ({ ...s, reduceMotion: enabled }));
   const setDisableShadows = (enabled: boolean) => setSettings(s => ({ ...s, disableShadows: enabled }));
+  const setDisableGradients = (enabled: boolean) => setSettings(s => ({ ...s, disableGradients: enabled }));
 
   // Sync accent color to CSS variable for global theming
   useEffect(() => {
@@ -91,7 +96,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       reduceMotion,
       setReduceMotion,
       disableShadows,
-      setDisableShadows
+      setDisableShadows,
+      disableGradients,
+      setDisableGradients
     }}>
       {children}
     </AppContext.Provider>

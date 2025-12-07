@@ -1,0 +1,148 @@
+import {
+    FileText,
+    Music,
+    Image,
+    Film,
+    Trash2,
+    Settings
+} from 'lucide-react';
+import { lightenColor } from '../../utils/colors';
+import { useAppContext } from '../AppContext';
+
+interface FileIconProps {
+    name: string;
+    type: 'directory' | 'file' | 'folder';
+    accentColor?: string;
+    className?: string; // For sizing, e.g. "w-8 h-8"
+}
+
+export function FileIcon({ name, type, accentColor = '#3b82f6', className = "w-full h-full" }: FileIconProps) {
+    const { disableGradients } = useAppContext();
+    const isDirectory = type === 'directory' || type === 'folder';
+
+    // Standardized padding style to scale icons to 70% (100% - 15%*2)
+    // Matches folder graphic size (56/80 approx 70%)
+    // Using style for percentage padding to ensure it works across all container sizes
+    const iconStyle = { padding: '15%', boxSizing: 'border-box' as const };
+
+    // Generate unique ID for gradient
+    // We utilize a deterministic ID based on name where possible to avoid hydration mismatch if this were SSR
+    // But for client side purely, this is fine.
+    const uniqueId = `${name.replace(/\s+/g, '-')}-${Math.random().toString(36).substr(2, 9)}`;
+
+    // Gradient Logic
+    const lightAccent = lightenColor(accentColor, 20);
+    const folderGradientId = `folder-gradient-${uniqueId}`;
+    const strokeGradientId = `stroke-gradient-${uniqueId}`;
+
+    if (isDirectory) {
+        // Special folder icons (Trash, Config) now use Gradients on Stroke
+        if (name === '.Trash' || name === 'Config') {
+            if (disableGradients) {
+                return name === '.Trash'
+                    ? <Trash2 className={className} strokeWidth={1.5} style={{ ...iconStyle, color: accentColor }} />
+                    : <Settings className={className} strokeWidth={1.5} style={{ ...iconStyle, color: accentColor }} />;
+            }
+            return (
+                <>
+                    <svg width="0" height="0" style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }}>
+                        <defs>
+                            <linearGradient id={strokeGradientId} x1="0" y1="0" x2="0" y2="24" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%" stopColor={lightAccent} />
+                                <stop offset="100%" stopColor={accentColor} />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    {name === '.Trash'
+                        ? <Trash2 className={className} strokeWidth={1.5} style={{ ...iconStyle, stroke: `url(#${strokeGradientId})` }} />
+                        : <Settings className={className} strokeWidth={1.5} style={{ ...iconStyle, stroke: `url(#${strokeGradientId})` }} />
+                    }
+                </>
+            );
+        }
+
+        // Default Folder Icon (SVG Gradient Fill)
+        return (
+            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+                <path
+                    d="M12 18C12 15.7909 13.7909 14 16 14H32L37 21H64C66.2091 21 68 22.7909 68 25V62C68 64.2091 66.2091 66 64 66H16C13.7909 66 12 64.2091 12 62V18Z"
+                    fill={disableGradients ? accentColor : `url(#${folderGradientId})`}
+                />
+                {!disableGradients && (
+                    <defs>
+                        <linearGradient id={folderGradientId} x1="40" y1="14" x2="40" y2="66" gradientUnits="userSpaceOnUse">
+                            <stop stopColor={lightAccent} />
+                            <stop offset="1" stopColor={accentColor} />
+                        </linearGradient>
+                    </defs>
+                )}
+            </svg>
+        );
+    }
+
+    // Generic Icon Gradient Definition (reused for files)
+    const renderIconWithGradient = (IconComponent: any, colorClass?: string) => {
+        if (disableGradients) {
+            return <IconComponent
+                className={`${className} ${colorClass || ''}`}
+                strokeWidth={1.5}
+                style={{ ...iconStyle, color: colorClass ? undefined : accentColor }}
+            />;
+        }
+
+        return (
+            <>
+                <svg width="0" height="0" style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }}>
+                    <defs>
+                        <linearGradient id={strokeGradientId} x1="0" y1="0" x2="0" y2="24" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stopColor={lightAccent} />
+                            <stop offset="100%" stopColor={accentColor} />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <IconComponent
+                    className={`${className} ${colorClass || ''}`}
+                    strokeWidth={1.5}
+                    style={{ ...iconStyle, stroke: colorClass ? undefined : `url(#${strokeGradientId})` }}
+                />
+            </>
+        );
+    };
+
+    // File type icons based on extension
+    const lowerName = name.toLowerCase();
+
+    if (lowerName.endsWith('.mp3') || lowerName.endsWith('.wav') || lowerName.endsWith('.flac')) {
+        // Keep specific colors for media types, but maybe apply gradient if desired? 
+        // User asked for "standard standard icons, reactive to accent color".
+        // But previously we had colored icons (Pink Music, etc).
+        // User said: "All icons in Finder... same gradient logic I see on folder".
+        // Use gradient on stroke for EVERYTHING?
+        // Let's assume generic text files definitely need it. 
+        // Media files might stay colored OR use the gradient. The prompt "reactive to accent color" implies uniformity.
+        // Applying gradient everywhere for maximum consistency as per "standardize this across all icons".
+        // Actually, if I remove 'text-pink-400' and use gradient, it becomes accent-colored.
+        // Let's stick to the specific colors for media (Standard OS behavior) BUT applies gradient?
+        // Valid interpretation: Media icons keep their distinct color (Pink) but maybe gradient??
+        // Simpler: Just apply the Accent Gradient to Generic/Text/Trash/Settings. Keep Media distinct if they are distinct.
+        // Re-reading: "make this the standard icon for text files... It also should comply to the accent color... standardize scale... apply same gradient logic"
+        // Most conservative fit: Apply accent gradient to generic files. Keep legacy colors for media UNLESS specifically asked?
+        // "reactive to accent color - the size in Terminal is good right now".
+        // I will use `renderIconWithGradient` but PASS the color class if it exists?
+        // Wait, if I pass a color class (text-pink-400), `stroke` is set via CSS class `stroke-current`.
+        // If I set `style={{ stroke: url(...) }}` it overrides class.
+        // I will maintain distinct colors for media (Pink, Green, Purple) but Apply the Gradient TO THEM?
+        // No, `lightAccent` is based on `accentColor`. If I apply that to a Pink icon, it becomes Blue-ish.
+        // So I will only apply the accent gradient to the Default/Generic icons + System icons.
+        return renderIconWithGradient(Music, 'text-pink-400');
+    }
+    if (lowerName.endsWith('.jpg') || lowerName.endsWith('.png') || lowerName.endsWith('.gif') || lowerName.endsWith('.webp')) {
+        return renderIconWithGradient(Image, 'text-green-400');
+    }
+    if (lowerName.endsWith('.mp4') || lowerName.endsWith('.mov') || lowerName.endsWith('.avi')) {
+        return renderIconWithGradient(Film, 'text-purple-400');
+    }
+
+    // Default generic/text file icon -> Accent Gradient
+    return renderIconWithGradient(FileText);
+}

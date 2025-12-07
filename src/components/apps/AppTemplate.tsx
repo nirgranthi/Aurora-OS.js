@@ -15,6 +15,10 @@ interface AppTemplateProps {
         icon: LucideIcon;
         badge?: string;
         action?: () => void;
+        // Drag and drop support
+        onDrop?: (e: React.DragEvent) => void;
+        onDragOver?: (e: React.DragEvent) => void;
+        onDragLeave?: (e: React.DragEvent) => void;
       }[];
     }[];
   };
@@ -85,6 +89,9 @@ export function AppTemplate({
                     <button
                       key={item.id}
                       onClick={() => item.action ? item.action() : onItemClick?.(item.id)}
+                      onDrop={item.onDrop}
+                      onDragOver={item.onDragOver}
+                      onDragLeave={item.onDragLeave}
                       className={cn(
                         "w-full flex items-center gap-2.5 px-2.5 py-1.5 text-sm rounded-md transition-colors group",
                         isCompact ? "justify-center" : "justify-start",

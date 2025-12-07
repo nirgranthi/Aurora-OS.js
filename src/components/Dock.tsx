@@ -2,6 +2,8 @@ import { FolderOpen, Settings, Mail, Calendar, Image, Music, Video, Terminal, Gl
 import { motion } from 'motion/react';
 import { useState, useEffect, useMemo, memo } from 'react';
 import type { WindowState } from '../App';
+import { useThemeColors } from '../hooks/useThemeColors';
+import { useAppContext } from './AppContext';
 
 interface DockProps {
   onOpenApp: (appType: string) => void;
@@ -11,24 +13,21 @@ interface DockProps {
 }
 
 const dockApps = [
-  { id: 'finder', icon: FolderOpen, label: 'Finder', color: 'from-blue-500 to-blue-600' },
-  { id: 'mail', icon: Mail, label: 'Mail', color: 'from-blue-400 to-blue-500' },
-  { id: 'calendar', icon: Calendar, label: 'Calendar', color: 'from-red-500 to-red-600' },
-  { id: 'photos', icon: Image, label: 'Photos', color: 'from-pink-500 to-rose-600' },
-  { id: 'music', icon: Music, label: 'Music', color: 'from-purple-500 to-purple-600' },
-  { id: 'videos', icon: Video, label: 'Videos', color: 'from-orange-500 to-orange-600' },
-  { id: 'messages', icon: MessageSquare, label: 'Messages', color: 'from-green-500 to-green-600' },
-  { id: 'browser', icon: Globe, label: 'Browser', color: 'from-cyan-500 to-blue-600' },
-  { id: 'terminal', icon: Terminal, label: 'Terminal', color: 'from-gray-700 to-gray-900' },
-  { id: 'settings', icon: Settings, label: 'Settings', color: 'from-gray-500 to-gray-600' },
+  { id: 'finder', icon: FolderOpen, label: 'Finder', color: 'from-blue-500 to-blue-600', solid: '#3b82f6' },
+  { id: 'mail', icon: Mail, label: 'Mail', color: 'from-blue-400 to-blue-500', solid: '#60a5fa' },
+  { id: 'calendar', icon: Calendar, label: 'Calendar', color: 'from-red-500 to-red-600', solid: '#ef4444' },
+  { id: 'photos', icon: Image, label: 'Photos', color: 'from-pink-500 to-rose-600', solid: '#ec4899' },
+  { id: 'music', icon: Music, label: 'Music', color: 'from-purple-500 to-purple-600', solid: '#a855f7' },
+  { id: 'videos', icon: Video, label: 'Videos', color: 'from-orange-500 to-orange-600', solid: '#f97316' },
+  { id: 'messages', icon: MessageSquare, label: 'Messages', color: 'from-green-500 to-green-600', solid: '#22c55e' },
+  { id: 'browser', icon: Globe, label: 'Browser', color: 'from-cyan-500 to-blue-600', solid: '#06b6d4' },
+  { id: 'terminal', icon: Terminal, label: 'Terminal', color: 'from-gray-700 to-gray-900', solid: '#374151' },
+  { id: 'settings', icon: Settings, label: 'Settings', color: 'from-gray-500 to-gray-600', solid: '#6b7280' },
 ];
-
-import { useThemeColors } from '../hooks/useThemeColors';
-import { useAppContext } from './AppContext';
 
 function DockComponent({ onOpenApp, onRestoreWindow, onFocusWindow, windows }: DockProps) {
   const { dockBackground, blurStyle } = useThemeColors();
-  const { reduceMotion, disableShadows } = useAppContext();
+  const { reduceMotion, disableShadows, disableGradients } = useAppContext();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [shouldHide, setShouldHide] = useState(false);
 
@@ -83,8 +82,6 @@ function DockComponent({ onOpenApp, onRestoreWindow, onFocusWindow, windows }: D
     setShouldHide(hasIntersection);
   }, [hasIntersection]);
 
-  // Handle dock icon click - macOS behavior
-  // Hold Alt/Option to force open a new window
   // Handle dock icon click - macOS behavior
   // Hold Alt/Option to force open a new window
   const handleAppClick = (appId: string, e: React.MouseEvent) => {
@@ -144,12 +141,23 @@ function DockComponent({ onOpenApp, onRestoreWindow, onFocusWindow, windows }: D
             const hasWindows = appWindows.length > 0;
             const windowCount = appWindows.length;
 
+            // Handle gradient vs solid color logic
+            // Use inline style for solid color to guarantee rendering
+            const bgClass = disableGradients
+              ? ''
+              : `bg-gradient-to-br ${app.color}`;
+
+            const style = disableGradients
+              ? { backgroundColor: app.solid }
+              : {};
+
             return (
               <motion.button
                 key={app.id}
                 aria-label={app.label}
-                className={`relative w-12 h-12 rounded-xl bg-gradient-to-br ${app.color} flex items-center justify-center text-white 
+                className={`relative w-12 h-12 rounded-xl ${bgClass} flex items-center justify-center text-white 
                   ${!disableShadows ? 'shadow-lg hover:shadow-xl' : ''} transition-all`}
+                style={style}
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
                 onClick={(e) => handleAppClick(app.id, e)}
