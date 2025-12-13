@@ -16,6 +16,7 @@ export const STORAGE_KEYS = {
 
     // Hard memory keys (core data, dangerous to forget)
     FILESYSTEM: 'aurora-filesystem',
+    USERS: 'aurora-users',
 } as const;
 
 /**
@@ -72,6 +73,7 @@ export function hardReset(): void {
                 key === STORAGE_KEYS.DESKTOP_ICONS ||
                 key === STORAGE_KEYS.SOUND ||
                 key === STORAGE_KEYS.FILESYSTEM ||
+                key === STORAGE_KEYS.USERS ||
                 key.startsWith(STORAGE_KEYS.APP_PREFIX)
             ) {
                 keysToRemove.push(key);
@@ -110,7 +112,7 @@ export function getStorageStats(): {
             const value = localStorage.getItem(key) || '';
             const bytes = new Blob([key + value]).size;
 
-            if (key === STORAGE_KEYS.FILESYSTEM) {
+            if (key === STORAGE_KEYS.FILESYSTEM || key === STORAGE_KEYS.USERS) {
                 hardKeys++;
                 hardBytes += bytes;
             } else if (

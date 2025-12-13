@@ -45,7 +45,6 @@ export function DevCenter() {
 
     // Storage Tab State
     const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [, setStorageUpdate] = useState(0); // Trigger re-render for storage
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -71,7 +70,7 @@ export function DevCenter() {
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
             notify.system('success', 'Storage', 'Preferences exported successfully');
-        } catch (e) {
+        } catch {
             notify.system('error', 'Storage', 'Failed to export preferences');
         }
     };
@@ -94,7 +93,7 @@ export function DevCenter() {
                 });
                 refreshStorage();
                 notify.system('success', 'Storage', 'Preferences imported successfully');
-            } catch (err) {
+            } catch {
                 notify.system('error', 'Storage', 'Failed to parse import file');
             }
         };
@@ -257,7 +256,7 @@ export function DevCenter() {
                                     try {
                                         const parsed = JSON.parse(rawValue);
                                         formattedValue = JSON.stringify(parsed, null, 2);
-                                    } catch (e) {
+                                    } catch {
                                         // keeping rawValue
                                     }
 
@@ -314,7 +313,6 @@ export function DevCenter() {
                     </div>
                 );
             case 'filesystem':
-                // eslint-disable-next-line no-case-declarations
                 return (
                     <div className={`h-full flex flex-col ${isNarrow ? 'p-4' : 'p-6'}`}>
                         <div className="flex items-center justify-between mb-6">

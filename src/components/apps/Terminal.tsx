@@ -3,6 +3,7 @@ import { useFileSystem } from '../FileSystemContext';
 import { useAppContext } from '../AppContext';
 import { AppTemplate } from './AppTemplate';
 import { FileIcon } from '../ui/FileIcon';
+import { checkPermissions } from '../../utils/fileSystemUtils';
 
 interface CommandHistory {
   command: string;
@@ -36,8 +37,13 @@ export function Terminal({ onLaunchApp }: TerminalProps) {
     readFile,
     resolvePath: contextResolvePath,
     homePath,
-    currentUser
+    currentUser,
+    users
   } = useFileSystem();
+
+  const userObj = users.find(u => u.username === currentUser) || {
+    username: 'nobody', uid: 65534, gid: 65534, fullName: 'Nobody', homeDir: '/', shell: ''
+  };
 
   // Each Terminal instance has its own working directory (independent windows)
   const [currentPath, setCurrentPath] = useState(homePath);
@@ -191,8 +197,25 @@ export function Terminal({ onLaunchApp }: TerminalProps) {
       return;
     }
 
+    // Handle Output Redirection (> and >>)
+    let commandStr = trimmed;
+    let redirectPath: string | null = null;
+    let appendMode = false;
+
+    if (commandStr.includes('>>')) {
+      const parts = commandStr.split('>>');
+      commandStr = parts[0].trim();
+      redirectPath = parts[1]?.trim();
+      appendMode = true;
+    } else if (commandStr.includes('>')) {
+      const parts = commandStr.split('>');
+      commandStr = parts[0].trim();
+      redirectPath = parts[1]?.trim();
+      appendMode = false;
+    }
+
     // Split logic that respects quotes? For now simple split
-    const parts = trimmed.split(/\s+/);
+    const parts = commandStr.split(/\s+/);
     const command = parts[0];
     const rawArgs = parts.slice(1);
 
@@ -205,268 +228,332 @@ export function Terminal({ onLaunchApp }: TerminalProps) {
     let output: (string | ReactNode)[] = [];
     let error = false;
 
-    // 1. Check Built-ins
-    switch (command) {
-      case 'help':
-        output = [
-          'Available commands:',
-          '  ls [path]         - List directory contents',
-          '  cd <path>         - Change directory',
-          '  pwd               - Print working directory',
-          '  cat <file>        - Display file contents',
-          '  mkdir <name>      - Create directory',
-          '  touch <name>      - Create file',
-          '  rm <name>         - Remove file or directory',
-          '  echo <text>       - Display text',
-          '  whoami            - Print current user',
-          '  hostname          - Print system hostname',
-          '  clear             - Clear terminal',
-          '  help              - Show this help message',
-          '  [app]             - Launch installed applications (e.g. Finder)',
-          ''
-        ];
-        break;
+    // Helper to capture output for redirection
+    // We'll wrap the switch processing to capture output
+    const generateOutput = (): { output: (string | ReactNode)[], error: boolean } => {
+      let cmdOutput: (string | ReactNode)[] = [];
+      let cmdError = false;
 
-      case 'ls': {
-        const pathsToList = args.length > 0 ? args.filter(a => !a.startsWith('-')) : ['']; // Default to current
-        // Handle flags
-        const longFormat = args.includes('-l') || args.includes('-la') || args.includes('-al') || args.includes('-ll');
+      // 1. Check Built-ins
+      switch (command) {
+        case 'help':
+          cmdOutput = [
+            'Available commands:',
+            '  ls [path]         - List directory contents',
+            '  cd <path>         - Change directory',
+            '  pwd               - Print working directory',
+            '  cat <file>        - Display file contents',
+            '  mkdir <name>      - Create directory',
+            '  touch <name>      - Create file',
+            '  rm <name>         - Remove file or directory',
+            '  echo <text>       - Display text',
+            '  whoami            - Print current user',
+            '  hostname          - Print system hostname',
+            '  clear             - Clear terminal',
+            '  help              - Show this help message',
+            '  [app]             - Launch installed applications (e.g. Finder)',
+            ''
+          ];
+          break;
 
-        // Loop through all paths
-        const allOutputs: (string | ReactNode)[] = [];
+        case 'ls': {
+          const pathsToList = args.length > 0 ? args.filter(a => !a.startsWith('-')) : ['']; // Default to current
+          // Handle flags
+          const longFormat = args.includes('-l') || args.includes('-la') || args.includes('-al') || args.includes('-ll');
 
-        let hasErrors = false;
+          // Loop through all paths
+          const allOutputs: (string | ReactNode)[] = [];
+          let hasErrors = false;
 
-        pathsToList.forEach((pathArg, idx) => {
-          const lsPath = pathArg ? resolvePath(pathArg) : currentPath;
+          pathsToList.forEach((pathArg, idx) => {
+            const lsPath = pathArg ? resolvePath(pathArg) : currentPath;
 
-          // If listing multiple directories, show headers
-          if (pathsToList.length > 1) {
-            if (idx > 0) allOutputs.push(''); // Spacer
-            allOutputs.push(`${pathArg || '.'}:`);
-          }
+            // If listing multiple directories, show headers
+            if (pathsToList.length > 1) {
+              if (idx > 0) allOutputs.push(''); // Spacer
+              allOutputs.push(`${pathArg || '.'}:`);
+            }
 
-          const contents = listDirectory(lsPath);
-          if (contents) {
-            const filteredContents = contents;
-            // We show all by default
+            const contents = listDirectory(lsPath);
+            if (contents) {
+              const filteredContents = contents;
 
-            if (filteredContents.length === 0) {
-              // empty
-            } else if (longFormat) {
-              const lines = filteredContents.map(node => {
-                const perms = node.permissions || (node.type === 'directory' ? 'drwxr-xr-x' : '-rw-r--r--');
-                const owner = node.owner || currentUser;
-                const size = node.size?.toString().padStart(6) || '     0';
-                const name = node.type === 'directory' ? `\x1b[34m${node.name}\x1b[0m` : node.name;
-                return `${perms}  ${owner}  ${size}  ${name}`;
-              });
-              allOutputs.push(...lines);
-            } else {
-              const grid = (
-                <div key={lsPath} className="flex flex-wrap gap-x-4 gap-y-1">
-                  {filteredContents.map(node => (
-                    <div key={node.id} className="flex items-center gap-2">
-                      <div className="w-4 h-4 shrink-0 inline-flex items-center justify-center">
-                        <FileIcon
-                          name={node.name}
-                          type={node.type}
-                          accentColor={accentColor}
-                          isEmpty={node.children?.length === 0}
-                        />
+              if (filteredContents.length === 0) {
+                // empty
+              } else if (longFormat) {
+                const lines = filteredContents.map(node => {
+                  const perms = node.permissions || (node.type === 'directory' ? 'drwxr-xr-x' : '-rw-r--r--');
+                  const owner = node.owner || currentUser;
+                  const size = node.size?.toString().padStart(6) || '     0';
+                  const name = node.type === 'directory' ? `\x1b[34m${node.name}\x1b[0m` : node.name;
+                  return `${perms}  ${owner}  ${size}  ${name}`;
+                });
+                allOutputs.push(...lines);
+              } else {
+                const grid = (
+                  <div key={lsPath} className="flex flex-wrap gap-x-4 gap-y-1">
+                    {filteredContents.map(node => (
+                      <div key={node.id} className="flex items-center gap-2">
+                        <div className="w-4 h-4 shrink-0 inline-flex items-center justify-center">
+                          <FileIcon
+                            name={node.name}
+                            type={node.type}
+                            accentColor={accentColor}
+                            isEmpty={node.children?.length === 0}
+                          />
+                        </div>
+                        <span className={node.type === 'directory' ? 'font-bold' : ''}>
+                          {node.name}
+                        </span>
                       </div>
-                      <span className={node.type === 'directory' ? 'font-bold' : ''}>
-                        {node.name}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              );
-              allOutputs.push(grid);
-            }
-          } else {
-            allOutputs.push(`ls: ${pathArg}: No such file or directory`);
-            hasErrors = true;
-          }
-        });
-
-        output = allOutputs;
-        if (hasErrors && pathsToList.length === 1) error = true; // Only flag error if single command failed
-        break;
-      }
-
-      case 'cd': {
-        if (args.length === 0 || args[0] === '~') {
-          setCurrentPath(homePath);
-          output = [];
-        } else {
-          const newPath = resolvePath(args[0]);
-          const node = getNodeAtPath(newPath);
-          if (node && node.type === 'directory') {
-            setCurrentPath(newPath);
-            output = [];
-          } else {
-            output = [`cd: ${args[0]}: No such directory`];
-            error = true;
-          }
-        }
-        break;
-      }
-
-      case 'pwd':
-        output = [currentPath];
-        break;
-
-      case 'whoami':
-        output = [currentUser];
-        break;
-
-      case 'hostname':
-        output = ['aurora'];
-        break;
-
-      case 'cat': {
-        if (args.length === 0) {
-          output = ['cat: missing file operand'];
-          error = true;
-        } else {
-          const catOutputs: string[] = [];
-          args.forEach(arg => {
-            const filePath = resolvePath(arg);
-            const content = readFile(filePath);
-            if (content !== null) {
-              catOutputs.push(...content.split('\n'));
-            } else {
-              catOutputs.push(`cat: ${arg}: No such file or directory`);
-              error = true; // warning?
-            }
-          });
-          output = catOutputs;
-        }
-        break;
-      }
-
-      case 'mkdir': {
-        if (args.length === 0) {
-          output = ['mkdir: missing operand'];
-          error = true;
-        } else {
-          // Allow multiple
-          args.forEach(arg => {
-            const fullPath = resolvePath(arg);
-            const lastSlashIndex = fullPath.lastIndexOf('/');
-            const parentPath = lastSlashIndex === 0 ? '/' : fullPath.substring(0, lastSlashIndex);
-            const name = fullPath.substring(lastSlashIndex + 1);
-
-            const success = createDirectory(parentPath, name);
-            if (!success) {
-              output.push(`mkdir: cannot create directory '${arg}'`);
-              error = true;
-            }
-          });
-        }
-        break;
-      }
-
-      case 'touch': {
-        if (args.length === 0) {
-          output = ['touch: missing file operand'];
-          error = true;
-        } else {
-          args.forEach(arg => {
-            const fullPath = resolvePath(arg);
-            const lastSlashIndex = fullPath.lastIndexOf('/');
-            const parentPath = lastSlashIndex === 0 ? '/' : fullPath.substring(0, lastSlashIndex);
-            const name = fullPath.substring(lastSlashIndex + 1);
-
-            const success = createFile(parentPath, name, '');
-            if (!success) {
-              output.push(`touch: cannot create file '${arg}'`);
-              error = true;
-            }
-          });
-        }
-        break;
-      }
-
-      case 'rm': {
-        if (args.length === 0) {
-          output = ['rm: missing operand'];
-          error = true;
-        } else {
-          args.forEach(arg => {
-            const targetPath = resolvePath(arg);
-            // Check if recursive flag is present? (simplified rm)
-            // For now, always try moveToTrash which handles file/dir
-            const success = moveToTrash(targetPath);
-            if (!success && !arg.includes('*')) {
-              output.push(`rm: cannot remove '${arg}': No such file or directory`);
-              error = true;
-            }
-          });
-        }
-        break;
-      }
-
-      case 'echo':
-        output = [args.join(' ')];
-        break;
-
-      case 'clear':
-        setHistory([{ command: '', output: [], path: currentPath }]);
-        setInput('');
-        return;
-
-      default: {
-        // Check PATH for executable
-        let foundPath: string | null = null;
-        const cmd = command;
-
-        if (cmd.includes('/')) {
-          const resolved = resolvePath(cmd);
-          const node = getNodeAtPath(resolved);
-          if (node && node.type === 'file') foundPath = resolved;
-        } else {
-          for (const dir of PATH) {
-            const checkPath = (dir === '/' ? '' : dir) + '/' + cmd;
-            const node = getNodeAtPath(checkPath);
-            if (node && node.type === 'file') {
-              foundPath = checkPath;
-              break;
-            }
-          }
-        }
-
-        if (foundPath) {
-          const content = readFile(foundPath);
-          if (content && content.startsWith('#!app ')) {
-            const appId = content.slice(6).trim();
-
-            // Resolve args for app
-            const resolvedAppArgs = args.map(arg => {
-              if (!arg.startsWith('-')) {
-                return resolvePath(arg);
+                    ))}
+                  </div>
+                );
+                allOutputs.push(grid);
               }
-              return arg;
-            });
+            } else {
+              allOutputs.push(`ls: ${pathArg}: No such file or directory`);
+              hasErrors = true;
+            }
+          });
 
-            onLaunchApp?.(appId, resolvedAppArgs);
-            output = [];
-          } else if (content && content.startsWith('#!')) {
-            output = [`${cmd}: script execution not fully supported`];
-          } else {
-            output = [`${cmd}: binary file`];
-          }
-        } else {
-          output = [`${cmd}: command not found`];
-          error = true;
+          cmdOutput = allOutputs;
+          if (hasErrors && pathsToList.length === 1) cmdError = true;
+          break;
         }
+
+        case 'cd': {
+          if (args.length === 0 || args[0] === '~') {
+            setCurrentPath(homePath);
+            cmdOutput = [];
+          } else {
+            const newPath = resolvePath(args[0]);
+            const node = getNodeAtPath(newPath);
+            if (node && node.type === 'directory') {
+              // Permission Check: Execute (Enter directory)
+              if (!checkPermissions(node, userObj, 'execute')) {
+                cmdOutput = [`cd: ${args[0]}: Permission denied`];
+                cmdError = true;
+              } else {
+                setCurrentPath(newPath);
+                cmdOutput = [];
+              }
+            } else {
+              cmdOutput = [`cd: ${args[0]}: No such directory`];
+              cmdError = true;
+            }
+          }
+          break;
+        }
+
+        case 'pwd':
+          cmdOutput = [currentPath];
+          break;
+
+        case 'whoami':
+          cmdOutput = [currentUser];
+          break;
+
+        case 'hostname':
+          cmdOutput = ['aurora'];
+          break;
+
+        case 'cat': {
+          if (args.length === 0) {
+            cmdOutput = ['cat: missing file operand'];
+            cmdError = true;
+          } else {
+            const catOutputs: string[] = [];
+            args.forEach(arg => {
+              const filePath = resolvePath(arg);
+              const content = readFile(filePath);
+              if (content !== null) {
+                catOutputs.push(...content.split('\n'));
+              } else {
+                // Check if file exists but permission denied vs not found
+                const node = getNodeAtPath(filePath);
+                if (node) {
+                  catOutputs.push(`cat: ${arg}: Permission denied`);
+                } else {
+                  catOutputs.push(`cat: ${arg}: No such file or directory`);
+                }
+                cmdError = true;
+              }
+            });
+            cmdOutput = catOutputs;
+          }
+          break;
+        }
+
+        case 'mkdir': {
+          if (args.length === 0) {
+            cmdOutput = ['mkdir: missing operand'];
+            cmdError = true;
+          } else {
+            args.forEach(arg => {
+              const fullPath = resolvePath(arg);
+              const lastSlashIndex = fullPath.lastIndexOf('/');
+              const parentPath = lastSlashIndex === 0 ? '/' : fullPath.substring(0, lastSlashIndex);
+              const name = fullPath.substring(lastSlashIndex + 1);
+
+              const success = createDirectory(parentPath, name);
+              if (!success) {
+                cmdOutput.push(`mkdir: cannot create directory '${arg}'`);
+                cmdError = true;
+              }
+            });
+          }
+          break;
+        }
+
+        case 'touch': {
+          if (args.length === 0) {
+            cmdOutput = ['touch: missing file operand'];
+            cmdError = true;
+          } else {
+            args.forEach(arg => {
+              const fullPath = resolvePath(arg);
+              const lastSlashIndex = fullPath.lastIndexOf('/');
+              const parentPath = lastSlashIndex === 0 ? '/' : fullPath.substring(0, lastSlashIndex);
+              const name = fullPath.substring(lastSlashIndex + 1);
+
+              const success = createFile(parentPath, name, '');
+              if (!success) {
+                cmdOutput.push(`touch: cannot create file '${arg}'`);
+                cmdError = true;
+              }
+            });
+          }
+          break;
+        }
+
+        case 'rm': {
+          if (args.length === 0) {
+            cmdOutput = ['rm: missing operand'];
+            cmdError = true;
+          } else {
+            args.forEach(arg => {
+              const targetPath = resolvePath(arg);
+              const node = getNodeAtPath(targetPath);
+
+              if (!node && !arg.includes('*')) {
+                cmdOutput.push(`rm: cannot remove '${arg}': No such file or directory`);
+                cmdError = true;
+                return;
+              }
+
+              // Try to delete
+              const success = moveToTrash(targetPath);
+              if (!success && !arg.includes('*')) {
+                // It existed (checked above), so failure must be permissions
+                cmdOutput.push(`rm: cannot remove '${arg}': Permission denied`);
+                cmdError = true;
+              }
+            });
+          }
+          break;
+        }
+
+        case 'echo':
+          cmdOutput = [args.join(' ')];
+          break;
+
+        case 'clear':
+          cmdOutput = [];
+          // Clear handling is special, handled outside if possible or we just return special flag
+          // But since we are inside generateOutput, we can't clear explicitly here. 
+          // We'll handle 'clear' as a special case before redirection.
+          break;
+
+        default: {
+          // Check PATH for executable
+          let foundPath: string | null = null;
+          const cmd = command;
+
+          if (cmd.includes('/')) {
+            const resolved = resolvePath(cmd);
+            const node = getNodeAtPath(resolved);
+            if (node && node.type === 'file') foundPath = resolved;
+          } else {
+            for (const dir of PATH) {
+              const checkPath = (dir === '/' ? '' : dir) + '/' + cmd;
+              const node = getNodeAtPath(checkPath);
+              if (node && node.type === 'file') {
+                foundPath = checkPath;
+                break;
+              }
+            }
+          }
+
+          if (foundPath) {
+            const content = readFile(foundPath);
+            if (content && content.startsWith('#!app ')) {
+              const appId = content.slice(6).trim();
+              const resolvedAppArgs = args.map(arg => !arg.startsWith('-') ? resolvePath(arg) : arg);
+              onLaunchApp?.(appId, resolvedAppArgs);
+              cmdOutput = [];
+            } else if (content && content.startsWith('#!')) {
+              cmdOutput = [`${cmd}: script execution not fully supported`];
+            } else {
+              cmdOutput = [`${cmd}: binary file`];
+            }
+          } else {
+            cmdOutput = [`${cmd}: command not found`];
+            cmdError = true;
+          }
+        }
+      }
+      return { output: cmdOutput, error: cmdError };
+    };
+
+    // Special case handling for clear to ensure it works on UI
+    if (command === 'clear') {
+      setHistory([{ command: '', output: [], path: currentPath }]);
+      setInput('');
+      return;
+    }
+
+    const result = generateOutput();
+    output = result.output;
+    error = result.error;
+
+    // Handle Redirection Persistence
+    if (redirectPath) {
+      const fullRedirectPath = resolvePath(redirectPath);
+      const lastSlashIndex = fullRedirectPath.lastIndexOf('/');
+      const parentPath = lastSlashIndex === 0 ? '/' : fullRedirectPath.substring(0, lastSlashIndex);
+      const fileName = fullRedirectPath.substring(lastSlashIndex + 1);
+
+      // Flatten output to string
+      const contentToWrite = output.map(o => {
+        if (typeof o === 'string') return o;
+        return '[Object]'; // React nodes can't be written to file easily
+      }).join('\n');
+
+      let success = false;
+      if (appendMode) {
+        // Read existing + append
+        const existing = readFile(fullRedirectPath);
+        if (existing !== null) {
+          success = createFile(parentPath, fileName, existing + '\n' + contentToWrite);
+        } else {
+          success = createFile(parentPath, fileName, contentToWrite);
+        }
+      } else {
+        // Overwrite
+        success = createFile(parentPath, fileName, contentToWrite);
+      }
+
+      if (!success) {
+        output = [`${command}: error writing to '${redirectPath}': Permission denied`];
+        error = true; // Redirection failed
+      } else {
+        output = []; // Output redirected, nothing to show
       }
     }
 
     setHistory(prev => [...prev, { command: trimmed, output, error, path: currentPath }]);
     setCommandHistory(prev => {
-      // Don't add duplicates consecutively
       if (prev.length > 0 && prev[prev.length - 1] === trimmed) return prev;
       return [...prev, trimmed];
     });

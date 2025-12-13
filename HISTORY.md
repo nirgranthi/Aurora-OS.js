@@ -1,4 +1,16 @@
-# Version History
+## v0.7.2
+- **User Management**:
+    - **Multi-User Structure**: Implemented robust `User` and `Group` system with `/etc/passwd` and `/etc/group` bidirectional syncing.
+    - **Persistent State**: User database is synced between `localStorage` and the virtual filesystem.
+    - **UI**: Added "Users & Groups" Settings panel for adding/removing users.
+- **Advanced Filesystem Permissions**:
+    - **Linux Compliance**: Full `rwxrwxrwx` enforcement checking Owner, Group, and Others.
+    - **Sticky Bit (`t`)**: Implemented secure deletion policies for shared directories like `/tmp`.
+    - **Directory Execute (`x`)**: Traversal now correctly requires execute permissions on parent directories.
+- **Terminal Enhancements**:
+    - **Redirection**: Added support for standard shell redirection operators `>` (overwrite) and `>>` (append).
+    - **Improved `rm`**: Now correctly distinguishes between "No such file" and "Permission denied".
+
 
 ## v0.7.1
 - **UI Standardization**:

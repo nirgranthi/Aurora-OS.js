@@ -5,6 +5,7 @@ import { cn } from './ui/utils';
 import { useAppContext } from './AppContext';
 import { AudioApplet } from './AudioApplet';
 import { NotificationCenter } from './NotificationCenter';
+import { hardReset, softReset } from '../utils/memory';
 import {
   Menubar,
   MenubarMenu,
@@ -14,6 +15,7 @@ import {
   MenubarSeparator,
   MenubarShortcut,
 } from './ui/menubar';
+import { Badge } from './ui/badge';
 
 interface MenuBarProps {
   focusedApp?: string | null;
@@ -159,21 +161,45 @@ function MenuBarComponent({ focusedApp, onOpenApp }: MenuBarProps) {
               className={cn("border-white/10 text-white min-w-[14rem] p-1 z-[10000]", !disableShadows ? "shadow-xl" : "shadow-none")}
               style={{ background: getBackgroundColor(0.8), ...blurStyle }}
             >
-              <MenubarItem>About This Mac</MenubarItem>
+              <MenubarItem onClick={() => {
+                // Direct link to About section
+                sessionStorage.setItem('settings-pending-section', 'about');
+                window.dispatchEvent(new CustomEvent('aurora-open-settings-section', { detail: 'about' }));
+                onOpenApp?.('settings');
+              }}>
+                About This Computer...
+              </MenubarItem>
               <MenubarSeparator className="bg-white/10" />
-              <MenubarItem>System Settings...</MenubarItem>
+              <MenubarItem onClick={() => onOpenApp?.('settings')}>
+                System Settings...
+              </MenubarItem>
               <MenubarItem>App Store...</MenubarItem>
               <MenubarSeparator className="bg-white/10" />
-              <MenubarItem>Recent Items</MenubarItem>
-              <MenubarSeparator className="bg-white/10" />
-              <MenubarItem>Force Quit... <MenubarShortcut>⌥⌘⎋</MenubarShortcut></MenubarItem>
+              <MenubarItem
+                onClick={() => {
+                  // Hard Reset -> PANIC
+                  hardReset();
+                  window.location.reload();
+                }}
+                className="text-red-500 focus:text-red-500 focus:bg-red-500/10"
+              >
+                PANIC <Badge variant="destructive" className="ml-auto text-[10px] h-5 px-1.5">Hard Reset</Badge>
+              </MenubarItem>
               <MenubarSeparator className="bg-white/10" />
               <MenubarItem>Sleep</MenubarItem>
-              <MenubarItem>Restart...</MenubarItem>
-              <MenubarItem>Shut Down...</MenubarItem>
+              <MenubarItem>Restart</MenubarItem>
+              <MenubarItem onClick={() => {
+                // Soft Reset -> Restart
+                softReset();
+                window.location.reload();
+              }}
+                className="text-yellow-500 focus:text-yellow-500 focus:bg-yellow-500/10"
+              >
+                Shut Down <Badge variant="outline" className="ml-auto text-[10px] h-5 px-1.5 border-yellow-500/50 text-yellow-400 bg-yellow-500/10">Soft Reset</Badge>
+              </MenubarItem>
               <MenubarSeparator className="bg-white/10" />
-              <MenubarItem>Lock Screen <MenubarShortcut>⌃⌘Q</MenubarShortcut></MenubarItem>
-              <MenubarItem>Log Out User... <MenubarShortcut>⇧⌘Q</MenubarShortcut></MenubarItem>
+              <MenubarItem>Lock Screen</MenubarItem>
+              <MenubarItem>Log Out User</MenubarItem>
             </MenubarContent>
           </MenubarMenu>
 
@@ -187,9 +213,9 @@ function MenuBarComponent({ focusedApp, onOpenApp }: MenuBarProps) {
             >
               <MenubarItem>About {appConfig.name}</MenubarItem>
               <MenubarSeparator className="bg-white/10" />
-              <MenubarItem>Settings... <MenubarShortcut>⌘,</MenubarShortcut></MenubarItem>
+              <MenubarItem>Settings...</MenubarItem>
               <MenubarSeparator className="bg-white/10" />
-              <MenubarItem>Quit {appConfig.name} <MenubarShortcut>⌘Q</MenubarShortcut></MenubarItem>
+              <MenubarItem>Quit {appConfig.name}</MenubarItem>
             </MenubarContent>
           </MenubarMenu>
 

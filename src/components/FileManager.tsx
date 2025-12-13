@@ -395,7 +395,7 @@ export function FileManager({ initialPath }: { initialPath?: string }) {
           className={`p-1.5 rounded-md transition-colors ${!selectedItem ? 'opacity-30 cursor-not-allowed' : 'hover:bg-red-500/20 text-red-400'}`}
           title="Move to Trash"
         >
-          <Trash2 className="w-4 h-4" />
+          <Trash2 className="w-4 h-4 text-white/50" />
         </button>
       </div>
 

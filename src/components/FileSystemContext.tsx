@@ -8,23 +8,29 @@ import {
   ensureIds,
   isDescendant,
   findNodeAndParent,
-  initialFileSystem
+  initialFileSystem,
+  User,
+  parsePasswd,
+  formatPasswd,
+  createUserHome,
+  checkPermissions
 } from '../utils/fileSystemUtils';
 
-export type { FileNode } from '../utils/fileSystemUtils';
-
-
+export type { FileNode, User } from '../utils/fileSystemUtils';
 
 export interface FileSystemContextType {
   fileSystem: FileNode;
   currentPath: string;
   currentUser: string;
+  users: User[];
   homePath: string;
   setCurrentPath: (path: string) => void;
   getNodeAtPath: (path: string) => FileNode | null;
   createFile: (path: string, name: string, content?: string) => boolean;
   createDirectory: (path: string, name: string) => boolean;
   deleteNode: (path: string) => boolean;
+  addUser: (username: string, fullName: string) => boolean;
+  deleteUser: (username: string) => boolean;
   writeFile: (path: string, content: string) => boolean;
   readFile: (path: string) => string | null;
   listDirectory: (path: string) => FileNode[] | null;
@@ -37,6 +43,7 @@ export interface FileSystemContextType {
 }
 
 const STORAGE_KEY = 'aurora-filesystem';
+const USERS_STORAGE_KEY = 'aurora-users';
 
 // Load filesystem from localStorage or return initial
 function loadFileSystem(): FileNode {
@@ -62,13 +69,80 @@ function saveFileSystem(fs: FileNode): void {
   }
 }
 
+const DEFAULT_USERS: User[] = [
+  { username: 'root', uid: 0, gid: 0, fullName: 'System Administrator', homeDir: '/root', shell: '/bin/bash' },
+  { username: 'user', uid: 1000, gid: 1000, fullName: 'User', homeDir: '/home/user', shell: '/bin/bash' },
+  { username: 'guest', uid: 1001, gid: 1001, fullName: 'Guest', homeDir: '/home/guest', shell: '/bin/bash' }
+];
+
+// Load users from localStorage
+function loadUsers(): User[] {
+  try {
+    const stored = localStorage.getItem(USERS_STORAGE_KEY);
+    if (stored) {
+      console.log('Loaded users from storage:', JSON.parse(stored));
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0 && parsed.every(u => u.username && typeof u.uid === 'number')) {
+        return parsed;
+      }
+      console.warn('Stored users data corrupted or empty, reverting to defaults');
+    }
+  } catch (e) {
+    console.warn('Failed to load users:', e);
+  }
+  console.log('Using default users');
+  return DEFAULT_USERS;
+}
+
+// Helper to get current user object
+const getCurrentUser = (username: string, users: User[]): User => {
+  return users.find(u => u.username === username) || {
+    username: 'nobody', uid: 65534, gid: 65534, fullName: 'Nobody', homeDir: '/', shell: ''
+  };
+};
+
 const FileSystemContext = createContext<FileSystemContextType | undefined>(undefined);
 
 export function FileSystemProvider({ children }: { children: ReactNode }) {
   const [fileSystem, setFileSystem] = useState<FileNode>(() => loadFileSystem());
+  const [users, setUsers] = useState<User[]>(() => loadUsers());
   const [currentUser] = useState('user'); // Default user - could be extended for login system
   const homePath = currentUser === 'root' ? '/root' : `/home/${currentUser}`;
   const [currentPath, setCurrentPath] = useState(homePath);
+
+  const userObj = getCurrentUser(currentUser, users);
+
+  // Persist users
+  useEffect(() => {
+    console.log('Persisting users:', users);
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+  }, [users]);
+
+  // Sync users State -> Filesystem (/etc/passwd)
+  useEffect(() => {
+    const passwdContent = formatPasswd(users);
+
+    setFileSystem(prevFS => {
+      // Find /etc/passwd
+      const newFS = deepCloneFileSystem(prevFS);
+      const etc = newFS.children?.find(c => c.name === 'etc');
+      if (etc && etc.children) {
+        let passwd = etc.children.find(c => c.name === 'passwd');
+        if (!passwd) {
+          // create if missing?
+          passwd = { id: crypto.randomUUID(), name: 'passwd', type: 'file', content: '', owner: 'root', permissions: '-rw-r--r--' };
+          etc.children.push(passwd);
+        }
+
+        if (passwd.content !== passwdContent) {
+          passwd.content = passwdContent;
+          passwd.modified = new Date();
+          return newFS; // Update state
+        }
+      }
+      return prevFS; // No change needed
+    });
+  }, [users]);
 
   // Persist filesystem changes to localStorage (Debounced)
   useEffect(() => {
@@ -116,9 +190,12 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
   // Reset filesystem to initial state
   const resetFileSystem = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(USERS_STORAGE_KEY);
     setFileSystem(deepCloneFileSystem(initialFileSystem));
+    setUsers(DEFAULT_USERS);
     setCurrentPath(homePath);
-  }, [homePath]);
+    notify.system('success', 'System', 'System reset to factory defaults');
+  }, [homePath, setUsers]);
 
   const getNodeAtPath = useCallback((path: string): FileNode | null => {
     const resolved = resolvePath(path);
@@ -131,23 +208,46 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
       if (!current || current.type !== 'directory' || !current.children) {
         return null;
       }
+
+      // Enforce Directory Execute (Traversal) Permission
+      // In Linux, you need +x on a directory to access its children (traverse it)
+      if (!checkPermissions(current, userObj, 'execute')) {
+        // We fail silently here (like standard path resolution would effectively "not find" it due to permissions)
+        // But effectively it blocks access. Operative functions will fail with null.
+        return null;
+      }
+
       current = current.children.find(child => child.name === part) || null;
     }
 
     return current;
-  }, [fileSystem, resolvePath]);
+  }, [fileSystem, resolvePath, userObj]);
 
   const listDirectory = useCallback((path: string): FileNode[] | null => {
-    const node = getNodeAtPath(path);
+    const node = getNodeAtPath(path); // This now implicitly checks traversal permissions on parents
     if (!node || node.type !== 'directory') return null;
+
+    // Enforce Read Permission on the target directory itself
+    if (!checkPermissions(node, userObj, 'read')) {
+      notify.system('error', 'Permission Denied', `Cannot open directory ${node.name}: Permission denied`);
+      return null;
+    }
+
     return node.children || [];
-  }, [getNodeAtPath]);
+  }, [getNodeAtPath, userObj]);
 
   const readFile = useCallback((path: string): string | null => {
-    const node = getNodeAtPath(path);
+    const node = getNodeAtPath(path); // Implicitly checks traversal
     if (!node || node.type !== 'file') return null;
+
+    // Enforce Read Permission on file
+    if (!checkPermissions(node, userObj, 'read')) {
+      notify.system('error', 'Permission Denied', `Cannot read file ${node.name}: Permission denied`);
+      return null;
+    }
+
     return node.content || '';
-  }, [getNodeAtPath]);
+  }, [getNodeAtPath, userObj]);
 
   const deleteNode = useCallback((path: string): boolean => {
     const resolved = resolvePath(path);
@@ -156,6 +256,35 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
     const parts = resolved.split('/').filter(p => p);
     const name = parts.pop();
     if (!name) return false;
+
+    // Permissions Check: Need write access to parent directory
+    const parentPath = resolved.substring(0, resolved.lastIndexOf('/')) || '/';
+    const parentNode = getNodeAtPath(parentPath);
+    if (!parentNode) return false;
+
+    // 1. Check basic Write permission on parent
+    if (!checkPermissions(parentNode, userObj, 'write')) {
+      notify.system('error', 'Permission Denied', `Cannot delete ${name}: Permission denied`);
+      return false;
+    }
+
+    const targetNode = parentNode.children?.find(c => c.name === name);
+    if (!targetNode) return false;
+
+    // 2. Sticky Bit Check
+    // If sticky bit is set (t/T at end), user can only delete if they own the FILE or the DIRECTORY
+    const perms = parentNode.permissions || '';
+    const isSticky = perms.endsWith('t') || perms.endsWith('T');
+
+    if (isSticky) {
+      const isOwnerOfFile = targetNode.owner === currentUser;
+      const isOwnerOfParent = parentNode.owner === currentUser;
+
+      if (!isOwnerOfFile && !isOwnerOfParent && currentUser !== 'root') {
+        notify.system('error', 'Permission Denied', `Sticky bit constraint: You can only delete your own files in ${parentNode.name}`);
+        return false;
+      }
+    }
 
     setFileSystem(prevFS => {
       const newFS = deepCloneFileSystem(prevFS);
@@ -175,7 +304,7 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
     });
 
     return true;
-  }, [resolvePath]);
+  }, [resolvePath, getNodeAtPath, userObj, currentUser]);
 
   // Re-implemented moveNode with strict name check feature
   const moveNode = useCallback((fromPath: string, toPath: string): boolean => {
@@ -184,6 +313,15 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
 
     const node = getNodeAtPath(resolvedFrom);
     if (!node) return false;
+
+    // Check permissions
+    // 1. Source Parent (Write)
+    const sourceParentPath = resolvedFrom.substring(0, resolvedFrom.lastIndexOf('/')) || '/';
+    const sourceParent = getNodeAtPath(sourceParentPath);
+    if (!sourceParent || !checkPermissions(sourceParent, userObj, 'write')) {
+      notify.system('error', 'Permission Denied', `Cannot move from ${sourceParentPath}`);
+      return false;
+    }
 
     // Clone the node to move
     const nodeToMove = deepCloneFileNode(node);
@@ -197,6 +335,12 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
 
     const destParent = getNodeAtPath(parentPath);
     if (!destParent || destParent.type !== 'directory' || !destParent.children) return false;
+
+    // 2. Dest Parent (Write)
+    if (!checkPermissions(destParent, userObj, 'write')) {
+      notify.system('error', 'Permission Denied', `Cannot move to ${parentPath}`);
+      return false;
+    }
 
     // Check for collision at destination
     if (destParent.children.some(child => child.name === newName)) {
@@ -230,30 +374,41 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
     });
 
     return true;
-  }, [getNodeAtPath, deleteNode, resolvePath]);
-
-
+  }, [getNodeAtPath, deleteNode, resolvePath, userObj]);
 
   const moveNodeById = useCallback((id: string, destParentPath: string): boolean => {
     // 1. Find the source node and its parent using ID
     const result = findNodeAndParent(fileSystem, id);
     if (!result) return false;
 
-    const { node: nodeToMove } = result;
+    const { node: nodeToMove, parent: sourceParent } = result;
     const destParent = getNodeAtPath(resolvePath(destParentPath));
+
+    // Permission Check 1: Source Parent (Write)
+    // We need to check if the current user can write to the source parent to remove the node
+    if (!checkPermissions(sourceParent, userObj, 'write')) {
+      notify.system('error', 'Permission Denied', `Cannot move from ${sourceParent.name}`);
+      return false;
+    }
 
     // 2. Validate destination
     if (!destParent || destParent.type !== 'directory' || !destParent.children) return false;
 
+    // Permission Check 2: Destination Parent (Write)
+    if (!checkPermissions(destParent, userObj, 'write')) {
+      notify.system('error', 'Permission Denied', `Cannot move to ${destParent.name}`);
+      return false;
+    }
+
+    // Safety Checks: Prevent recursive moves
+
     // Safety Checks: Prevent recursive moves
     if (nodeToMove.id === destParent.id) {
       notify.system('error', 'FileSystem', 'Operation blocked: Cannot move a directory into itself');
-      //console.warn('Operation blocked: Cannot move a directory into itself');
       return false;
     }
     if (isDescendant(nodeToMove, destParent.id)) {
       notify.system('error', 'FileSystem', 'Operation blocked: Cannot move a directory into its own descendant');
-      //console.warn('Operation blocked: Cannot move a directory into its own descendant');
       return false;
     }
 
@@ -261,6 +416,8 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
     if (destParent.children.some(child => child.name === nodeToMove.name)) {
       return false;
     }
+
+    // Permissions are now checked above.
 
     // 4. Perform Move
     setFileSystem(prevFS => {
@@ -338,15 +495,11 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
   }, [resolvePath, getNodeAtPath, moveNode, deleteNode]);
 
   const emptyTrash = useCallback(() => {
+    // Only allow if owner of Trash? usually yes.
     setFileSystem(prevFS => {
       const newFS = deepCloneFileSystem(prevFS);
-      const trashPath = resolvePath('~/.Trash'); // resolve in callback? context resolvePath is stable
-      // Actually resolvePath depends on currentPath/homePath in scope, but we know .Trash is always at ~
-      // And we need to find it in the newFS tree.
-      // Simpler: Just find .Trash in newFS manually or use standard traversal since we know structure
+      const trashPath = resolvePath('~/.Trash');
 
-      // We assume .Trash is at root or user home.
-      // Let's use the same traversal logic as deleteNode but target .Trash children
       const parts = trashPath.split('/').filter(p => p);
       let current = newFS;
 
@@ -370,6 +523,12 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
     const resolved = resolvePath(path);
     const node = getNodeAtPath(resolved);
     if (!node || node.type !== 'directory' || !node.children) return false;
+
+    // Permissions check
+    if (!checkPermissions(node, userObj, 'write')) {
+      notify.system('error', 'Permission Denied', `Cannot create file in ${resolved}`);
+      return false;
+    }
 
     // Check for existing node (file OR directory) with same name
     if (node.children.some(child => child.name === name)) {
@@ -405,12 +564,18 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
     });
 
     return true;
-  }, [getNodeAtPath, resolvePath, currentUser]);
+  }, [getNodeAtPath, resolvePath, currentUser, userObj]);
 
   const createDirectory = useCallback((path: string, name: string): boolean => {
     const resolved = resolvePath(path);
     const node = getNodeAtPath(resolved);
     if (!node || node.type !== 'directory' || !node.children) return false;
+
+    // Permissions check
+    if (!checkPermissions(node, userObj, 'write')) {
+      notify.system('error', 'Permission Denied', `Cannot create directory in ${resolved}`);
+      return false;
+    }
 
     // Check for existing node (file OR directory) with same name
     if (node.children.some(child => child.name === name)) {
@@ -446,11 +611,22 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
     });
 
     return true;
-  }, [getNodeAtPath, resolvePath, currentUser]);
+  }, [getNodeAtPath, resolvePath, currentUser, userObj]);
 
+  // Hook into writeFile to detect /etc/passwd changes (File -> State)
   const writeFile = useCallback((path: string, content: string): boolean => {
     const resolved = resolvePath(path);
+    const node = getNodeAtPath(resolved);
 
+    // Check modify permission on file itself if it exists
+    if (node) {
+      if (!checkPermissions(node, userObj, 'write')) {
+        notify.system('error', 'Permission Denied', `Cannot write to ${resolved}`);
+        return false;
+      }
+    }
+
+    // Original write logic
     setFileSystem(prevFS => {
       const newFS = deepCloneFileSystem(prevFS);
       const parts = resolved.split('/').filter(p => p);
@@ -474,8 +650,89 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
       return newFS;
     });
 
+    // Check if we wrote to /etc/passwd
+    if (resolved === '/etc/passwd') {
+      try {
+        const parsedUsers = parsePasswd(content);
+        // Detect if content actually changed in a meaningful way
+        if (JSON.stringify(parsedUsers) !== JSON.stringify(users)) {
+          setUsers(parsedUsers);
+        }
+      } catch (e) {
+        console.error('Failed to parse /etc/passwd update:', e);
+      }
+    }
+
     return true;
-  }, [resolvePath]);
+  }, [resolvePath, users, getNodeAtPath, userObj]);
+
+  const addUser = useCallback((username: string, fullName: string): boolean => {
+    console.log('Adding user:', username);
+    if (users.some(u => u.username === username)) return false;
+
+    const maxUid = Math.max(...users.map(u => u.uid));
+    const newUid = maxUid < 1000 ? 1000 : maxUid + 1;
+
+    const newUser: User = {
+      username,
+      password: 'x',
+      uid: newUid,
+      gid: newUid,
+      fullName,
+      homeDir: `/home/${username}`,
+      shell: '/bin/bash'
+    };
+
+    setUsers(prev => [...prev, newUser]);
+
+    // Create populated home directory
+    const homeNode = ensureIds(createUserHome(username));
+
+    setFileSystem(prevFS => {
+      const newFS = deepCloneFileSystem(prevFS);
+      // Navigate to /home
+      let homeDir = newFS.children?.find(c => c.name === 'home');
+
+      // Safety check: ensure /home exists
+      if (!homeDir) {
+        // Create /home if it doesn't exist (unlikely but safe)
+        homeDir = {
+          id: crypto.randomUUID(),
+          name: 'home',
+          type: 'directory',
+          children: [],
+          owner: 'root',
+          permissions: 'drwxr-xr-x'
+        };
+        if (newFS.children) newFS.children.push(homeDir);
+        else newFS.children = [homeDir];
+      }
+
+      if (homeDir && homeDir.children) {
+        // Check if directory already exists
+        if (!homeDir.children.some(c => c.name === username)) {
+          homeDir.children.push(homeNode);
+        }
+      }
+
+      return newFS;
+    });
+
+    return true;
+  }, [users]);
+
+  const deleteUser = useCallback((username: string): boolean => {
+    if (username === 'root' || username === 'user') {
+      notify.system('error', 'User Management', 'Cannot delete default system users');
+      return false;
+    }
+    const target = users.find(u => u.username === username);
+    if (!target) return false;
+
+    setUsers(prev => prev.filter(u => u.username !== username));
+
+    return true;
+  }, [users]);
 
   return (
     <FileSystemContext.Provider
@@ -483,12 +740,15 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
         fileSystem,
         currentPath,
         currentUser,
+        users,
         homePath,
         setCurrentPath,
         getNodeAtPath,
         createFile,
         createDirectory,
         deleteNode,
+        addUser,
+        deleteUser,
         writeFile,
         readFile,
         listDirectory,

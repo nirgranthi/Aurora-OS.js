@@ -1,6 +1,7 @@
 import { Palette, Monitor, Bell, Shield, Wifi, User, HardDrive, Zap, Info, AlertTriangle, RefreshCw, Trash2 } from 'lucide-react';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useAppContext } from './AppContext';
+import { useFileSystem } from './FileSystemContext';
 import { Checkbox } from './ui/checkbox';
 import { AppTemplate } from './apps/AppTemplate';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from './ui/accordion';
@@ -36,8 +37,8 @@ const settingsSidebar = {
 };
 
 const presetColors = [
-  { name: 'Carbon', value: '#52525b' },   // Zinc-600 (Modern Neutral)
   { name: 'Crimson', value: '#e11d48' },  // Rose-600 (Vibrant Red)
+  { name: 'Carbon', value: '#fe5000' },   // MOONHOUND Studio
   { name: 'Amber', value: '#f59e0b' },    // Amber-500 (Warm Gold)
   { name: 'Emerald', value: '#10b981' },  // Emerald-500 (Crisp Green)
   { name: 'Azure', value: '#3b82f6' },    // Blue-500 (Classic Tech Blue)
@@ -47,7 +48,29 @@ const presetColors = [
 ];
 
 export function Settings() {
-  const [activeSection, setActiveSection] = useState('appearance');
+  const [activeSection, setActiveSection] = useState(() => {
+    // Check for pending section request (Deep Linking)
+    const pending = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('settings-pending-section') : null;
+    if (pending) {
+      sessionStorage.removeItem('settings-pending-section');
+      return pending;
+    }
+    return 'appearance';
+  });
+
+  // Listen for external requests to change section (when app is already open)
+  useEffect(() => {
+    const handleOpenSection = (e: CustomEvent<string>) => {
+      if (e.detail) {
+        setActiveSection(e.detail);
+      }
+    };
+
+    window.addEventListener('aurora-open-settings-section', handleOpenSection as EventListener);
+    return () => {
+      window.removeEventListener('aurora-open-settings-section', handleOpenSection as EventListener);
+    };
+  }, []);
   const {
     accentColor,
     setAccentColor,
@@ -64,7 +87,11 @@ export function Settings() {
     devMode,
     setDevMode
   } = useAppContext();
+  const { users, addUser, deleteUser, currentUser } = useFileSystem();
   const [customColor, setCustomColor] = useState(accentColor);
+  const [newUsername, setNewUsername] = useState('');
+  const [newFullName, setNewFullName] = useState('');
+  const [isAddingUser, setIsAddingUser] = useState(false);
 
   // About section state
   const storageStats = useMemo(() => {
@@ -370,8 +397,90 @@ export function Settings() {
         {activeSection === 'users' && (
           <div>
             <h2 className="text-2xl text-white mb-6">Users & Groups</h2>
-            <div className="bg-black/20 rounded-xl p-6 border border-white/5">
-              <p className="text-white/60">User settings coming soon...</p>
+
+            {/* User List */}
+            <div className="bg-black/20 rounded-xl p-6 mb-6 border border-white/5">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg text-white">Current Users</h3>
+                <GlassButton
+                  onClick={() => setIsAddingUser(!isAddingUser)}
+                  style={{ backgroundColor: isAddingUser ? undefined : accentColor }}
+                  className={isAddingUser ? "bg-white/10" : ""}
+                >
+                  {isAddingUser ? 'Cancel' : 'Add User'}
+                </GlassButton>
+              </div>
+
+              {isAddingUser && (
+                <div className="mb-6 p-4 bg-white/5 rounded-lg border border-white/10 space-y-3">
+                  <h4 className="text-white text-sm font-medium">New User Details</h4>
+                  <div className="grid gap-3">
+                    <GlassInput
+                      placeholder="Username (e.g. alice)"
+                      value={newUsername}
+                      onChange={(e) => setNewUsername(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))}
+                    />
+                    <GlassInput
+                      placeholder="Full Name"
+                      value={newFullName}
+                      onChange={(e) => setNewFullName(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2 mt-2">
+                    <GlassButton
+                      disabled={!newUsername || !newFullName}
+                      onClick={() => {
+                        if (addUser(newUsername, newFullName)) {
+                          setNewUsername('');
+                          setNewFullName('');
+                          setIsAddingUser(false);
+                        } else {
+                          // alert? using custom notify handling from calling code usually, but here just inline check
+                          alert('User already exists');
+                        }
+                      }}
+                      style={{ backgroundColor: accentColor }}
+                    >
+                      Create User
+                    </GlassButton>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-3">
+                {users.map((user) => (
+                  <div key={user.username} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/5 group">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-600 flex items-center justify-center text-white font-bold text-lg">
+                        {user.fullName.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="text-white font-medium flex items-center gap-2">
+                          {user.fullName}
+                          {user.username === currentUser && <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded text-white/80">Current</span>}
+                          {user.uid === 0 && <span className="text-xs bg-red-500/50 px-1.5 py-0.5 rounded text-white">Root</span>}
+                        </div>
+                        <div className="text-white/40 text-sm">
+                          {user.username} • UID: {user.uid} • {user.homeDir}
+                        </div>
+                      </div>
+                    </div>
+
+                    {user.uid >= 1000 && user.username !== 'user' && ( // Prevent deleting default 'user' or root for safety
+                      <button
+                        onClick={() => {
+                          if (confirm(`Are you sure you want to delete ${user.username}?`)) {
+                            deleteUser(user.username);
+                          }
+                        }}
+                        className="p-2 text-white/40 hover:text-red-400 hover:bg-white/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}

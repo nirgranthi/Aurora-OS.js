@@ -1,4 +1,4 @@
-# Aurora OS.js [![Version](https://img.shields.io/badge/Version-v0.7.0-blue)](https://github.com/mental-os/Aurora-OS.js) [![GitHub Pages](https://github.com/mental-os/Aurora-OS.js/actions/workflows/deploy.yml/badge.svg)](https://github.com/mental-os/Aurora-OS.js/actions/workflows/deploy.yml) [![Dependabot](https://github.com/mental-os/Aurora-OS.js/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/mental-os/Aurora-OS.js/actions/workflows/dependabot/dependabot-updates) [![Build](https://github.com/mental-os/Aurora-OS.js/actions/workflows/ci.yml/badge.svg)](https://github.com/mental-os/Aurora-OS.js/actions/workflows/ci.yml)
+# Aurora OS.js [![Version](https://img.shields.io/badge/Version-v0.7.2-blue)](https://github.com/mental-os/Aurora-OS.js) [![GitHub Pages](https://github.com/mental-os/Aurora-OS.js/actions/workflows/deploy.yml/badge.svg)](https://github.com/mental-os/Aurora-OS.js/actions/workflows/deploy.yml) [![Dependabot](https://github.com/mental-os/Aurora-OS.js/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/mental-os/Aurora-OS.js/actions/workflows/dependabot/dependabot-updates) [![Build](https://github.com/mental-os/Aurora-OS.js/actions/workflows/ci.yml/badge.svg)](https://github.com/mental-os/Aurora-OS.js/actions/workflows/ci.yml)
 
 A modern, web-based desktop operating system interface built with React, Tailwind CSS, and Radix UI.
 
@@ -6,7 +6,8 @@ A modern, web-based desktop operating system interface built with React, Tailwin
 
 - **Desktop Environment**: Windows 11-inspired grid layout, multi-select drag-and-drop, and fluid window management with snap-like behavior.
 - **Window Management**: Minimize, maximize, close, and focus management with preserved state and independent navigation.
-- **Virtual Filesystem**: Complete in-memory Linux-style filesystem (`/bin`, `/etc`, `/home`, etc.) with permissions and persistent storage.
+- **Virtual Filesystem**: Complete in-memory Linux-style filesystem (`/bin`, `/etc`, `/home`, etc.) with permissions (Owner/Group/Others, Sticky Bit) and persistent storage.
+- **User Management**: Multi-user support with bidirectional `/etc/passwd` syncing and dedicated Settings panel.
 - **App Ecosystem**:
   - **Finder**: Full-featured file manager with breadcrumbs navigation, drag-and-drop file moving, and list/grid views.
   - **Terminal**: Zsh-like experience with autocomplete, command history, pipe support, and ability to launch GUI apps (`Finder /home`).
@@ -55,16 +56,9 @@ npm test
 
 ## Release Notes
 
-## v0.7.1
-- **UI Standardization**:
-    - **Glassmorphism**: Created standardized `GlassButton` and `GlassInput` components.
-    - **Adoption**: Integrated new glass UI into **DevCenter**, **Messages**, and **Settings** (Danger Zone, Custom Color).
-- **Architecture**:
-    - **Service Separation**: Extracted `SoundManager`, `SoundFeedback`, and `NotificationSystem` from `src/lib` to `src/services` to clearly distinguish stateful services from stateless utilities.
-    - **Cleanup**: Deleted legacy `src/lib` directory.
-- **Bug Fixes**:
-    - **Responsive Layouts**: Fixed sidebar cropping in Messages and grid overflow in Settings/DevCenter at narrow widths (<400px).
-    - **Linting**: resolved unused variables in MenuBar and DevCenter.
+## v0.7.2
+- **User Management**: Added full multi-user support with UI management and `/etc/passwd` syncing.
+- **Permissions**: Implemented Advanced Linux Permissions (Sticky Bit, Directory Traversal) and Terminal redirection (`>`, `>>`).
 
 [View full version history](HISTORY.md)
 

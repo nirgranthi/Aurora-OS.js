@@ -90,6 +90,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     document.documentElement.style.setProperty('--blur-enabled', blurEnabled ? '1' : '0');
   }, [blurEnabled]);
 
+  // Sync performance settings to data attributes for global CSS overrides
+  useEffect(() => {
+    document.documentElement.dataset.reduceMotion = reduceMotion ? 'true' : 'false';
+  }, [reduceMotion]);
+
+  useEffect(() => {
+    document.documentElement.dataset.disableShadows = disableShadows ? 'true' : 'false';
+  }, [disableShadows]);
+
+  useEffect(() => {
+    document.documentElement.dataset.disableGradients = disableGradients ? 'true' : 'false';
+  }, [disableGradients]);
+
   return (
     <AppContext.Provider value={{
       accentColor,

@@ -289,3 +289,30 @@ html {
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
 }
+
+/* ====================
+   PERFORMANCE OVERRIDES
+   ==================== */
+
+/* Reduce Motion: Kill all animations and transitions */
+:root[data-reduce-motion="true"] * {
+    animation-duration: 0.01s !important;
+    transition-duration: 0.01s !important;
+    scroll-behavior: auto !important;
+}
+
+/* Disable Shadows: Remove all box-shadows */
+:root[data-disable-shadows="true"] * {
+    box-shadow: none !important;
+}
+
+/* Disable Gradients: For generic gradient backgrounds */
+:root[data-disable-gradients="true"] .bg-gradient-to-br,
+:root[data-disable-gradients="true"] .bg-gradient-to-r,
+:root[data-disable-gradients="true"] .bg-gradient-to-b,
+:root[data-disable-gradients="true"] .bg-gradient-to-tr,
+:root[data-disable-gradients="true"] .bg-gradient-to-bl,
+:root[data-disable-gradients="true"] .bg-gradient-to-tl {
+    background-image: none !important;
+    background-color: var(--accent-user) !important;
+}

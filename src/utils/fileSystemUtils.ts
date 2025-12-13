@@ -13,6 +13,67 @@ export interface FileNode {
     modified?: Date;
 }
 
+export interface User {
+    username: string;
+    password?: string;
+    uid: number;
+    gid: number;
+    fullName: string;
+    homeDir: string;
+    shell: string;
+    groups?: string[]; // Supplementary groups
+}
+
+export interface Group {
+    groupName: string;
+    password?: string;
+    gid: number;
+    members: string[]; // usernames
+}
+
+export function parsePasswd(content: string): User[] {
+    return content.split('\n')
+        .filter(line => line.trim() && !line.startsWith('#'))
+        .map(line => {
+            const [username, password, uidStr, gidStr, fullName, homeDir, shell] = line.split(':');
+            return {
+                username,
+                password,
+                uid: parseInt(uidStr, 10),
+                gid: parseInt(gidStr, 10),
+                fullName,
+                homeDir,
+                shell
+            };
+        });
+}
+
+export function formatPasswd(users: User[]): string {
+    return users.map(u =>
+        `${u.username}:${u.password || 'x'}:${u.uid}:${u.gid}:${u.fullName}:${u.homeDir}:${u.shell}`
+    ).join('\n');
+}
+
+export function parseGroup(content: string): Group[] {
+    return content.split('\n')
+        .filter(line => line.trim() && !line.startsWith('#'))
+        .map(line => {
+            const [groupName, password, gidStr, membersStr] = line.split(':');
+            return {
+                groupName,
+                password,
+                gid: parseInt(gidStr, 10),
+                members: membersStr ? membersStr.split(',') : []
+            };
+        });
+}
+
+export function formatGroup(groups: Group[]): string {
+    return groups.map(g =>
+        `${g.groupName}:${g.password || 'x'}:${g.gid}:${g.members.join(',')}`
+    ).join('\n');
+}
+
 // Efficient deep clone function for FileNode
 export function deepCloneFileNode(node: FileNode): FileNode {
     const cloned: FileNode = {
@@ -101,18 +162,63 @@ export function createUserHome(username: string): any {
     };
 }
 
+export function checkPermissions(
+    node: FileNode,
+    user: User,
+    operation: 'read' | 'write' | 'execute'
+): boolean {
+    if (user.uid === 0 || user.username === 'root') return true;
+
+    const perms = node.permissions || (node.type === 'directory' ? 'drwxr-xr-x' : '-rw-r--r--');
+
+    // 1. Check Owner
+    if (node.owner === user.username) {
+        const checkChar = perms[1 + (operation === 'read' ? 0 : operation === 'write' ? 1 : 2)];
+        return checkChar !== '-';
+    }
+
+    // 2. Check Group (Primary + Supplementary)
+    let userInGroup = false;
+    if (node.group) {
+        if (node.group === user.gid.toString()) {
+            userInGroup = true;
+        } else if (user.groups && user.groups.includes(node.group)) {
+            userInGroup = true;
+        }
+    }
+
+    if (userInGroup) {
+        const checkChar = perms[4 + (operation === 'read' ? 0 : operation === 'write' ? 1 : 2)];
+        return checkChar !== '-';
+    }
+
+    // 3. Check Others
+    const checkChar = perms[7 + (operation === 'read' ? 0 : operation === 'write' ? 1 : 2)];
+
+    // Handle Sticky Bit (t/T) and regular x interaction for 'execute' on others
+    // Sticky bit is at index 9 (last char), replacing 'x'
+    // 't' = sticky + executable by others
+    // 'T' = sticky + NOT executable by others
+    if (operation === 'execute' && (checkChar === 't' || checkChar === 'T')) {
+        return checkChar === 't';
+    }
+
+    // Standard rwx check
+    return checkChar !== '-';
+}
+
 // Normalized Initial File System
 export const initialFileSystem: any = {
     name: '/',
     type: 'directory',
-    permissions: 'drwxr-xr-x',
+    permissions: 'drwxr-xr-x', // 755
     owner: 'root',
     children: [
         // Essential command binaries
         {
             name: 'bin',
             type: 'directory',
-            permissions: 'drwxr-xr-x',
+            permissions: 'drwxr-xr-x', // 755
             owner: 'root',
             children: [
                 { name: 'ls', type: 'file', permissions: '-rwxr-xr-x', owner: 'root', content: '#!/bin/bash\n# list directory contents' },
@@ -133,7 +239,7 @@ export const initialFileSystem: any = {
         {
             name: 'boot',
             type: 'directory',
-            permissions: 'drwxr-xr-x',
+            permissions: 'drwxr-xr-x', // 755
             owner: 'root',
             children: [
                 { name: 'kernel', type: 'file', permissions: '-rw-r--r--', owner: 'root', content: `Aurora OS Kernel ${pkg.version}` },
@@ -144,7 +250,7 @@ export const initialFileSystem: any = {
         {
             name: 'etc',
             type: 'directory',
-            permissions: 'drwxr-xr-x',
+            permissions: 'drwxr-xr-x', // 755
             owner: 'root',
             children: [
                 { name: 'passwd', type: 'file', permissions: '-rw-r--r--', owner: 'root', content: 'root:x:0:0:root:/root:/bin/bash\nuser:x:1000:1000:User:/home/user:/bin/bash\nguest:x:1001:1001:Guest:/home/guest:/bin/bash' },
@@ -167,7 +273,7 @@ export const initialFileSystem: any = {
         {
             name: 'home',
             type: 'directory',
-            permissions: 'drwxr-xr-x',
+            permissions: 'drwxr-xr-x', // 755 (allows access to /home, but subdirs are restricted)
             owner: 'root',
             children: [
                 {
@@ -215,7 +321,7 @@ export const initialFileSystem: any = {
         {
             name: 'lib',
             type: 'directory',
-            permissions: 'drwxr-xr-x',
+            permissions: 'drwxr-xr-x', // 755
             owner: 'root',
             children: [
                 { name: 'libc.so', type: 'file', permissions: '-rwxr-xr-x', owner: 'root', content: '# C standard library' },
@@ -226,7 +332,7 @@ export const initialFileSystem: any = {
         {
             name: 'root',
             type: 'directory',
-            permissions: 'drwx------',
+            permissions: 'drwx------', // 700 - Private
             owner: 'root',
             children: [
                 { name: 'Desktop', type: 'directory', children: [], owner: 'root', permissions: 'drwxr-xr-x' },
@@ -338,7 +444,7 @@ export const initialFileSystem: any = {
                 {
                     name: 'tmp',
                     type: 'directory',
-                    permissions: 'drwxrwxrwt',
+                    permissions: 'drwxrwxrwt', // 1777 (Sticky bit)
                     owner: 'root',
                     children: [],
                 },

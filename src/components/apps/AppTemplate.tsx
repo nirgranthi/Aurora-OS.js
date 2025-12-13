@@ -58,7 +58,8 @@ export function AppTemplate({
   const effectiveBreakpoint = sidebarCollapseBreakpoint ?? (minContentWidth ? minContentWidth + SIDEBAR_WIDTH : 500);
 
   // Explicit breakpoint for collapsing sidebar
-  const isCompact = width < effectiveBreakpoint;
+  // Treat 0 (loading) as expanded to prevent expansion animation on desktop
+  const isCompact = width === 0 ? false : width < effectiveBreakpoint;
 
   // Calculate actual content width available
   const sidebarWidth = hasSidebar && sidebar
