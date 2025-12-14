@@ -85,7 +85,16 @@ function loadUsers(): User[] {
       console.log('Loaded users from storage:', JSON.parse(stored));
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed) && parsed.length > 0 && parsed.every(u => u.username && typeof u.uid === 'number')) {
-        return parsed;
+        // Heal/Migrate users: If standard users are missing passwords (legacy data), restore defaults
+        return parsed.map(u => {
+          const defaultUser = DEFAULT_USERS.find(du => du.username === u.username);
+          // If it's a default user identity but has no password (or 'x'), restore default password
+          if (defaultUser && (!u.password || u.password === 'x')) {
+            console.log(`Restoring default password for user: ${u.username}`);
+            return { ...u, password: defaultUser.password };
+          }
+          return u;
+        });
       }
       console.warn('Stored users data corrupted or empty, reverting to defaults');
     }
