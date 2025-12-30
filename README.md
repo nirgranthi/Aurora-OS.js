@@ -1,4 +1,4 @@
-# Aurora OS.js [![Version](https://img.shields.io/badge/Version-v0.7.3--textPatch-blue)](https://github.com/mental-os/Aurora-OS.js) [![GitHub Pages](https://github.com/mental-os/Aurora-OS.js/actions/workflows/deploy.yml/badge.svg)](https://github.com/mental-os/Aurora-OS.js/actions/workflows/deploy.yml) [![Dependabot](https://github.com/mental-os/Aurora-OS.js/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/mental-os/Aurora-OS.js/actions/workflows/dependabot/dependabot-updates) [![Build](https://github.com/mental-os/Aurora-OS.js/actions/workflows/ci.yml/badge.svg)](https://github.com/mental-os/Aurora-OS.js/actions/workflows/ci.yml)
+# Aurora OS.js [![Version](https://img.shields.io/badge/Version-v0.7.4-blue)](https://github.com/mental-os/Aurora-OS.js) [![GitHub Pages](https://github.com/mental-os/Aurora-OS.js/actions/workflows/deploy.yml/badge.svg)](https://github.com/mental-os/Aurora-OS.js/actions/workflows/deploy.yml) [![Dependabot](https://github.com/mental-os/Aurora-OS.js/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/mental-os/Aurora-OS.js/actions/workflows/dependabot/dependabot-updates) [![Build](https://github.com/mental-os/Aurora-OS.js/actions/workflows/ci.yml/badge.svg)](https://github.com/mental-os/Aurora-OS.js/actions/workflows/ci.yml)
 
 A modern, web-based desktop operating system interface built with React, Tailwind CSS, and Radix UI.
 
@@ -60,19 +60,27 @@ npm test
 
 ## Release Notes
  
-### v0.7.3-textPatch
-- **The New Notepad Pro**:
-    - **Multi-Tab Interface**: A productive, tabbed editing environment with unique session persistence per user.
-    - **Dual-Mode Editing**: Seamless support for both Plain Text (`.txt`) and Markdown (`.md`) with a live, high-performance Preview mode.
-    - **Premium Aesthetics**: Featuring accent-themed syntax highlighting, glassmorphism toolbar, and custom-styled Markdown rendering (headings, code blocks, blockquotes).
-    - **Deep OS Integration**: Direct file association with Finder/Desktop, integrated `FilePicker` with permission enforcement, and unsaved changes interception system.
-    - **Auto-Save & Persistence**: Debounced state synchronization to `localStorage`, ensuring tabs are preserved across refreshes but securely cleared on Log Off.
- - **Dependabot Integration**:
-     - **Security & Stability**: Merged and verified updates for `jsdom`, `lucide-react`, `react-hook-form`, `@types/node`, and `typescript-eslint`.
-     - **Strict Lint Compliance**: Refactored the codebase to satisfy new ESLint rules, resolving high-impact warnings like `cascading renders` and `impure functions`.
- - **Technical Fixes**:
-     - **Cascading Render Fix**: Implemented a robust `useRef` + `setTimeout` strategy for the `useEffect` hooks in Notepad to prevent performance-degrading synchronous state updates.
-     - **Logic Restoration**: Repaired accidental file corruption in `Notepad.tsx`, restoring all critical imports and state management logic.
+### v0.7.4
+
+#### UI/UX Enhancements
+- **Root User Visual Indicator**: Windows owned by `root` now display a distinctive accent-colored border (full opacity when focused, 80% when unfocused)
+
+#### Notepad Major Improvements
+- **Expanded File Format Support**: Added support for 8 file types (`txt`, `md`, `json`, `js`, `ts`, `tsx`, `css`, `html`) with automatic syntax highlighting using Prism.js
+- **Smart Language Selector**: Replaced simple toggle with searchable combobox featuring glassmorphism effects, accent colors, and smooth transitions
+- **HTML Preview Mode**: Added live HTML preview for `.html` files with sandboxed iframe rendering
+
+#### Music App Enhancements
+- **Extended Audio Format Support**: Verified compatibility with `mp3`, `wav`, `flac`, `ogg`, `m4a` and updated FileIcon component for visual consistency
+
+#### Terminal Command Updates
+- **Permission Handling**: Updated `cd` to use `terminalUser` parameter; enhanced `rm` with explicit parent directory permission checks
+- **Code Audit**: Systematically reviewed all 26 terminal commands for consistency and best practices
+
+#### Technical Improvements
+- Enhanced owner-aware permission handling across applications
+- Improved terminal user context propagation
+- Better error handling in file system operations
 
 [View to-do list](TO-DO.md)
 

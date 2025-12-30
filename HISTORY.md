@@ -1,3 +1,25 @@
+### v0.7.4 (December 30, 2024)
+
+#### UI/UX Enhancements
+- **Root User Visual Indicator**: Windows owned by `root` now display a distinctive accent-colored border (full opacity when focused, 80% when unfocused)
+
+#### Notepad Major Improvements
+- **Expanded File Format Support**: Added support for 8 file types (`txt`, `md`, `json`, `js`, `ts`, `tsx`, `css`, `html`) with automatic syntax highlighting using Prism.js
+- **Smart Language Selector**: Replaced simple toggle with searchable combobox featuring glassmorphism effects, accent colors, and smooth transitions
+- **HTML Preview Mode**: Added live HTML preview for `.html` files with sandboxed iframe rendering
+
+#### Music App Enhancements
+- **Extended Audio Format Support**: Verified compatibility with `mp3`, `wav`, `flac`, `ogg`, `m4a` and updated FileIcon component for visual consistency
+
+#### Terminal Command Updates
+- **Permission Handling**: Updated `cd` to use `terminalUser` parameter; enhanced `rm` with explicit parent directory permission checks
+- **Code Audit**: Systematically reviewed all 26 terminal commands for consistency and best practices
+
+#### Technical Improvements
+- Enhanced owner-aware permission handling across applications
+- Improved terminal user context propagation
+- Better error handling in file system operations
+
 ## v0.7.3-textPatch
 - **The New Notepad Pro**:
     - **Multi-Tab Interface**: Productive tabbed layout with per-user session persistence.

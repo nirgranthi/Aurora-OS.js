@@ -25,27 +25,27 @@ export function MainMenu({ onNewGame, onContinue, canContinue }: MainMenuProps) 
             icon: Disc,
             disabled: !canContinue,
             action: onContinue,
-            desc: canContinue ? 'Resume your previous session' : 'No save data found'
+            desc: canContinue ? 'Resume your previous loop' : 'No loop data found'
         },
         {
             id: 'new-game',
-            label: 'New Game',
+            label: 'New Loop',
             icon: Play,
             disabled: false,
             action: onNewGame,
-            desc: 'Start a fresh simulation (Wipes data)'
+            desc: 'Start fresh (Wipes data)'
         },
         {
             id: 'settings',
-            label: 'Settings',
+            label: 'BIOS',
             icon: Settings,
             disabled: false,
             action: () => setShowSettings(true),
-            desc: 'Configure global simulation parameters'
+            desc: 'Configure global parameters'
         },
         {
             id: 'exit',
-            label: 'Exit',
+            label: 'Shutdown',
             icon: Power,
             disabled: false,
             action: () => window.close(), // Attempt to close tab

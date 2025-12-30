@@ -6,6 +6,7 @@ import { useAppContext } from '../AppContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useFileSystem } from '../FileSystemContext';
 import { useMusic, type Song } from '../MusicContext';
+import { useWindow } from '../WindowContext';
 import { cn } from '../ui/utils';
 import { Slider } from '../ui/slider';
 
@@ -61,14 +62,19 @@ const musicSidebar = (songCount: number, onSelect: (id: string) => void) => ({
   ],
 });
 
-export function Music() {
+interface MusicProps {
+  owner?: string;
+  initialPath?: string;
+}
+
+export function Music({ owner, initialPath }: MusicProps) {
   // const [appState, setAppState] = useAppStorage... (Moved to Context)
 
-  const { fileSystem, resolvePath, listDirectory } = useFileSystem();
-  const { accentColor } = useAppContext();
+  const { fileSystem, resolvePath, listDirectory, getNodeAtPath, readFile } = useFileSystem();
+  const { accentColor, activeUser: desktopUser } = useAppContext();
+  const activeUser = owner || desktopUser;
   const { getBackgroundColor, blurStyle } = useThemeColors();
 
-  // Consume Global Music Context
   const {
     playlist: songs,
     currentSong,
@@ -89,6 +95,8 @@ export function Music() {
     setActiveCategory
   } = useMusic();
 
+  const windowContext = useWindow();
+
   // Pause music when the window (component) closes to save session state
   useEffect(() => {
     setMusicOpen(true);
@@ -97,6 +105,29 @@ export function Music() {
       pause();
     };
   }, [pause, setMusicOpen]);
+
+  // Handle Initial Path and Dynamic Path updates from CLI/Finder
+  useEffect(() => {
+    const path = initialPath || windowContext?.data?.path;
+    if (path) {
+      const node = getNodeAtPath(path, activeUser);
+      if (node && node.type === 'file') {
+        const content = readFile(path, activeUser);
+        const meta = parseMetadata(node.name);
+        const song: Song = {
+          id: node.id,
+          path: path,
+          url: content || '',
+          title: meta.title,
+          artist: meta.artist,
+          album: meta.album,
+          duration: '--:--'
+        };
+        playSong(song);
+        setActiveCategory('recent');
+      }
+    }
+  }, [initialPath, windowContext?.data?.path, activeUser, getNodeAtPath, readFile, playSong, setActiveCategory]);
 
   // Derived state for view
   // We filter library songs for the badge size and the main view
@@ -115,8 +146,8 @@ export function Music() {
   useEffect(() => {
     // Only scan if playlist is empty? Or always to refresh?
     // Let's always refresh for now.
-    const musicPath = resolvePath('~/Music');
-    const files = listDirectory(musicPath);
+    const musicPath = resolvePath('~/Music', activeUser);
+    const files = listDirectory(musicPath, activeUser);
 
     if (files) {
       const audioFiles = files.filter(f =>
@@ -183,7 +214,7 @@ export function Music() {
         setPlaylist(mergedSongs);
       }
     }
-  }, [fileSystem, resolvePath, listDirectory, setPlaylist, songs, currentSong]);
+  }, [fileSystem, resolvePath, listDirectory, setPlaylist, songs, currentSong, activeUser]);
 
 
   // Progressive Metadata Resolver

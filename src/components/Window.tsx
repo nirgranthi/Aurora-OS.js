@@ -28,7 +28,7 @@ function WindowComponent({
   isFocused,
   bounds
 }: WindowProps) {
-  const { titleBarBackground } = useThemeColors();
+  const { titleBarBackground, accentColor } = useThemeColors();
   const { disableShadows, reduceMotion, blurEnabled } = useAppContext();
   const [isDragging, setIsDragging] = useState(false);
   const [beforeClose, setBeforeClose] = useState<(() => boolean | Promise<boolean>) | null>(null);
@@ -174,12 +174,14 @@ function WindowComponent({
         className={cn(
           "w-full h-full flex flex-col overflow-hidden",
           "transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
-          "rounded-xl border border-white/20",
+          "rounded-xl border",
+          window.owner !== 'root' && "border-white/20",
           (!disableShadows) && "shadow-2xl",
           (!isFocused && !window.isMinimized) && "brightness-75 saturate-50",
           (isDragging && !disableShadows) && "shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)]"
         )}
         style={{
+          borderColor: window.owner === 'root' ? (isFocused ? accentColor : `${accentColor}80`) : undefined,
           background: !isFocused ? '#171717' : undefined,
           opacity: window.isMinimized ? 0 : 1,
           transform: getTransform(),

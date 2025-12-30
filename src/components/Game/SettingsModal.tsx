@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Volume2, Monitor, RefreshCw, Trash2, X, VolumeX } from 'lucide-react';
+import pkg from '../../../package.json';
 import { cn } from '../ui/utils';
 import { feedback } from '../../services/soundFeedback';
 import { soundManager } from '../../services/sound';
@@ -61,7 +62,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                 className="bg-zinc-900/90 border border-white/10 p-8 max-w-lg w-full rounded-2xl shadow-2xl relative"
             >
                 <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-2xl font-bold text-white tracking-wide">Simulation Settings</h2>
+                    <h2 className="text-2xl font-bold text-white tracking-wide">BIOS Settings</h2>
                     <button
                         onClick={() => { feedback.click(); onClose(); }}
                         className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/50 hover:text-white"
@@ -140,7 +141,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                 </div>
 
                 <div className="mt-8 text-center text-xs text-white/20 font-mono">
-                    Aurora OS v0.7.3-audioPatch • BIOS Configuration
+                    {pkg.build.productName} v{pkg.version} • BIOS Configuration<br></br>More settings can be found once logged in.
                 </div>
             </motion.div>
         </div>

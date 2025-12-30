@@ -12,8 +12,8 @@ export const sudo: TerminalCommand = {
             return { output: ['sudo: segmentation fault (core dumped)'], error: true };
         }
 
-        const { args, fileSystem, spawnSession } = context;
-        const currentUserName = fileSystem.currentUser || 'nobody';
+        const { args, fileSystem, spawnSession, terminalUser } = context;
+        const currentUserName = terminalUser || fileSystem.currentUser || 'nobody';
 
         // 1. Check Sudoers Logic FIRST
         let isAuthorized = false;
@@ -37,6 +37,18 @@ export const sudo: TerminalCommand = {
             return { output: [`${currentUserName} is not in the sudoers file. This incident will be reported.`], error: true };
         }
 
+        // 2. Prompt for password if not root and not authorized in this terminal session
+        if (currentUserName !== 'root' && !context.isSudoAuthorized) {
+            const password = await context.prompt(`[sudo] password for ${currentUserName}: `, 'password');
+            const isValid = context.verifyPassword(currentUserName, password);
+
+            if (!isValid) {
+                return { output: ['sudo: 1 incorrect password attempt'], error: true };
+            }
+
+            context.setIsSudoAuthorized(true);
+        }
+
         if (args.includes('-s')) {
             // sudo -s -> sudo shell -> spawn root session directly
             // Sudo implies we are authorized to switch to root (simulated)
@@ -56,6 +68,37 @@ export const sudo: TerminalCommand = {
             const commandToRun = allCommands.find(c => c.name === cmdName);
 
             if (!commandToRun) {
+                // Secondary check: is it a binary file app launch?
+                const PATH = ['/bin', '/usr/bin', '/usr/local/bin'];
+                let binPath: string | null = null;
+                const cmd = cmdName;
+
+                if (cmd.includes('/')) {
+                    const resolved = context.resolvePath(cmd);
+                    const node = context.getNodeAtPath(resolved, 'root');
+                    if (node && node.type === 'file') binPath = resolved;
+                } else {
+                    for (const dir of PATH) {
+                        const check = (dir === '/' ? '' : dir) + '/' + cmd;
+                        const node = context.getNodeAtPath(check, 'root');
+                        if (node && node.type === 'file') {
+                            binPath = check;
+                            break;
+                        }
+                    }
+                }
+
+                if (binPath) {
+                    const content = context.readFile(binPath, 'root');
+                    if (content && content.startsWith('#!app ')) {
+                        const appId = content.replace('#!app ', '').trim();
+                        if (context.onLaunchApp) {
+                            context.onLaunchApp(appId, cmdArgs, 'root');
+                            return { output: [`Launched ${appId} as root`] };
+                        }
+                    }
+                }
+
                 return { output: [`sudo: ${cmdName}: command not found`], error: true };
             }
 

@@ -14,6 +14,14 @@ export interface CommandContext {
     terminalUser: string;
     spawnSession: (username: string) => void;
     closeSession: () => void;
+    onLaunchApp?: (appId: string, args: string[], owner?: string) => void;
+    getNodeAtPath: (path: string, asUser?: string) => any;
+    readFile: (path: string, asUser?: string) => string | null;
+    prompt: (message: string, type?: 'text' | 'password') => Promise<string>;
+    isSudoAuthorized: boolean;
+    setIsSudoAuthorized: (v: boolean) => void;
+    verifyPassword: (username: string, passwordToTry: string) => boolean;
+    print: (content: string | React.ReactNode) => void;
 }
 
 export interface CommandResult {

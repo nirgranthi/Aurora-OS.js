@@ -14,6 +14,7 @@ export interface WindowState {
     size: { width: number; height: number };
     zIndex: number;
     data?: any;
+    owner: string;
 }
 
 export interface WindowSession {
@@ -26,11 +27,12 @@ export interface WindowSession {
     size: { width: number; height: number };
     zIndex: number;
     data?: any;
+    owner: string;
 }
 
 export function useWindowManager(
     activeUser: string | null,
-    getAppContent: (type: string, data?: any) => { content: React.ReactNode; title: string }
+    getAppContent: (type: string, data?: any, owner?: string) => { content: React.ReactNode; title: string }
 ) {
     const [windows, setWindows] = useState<WindowState[]>([]);
     const [isRestoring, setIsRestoring] = useState(true);
@@ -45,7 +47,7 @@ export function useWindowManager(
             if (stored) {
                 const sessions: WindowSession[] = JSON.parse(stored);
                 const restoredWindows: WindowState[] = sessions.map((session) => {
-                    const { content } = getAppContent(session.type, session.data);
+                    const { content } = getAppContent(session.type, session.data, session.owner);
                     return {
                         ...session,
                         content,
@@ -82,6 +84,7 @@ export function useWindowManager(
             size: w.size,
             zIndex: w.zIndex,
             data: w.data,
+            owner: w.owner,
         }));
 
         try {
@@ -92,13 +95,14 @@ export function useWindowManager(
     }, [windows, activeUser, isRestoring]);
 
     const openWindow = useCallback(
-        (type: string, data?: { path?: string }) => {
+        (type: string, data?: { path?: string }, owner?: string) => {
             const MULTI_INSTANCE_APPS = ['finder', 'terminal', 'browser'];
 
             setWindows((prevWindows) => {
                 // Check for existing instance if not multi-instance
                 if (!MULTI_INSTANCE_APPS.includes(type)) {
-                    const existing = prevWindows.find(w => w.type === type);
+                    const windowOwner = owner || activeUser;
+                    const existing = prevWindows.find(w => w.type === type && w.owner === windowOwner);
                     if (existing) {
                         feedback.click(); // Sound on focus
 
@@ -115,7 +119,8 @@ export function useWindowManager(
                 }
 
                 feedback.windowOpen();
-                const { content, title } = getAppContent(type, data);
+                const windowOwner = owner || activeUser || 'guest';
+                const { content, title } = getAppContent(type, data, windowOwner);
 
                 topZIndexRef.current += 1;
                 const newZIndex = topZIndexRef.current;
@@ -130,11 +135,12 @@ export function useWindowManager(
                     size: { width: 900, height: 600 },
                     zIndex: newZIndex,
                     data,
+                    owner: owner || activeUser || 'guest',
                 };
                 return [...prevWindows, newWindow];
             });
         },
-        [getAppContent]
+        [getAppContent, activeUser]
     );
 
     const closeWindow = useCallback((id: string) => {

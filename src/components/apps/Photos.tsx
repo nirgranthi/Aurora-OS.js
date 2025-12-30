@@ -33,12 +33,12 @@ const mockPhotos = Array.from({ length: 24 }, (_, i) => ({
   color: ['bg-blue-500', 'bg-purple-500', 'bg-pink-500', 'bg-green-500', 'bg-orange-500', 'bg-teal-500'][i % 6],
 }));
 
-export function Photos() {
+export function Photos({ owner }: { owner?: string }) {
   // Persisted state
-  const [activeCategory, setActiveCategory] = useSessionStorage('photos-active-category', 'all');
+  const [activeCategory, setActiveCategory] = useSessionStorage('photos-active-category', 'all', owner);
   const [appState, setAppState] = useAppStorage('photos', {
     viewMode: 'grid',
-  });
+  }, owner);
 
   const toolbar = (
     <div className="flex items-center justify-between w-full">

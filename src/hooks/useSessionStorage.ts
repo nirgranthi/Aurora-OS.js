@@ -10,8 +10,9 @@ import { useAppContext } from '../components/AppContext';
  * @param initialState - Default state
  * @returns [state, setState, resetState]
  */
-export function useSessionStorage<T>(key: string, initialState: T): [T, (value: T | ((prev: T) => T)) => void, () => void] {
-    const { activeUser } = useAppContext(); // Note: useAppContext might return null activeUser if not logged in?
+export function useSessionStorage<T>(key: string, initialState: T, owner?: string): [T, (value: T | ((prev: T) => T)) => void, () => void] {
+    const { activeUser: desktopUser } = useAppContext();
+    const activeUser = owner || desktopUser;
     // If no user, fallback to 'guest' or global?
     // Using current user from context is safer.
 

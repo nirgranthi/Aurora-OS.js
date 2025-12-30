@@ -25,8 +25,8 @@ export function IntroSequence({ onComplete }: IntroSequenceProps) {
     useEffect(() => {
         if (!started) return;
 
-        const timer1 = setTimeout(() => setStep(2), 2500); // Fade out "Mental OS"
-        const timer3 = setTimeout(() => onComplete(), 3000); // End
+        const timer1 = setTimeout(() => setStep(2), 3000); // Fade out "Mental OS"
+        const timer3 = setTimeout(() => onComplete(), 5000); // End
 
         return () => {
             clearTimeout(timer1);
@@ -66,7 +66,7 @@ export function IntroSequence({ onComplete }: IntroSequenceProps) {
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 1.2, filter: 'blur(10px)' }}
-                        transition={{ duration: 1.5, ease: "anticipate" }}
+                        transition={{ duration: 3.5, ease: "anticipate" }}
                         className="flex flex-col items-center gap-6"
                     >
                         <div className="relative">

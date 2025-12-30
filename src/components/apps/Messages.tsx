@@ -38,11 +38,11 @@ const mockMessages = [
   { id: 6, text: 'Futu-ti Cristosu ma-tii de responsive design', sender: 'me', time: '10:30 AM' },
 ];
 
-export function Messages() {
+export function Messages({ owner }: { owner?: string }) {
   // Persisted state
   // Persisted state
   // We keep 'messages' app storage for future features (e.g. draft text), but move navigation to session
-  const [activeCategory, setActiveCategory] = useSessionStorage('messages-active-category', 'all');
+  const [activeCategory, setActiveCategory] = useSessionStorage('messages-active-category', 'all', owner);
 
 
   const [selectedConversationId, setSelectedConversationId] = useState<string | number>(mockConversations[0].id);

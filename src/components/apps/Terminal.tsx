@@ -4,7 +4,7 @@ import pkg from '../../../package.json';
 import { useTerminalLogic } from '../../hooks/useTerminalLogic';
 
 export interface TerminalProps {
-  onLaunchApp?: (appId: string, args: string[]) => void;
+  onLaunchApp?: (appId: string, args: string[], owner?: string) => void;
 }
 
 export function Terminal({ onLaunchApp }: TerminalProps) {
@@ -19,7 +19,8 @@ export function Terminal({ onLaunchApp }: TerminalProps) {
     shades,
     handleKeyDown,
     isCommandValid,
-    homePath
+    homePath,
+    promptState
   } = useTerminalLogic(onLaunchApp);
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -33,6 +34,14 @@ export function Terminal({ onLaunchApp }: TerminalProps) {
   }, [history]);
 
   const getPrompt = (path: string = currentPath) => {
+    if (promptState) {
+      return (
+        <span className="whitespace-nowrap mr-1">
+          <span style={{ color: 'white' }}>{promptState.message}</span>
+        </span>
+      );
+    }
+
     let displayPath: string;
     if (path === homePath) {
       displayPath = '~';
@@ -55,6 +64,9 @@ export function Terminal({ onLaunchApp }: TerminalProps) {
   };
 
   const inputOverlay = useMemo(() => {
+    if (promptState?.type === 'password') {
+      return null;
+    }
     const tokens: ReactNode[] = [];
     const regex = /("([^"]*)")|('([^']*)')|(\s+)|([^\s"']+)/g;
     let match;
@@ -100,7 +112,7 @@ export function Terminal({ onLaunchApp }: TerminalProps) {
         <span className="text-white/40">{ghostText}</span>
       </span>
     );
-  }, [input, isCommandValid, shades, ghostText]);
+  }, [input, isCommandValid, shades, ghostText, promptState?.type]);
 
   const content = (
     <div
@@ -115,9 +127,9 @@ export function Terminal({ onLaunchApp }: TerminalProps) {
     >
       <div className="text-gray-400 mb-2">{pkg.build.productName} terminal [v{pkg.version}]</div>
 
-      {history.map((item, i) => (
+      {history.map((item) => (
         <TerminalHistoryItem
-          key={i}
+          key={item.id}
           item={item}
           homePath={homePath}
           activeUser={activeTerminalUser}
@@ -133,7 +145,7 @@ export function Terminal({ onLaunchApp }: TerminalProps) {
           </div>
           <input
             ref={inputRef}
-            type="text"
+            type={promptState?.type === 'password' ? 'password' : 'text'}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -153,6 +165,7 @@ export function Terminal({ onLaunchApp }: TerminalProps) {
 // Memoized History Item
 interface TerminalHistoryItemProps {
   item: {
+    id: string;
     command: string;
     output: ReactNode[];
     path: string;
@@ -172,9 +185,13 @@ const TerminalHistoryItem = memo(function TerminalHistoryItem({ item, homePath, 
   return (
     <div className="mb-2">
       <div className="flex items-center gap-2" style={{ color: item.accentColor || '#4ade80' }}>
-        <span>
-          {user}@{`aurora:${displayPath}${promptSymbol}`}
-        </span>
+        {item.user && item.user.includes(':') ? (
+          <span className="text-white">{item.user}</span>
+        ) : (
+          <span>
+            {user}@{`aurora:${displayPath}${promptSymbol}`}
+          </span>
+        )}
         <span className="text-gray-100">{item.command}</span>
       </div>
       <div className="pl-0">

@@ -73,8 +73,9 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
             const distributor = nickname ? nickname : author;
             const isSecure = validateIntegrity();
 
-            add('audit', `Distributor: ${distributor}`, 'text-zinc-400');
+            add('audit', `Facilitator: ${distributor}`, 'text-zinc-400');
             add('audit', `System Integrity: ${isSecure ? 'SECURE' : 'NON-SECURE (IDENTITY MISMATCH)'}`, isSecure ? 'text-cyan-400' : 'text-pink-500');
+            add('audit', `CARAVANE ping: SUCCESS (HTTP Latency: ${Math.floor(Math.random() * 50 + 10)}ms)`, 'text-cyan-400');
 
             // Dependencies = System Modules
             const deps = pkg.dependencies as Record<string, string>;

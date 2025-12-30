@@ -6,6 +6,7 @@ import { getCommand, commands, getAllCommands } from '../utils/terminal/registry
 import { getColorShades } from '../utils/colors';
 
 export interface CommandHistory {
+    id: string;
     command: string;
     output: (string | ReactNode)[];
     error?: boolean;
@@ -82,7 +83,7 @@ const parseCommandInput = (input: string): { command: string; args: string[]; re
     };
 };
 
-export function useTerminalLogic(onLaunchApp?: (appId: string, args: string[]) => void) {
+export function useTerminalLogic(onLaunchApp?: (appId: string, args: string[], owner?: string) => void) {
     const { accentColor } = useAppContext();
     const [history, setHistory] = useState<CommandHistory[]>([]);
     const [input, setInput] = useState('');
@@ -93,6 +94,11 @@ export function useTerminalLogic(onLaunchApp?: (appId: string, args: string[]) =
 
     // Session Stack for su/sudo (independent of global desktop session)
     const [sessionStack, setSessionStack] = useState<string[]>([]);
+
+    // Interactive Prompting
+    const [promptState, setPromptState] = useState<{ message: string; type: 'text' | 'password'; callingHistoryId?: string } | null>(null);
+    const promptResolverRef = useRef<((value: string) => void) | null>(null);
+    const [isSudoAuthorized, setIsSudoAuthorized] = useState(false);
 
     const {
         listDirectory,
@@ -112,7 +118,8 @@ export function useTerminalLogic(onLaunchApp?: (appId: string, args: string[]) =
         resetFileSystem,
         chmod,
         chown,
-        writeFile
+        writeFile,
+        verifyPassword
     } = useFileSystem();
 
     // Initialize session with current global user
@@ -140,22 +147,12 @@ export function useTerminalLogic(onLaunchApp?: (appId: string, args: string[]) =
 
     // Local path resolution
     const resolvePath = useCallback((path: string): string => {
-        if (path.startsWith('/')) return contextResolvePath(path);
-        if (path === '~') return homePath;
-        if (path.startsWith('~/')) return homePath + path.slice(1);
-
-        const parts = currentPath.split('/').filter(p => p);
-        const pathParts = path.split('/');
-
-        for (const part of pathParts) {
-            if (part === '..') {
-                parts.pop();
-            } else if (part !== '.' && part !== '') {
-                parts.push(part);
-            }
+        let resolved = path;
+        if (!path.startsWith('/') && !path.startsWith('~')) {
+            resolved = currentPath + (currentPath === '/' ? '' : '/') + path;
         }
-        return '/' + parts.join('/');
-    }, [currentPath, contextResolvePath, homePath]);
+        return contextResolvePath(resolved, activeTerminalUser);
+    }, [currentPath, contextResolvePath, activeTerminalUser]);
 
     // Accent Color Logic
     const getTerminalAccentColor = useCallback(() => {
@@ -274,6 +271,7 @@ export function useTerminalLogic(onLaunchApp?: (appId: string, args: string[]) =
             setHistory(prev => [
                 ...prev,
                 {
+                    id: crypto.randomUUID(),
                     command: input,
                     output: candidates,
                     error: false,
@@ -294,7 +292,54 @@ export function useTerminalLogic(onLaunchApp?: (appId: string, args: string[]) =
         return false;
     };
 
+    const prompt = useCallback((message: string, type: 'text' | 'password' = 'text', callingHistoryId?: string): Promise<string> => {
+        setPromptState({ message, type, callingHistoryId });
+        return new Promise((resolve) => {
+            promptResolverRef.current = resolve;
+        });
+    }, []);
+
     const executeCommand = async (cmdInput: string) => {
+        if (promptState && promptResolverRef.current) {
+            const resolver = promptResolverRef.current;
+            promptResolverRef.current = null;
+            const { message, type, callingHistoryId } = promptState;
+            setPromptState(null);
+
+            // Append prompt result to the calling history item if it exists
+            if (callingHistoryId) {
+                setHistory(prev => {
+                    const newHistory = [...prev];
+                    const idx = newHistory.findIndex(h => h.id === callingHistoryId);
+                    if (idx !== -1) {
+                        const displayInput = type === 'password' ? '********' : cmdInput;
+                        newHistory[idx] = {
+                            ...newHistory[idx],
+                            output: [...newHistory[idx].output, `${message} ${displayInput}`]
+                        };
+                    }
+                    return newHistory;
+                });
+            } else {
+                // Fallback: Add as a new item if no calling ID (unlikely)
+                setHistory(prev => [
+                    ...prev,
+                    {
+                        id: crypto.randomUUID(),
+                        command: type === 'password' ? '********' : cmdInput,
+                        output: [],
+                        path: currentPath,
+                        user: message,
+                        accentColor: termAccent
+                    }
+                ]);
+            }
+
+            resolver(cmdInput);
+            setInput('');
+            return;
+        }
+
         const trimmed = cmdInput.trim();
 
         if (trimmed) {
@@ -302,9 +347,24 @@ export function useTerminalLogic(onLaunchApp?: (appId: string, args: string[]) =
         }
 
         if (!trimmed) {
-            setHistory([...history, { command: '', output: [], path: currentPath }]);
+            setHistory([...history, { id: crypto.randomUUID(), command: '', output: [], path: currentPath }]);
             return;
         }
+
+        const historyId = crypto.randomUUID();
+        setHistory(prev => [
+            ...prev,
+            {
+                id: historyId,
+                command: trimmed,
+                output: [],
+                path: currentPath,
+                accentColor: termAccent,
+                user: activeTerminalUser
+            }
+        ]);
+        setInput('');
+        setHistoryIndex(-1);
 
         const { command, args: rawArgs, redirectOp, redirectPath } = parseCommandInput(trimmed);
         const args: string[] = [];
@@ -325,7 +385,8 @@ export function useTerminalLogic(onLaunchApp?: (appId: string, args: string[]) =
             let shouldClear = false;
 
             const createScopedFileSystem = (asUser: string) => ({
-                currentUser, users, groups, homePath,
+                currentUser: asUser,
+                users, groups, homePath,
                 resetFileSystem, login, logout,
                 resolvePath: contextResolvePath,
                 listDirectory: (p: string) => listDirectory(p, asUser),
@@ -352,7 +413,27 @@ export function useTerminalLogic(onLaunchApp?: (appId: string, args: string[]) =
                     allCommands: getAllCommands(),
                     terminalUser: activeTerminalUser,
                     spawnSession: pushSession,
-                    closeSession: closeSession
+                    closeSession: closeSession,
+                    onLaunchApp: onLaunchApp,
+                    getNodeAtPath: getNodeAtPath,
+                    readFile: readFile,
+                    prompt: (m, t) => prompt(m, t, historyId),
+                    print: (content: string | ReactNode) => {
+                        setHistory(prev => {
+                            const newHistory = [...prev];
+                            const idx = newHistory.findIndex(h => h.id === historyId);
+                            if (idx !== -1) {
+                                newHistory[idx] = {
+                                    ...newHistory[idx],
+                                    output: [...newHistory[idx].output, content]
+                                };
+                            }
+                            return newHistory;
+                        });
+                    },
+                    isSudoAuthorized: isSudoAuthorized,
+                    setIsSudoAuthorized: setIsSudoAuthorized,
+                    verifyPassword: verifyPassword
                 });
 
                 cmdOutput = result.output;
@@ -364,12 +445,12 @@ export function useTerminalLogic(onLaunchApp?: (appId: string, args: string[]) =
                 let foundPath: string | null = null;
                 if (command.includes('/')) {
                     const resolved = resolvePath(command);
-                    const node = getNodeAtPath(resolved);
+                    const node = getNodeAtPath(resolved, activeTerminalUser);
                     if (node && node.type === 'file') foundPath = resolved;
                 } else {
                     for (const dir of PATH) {
                         const checkPath = (dir === '/' ? '' : dir) + '/' + command;
-                        const node = getNodeAtPath(checkPath);
+                        const node = getNodeAtPath(checkPath, activeTerminalUser);
                         if (node && node.type === 'file') {
                             foundPath = checkPath;
                             break;
@@ -378,12 +459,12 @@ export function useTerminalLogic(onLaunchApp?: (appId: string, args: string[]) =
                 }
 
                 if (foundPath) {
-                    const content = readFile(foundPath);
+                    const content = readFile(foundPath, activeTerminalUser);
                     if (content && content.startsWith('#!app ')) {
                         const appId = content.replace('#!app ', '').trim();
                         if (onLaunchApp) {
-                            onLaunchApp(appId, args);
-                            cmdOutput = [`Launched ${appId}`];
+                            onLaunchApp(appId, args, activeTerminalUser);
+                            cmdOutput = [`Launched ${appId} as ${activeTerminalUser}`];
                         } else {
                             cmdOutput = [`Cannot launch ${appId}`];
                             cmdError = true;
@@ -423,11 +504,11 @@ export function useTerminalLogic(onLaunchApp?: (appId: string, args: string[]) =
                 let finalContent = textContent;
                 const appendMode = redirectOp === '>>';
                 const absRedirectPath = resolvePath(redirectPath);
-                const existingNode = getNodeAtPath(absRedirectPath);
+                const existingNode = getNodeAtPath(absRedirectPath, activeTerminalUser);
                 const parentPath = absRedirectPath.substring(0, absRedirectPath.lastIndexOf('/')) || '/';
                 const fileName = absRedirectPath.substring(absRedirectPath.lastIndexOf('/') + 1);
 
-                const parentNode = getNodeAtPath(parentPath);
+                const parentNode = getNodeAtPath(parentPath, activeTerminalUser);
                 if (!parentNode || parentNode.type !== 'directory') {
                     output = [`zsh: no such file or directory: ${redirectPath}`];
                     error = true;
@@ -454,19 +535,18 @@ export function useTerminalLogic(onLaunchApp?: (appId: string, args: string[]) =
             }
         }
 
-        setHistory(prev => [
-            ...prev,
-            {
-                command: input,
-                output,
-                error,
-                path: currentPath,
-                accentColor: termAccent,
-                user: activeTerminalUser
+        setHistory(prev => {
+            const newHistory = [...prev];
+            const idx = newHistory.findIndex(h => h.id === historyId);
+            if (idx !== -1) {
+                newHistory[idx] = {
+                    ...newHistory[idx],
+                    output: [...newHistory[idx].output, ...output],
+                    error
+                };
             }
-        ]);
-        setInput('');
-        setHistoryIndex(-1);
+            return newHistory;
+        });
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -482,6 +562,7 @@ export function useTerminalLogic(onLaunchApp?: (appId: string, args: string[]) =
                     setHistory(prev => [
                         ...prev,
                         {
+                            id: crypto.randomUUID(),
                             command: input + '^C',
                             output: [],
                             error: false,
@@ -533,9 +614,10 @@ export function useTerminalLogic(onLaunchApp?: (appId: string, args: string[]) =
                 setHistory(prev => [
                     ...prev,
                     {
+                        id: crypto.randomUUID(),
                         command: '',
                         output: [
-                            <div className="text-red-500 font-bold bg-red-950/30 p-2 border border-red-500/50 rounded mb-2" >
+                            <div className="text-red-500 font-bold bg-red-950/30 p-2 border border-red-500/50 rounded mb-2" key="integrity-error">
                                 CRITICAL ERROR: SYSTEM INTEGRITY COMPROMISED < br />
                                 The system has detected unauthorized modifications to core identity files.< br />
                                 Entering Safe Mode: Write access disabled.Root access disabled.
@@ -562,6 +644,9 @@ export function useTerminalLogic(onLaunchApp?: (appId: string, args: string[]) =
         shades,
         handleKeyDown,
         isCommandValid,
-        homePath
+        homePath,
+        promptState,
+        isSudoAuthorized,
+        setIsSudoAuthorized
     };
 }

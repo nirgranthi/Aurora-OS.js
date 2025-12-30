@@ -90,12 +90,13 @@ function BreadcrumbPill({ name, isLast, accentColor, onClick, onDrop }: Breadcru
   );
 }
 
-export function FileManager({ initialPath, onOpenApp }: { initialPath?: string; onOpenApp?: (id: string, args?: any) => void }) {
-  const { accentColor } = useAppContext();
+export function FileManager({ initialPath, onOpenApp, owner }: { initialPath?: string; onOpenApp?: (id: string, args?: any, owner?: string) => void, owner?: string }) {
+  const { accentColor, activeUser: desktopUser } = useAppContext();
+  const activeUser = owner || desktopUser;
   const { playFile } = useMusic();
   // Drag and Drop Logic
   const [dragTargetId, setDragTargetId] = useState<string | null>(null);
-  const { listDirectory, homePath, moveNodeById, getNodeAtPath, moveToTrash, resolvePath, users, currentUser } = useFileSystem();
+  const { listDirectory, homePath, moveNodeById, getNodeAtPath, moveToTrash, resolvePath, users } = useFileSystem();
 
   const [containerRef, { width }] = useElementSize();
   const isMobile = width < 450;
@@ -126,7 +127,7 @@ export function FileManager({ initialPath, onOpenApp }: { initialPath?: string; 
 
   // Load directory contents when path changes
   useEffect(() => {
-    const contents = listDirectory(currentPath);
+    const contents = listDirectory(currentPath, activeUser);
     if (contents) {
       // Filter dotfiles and sort
       const filtered = contents.filter(item => !item.name.startsWith('.'));
@@ -140,7 +141,7 @@ export function FileManager({ initialPath, onOpenApp }: { initialPath?: string; 
       setItems([]);
     }
     setSelectedItem(null);
-  }, [currentPath, listDirectory]);
+  }, [currentPath, listDirectory, activeUser]);
 
   // Navigate to a directory
   const navigateTo = useCallback((path: string) => {
@@ -151,12 +152,12 @@ export function FileManager({ initialPath, onOpenApp }: { initialPath?: string; 
     // However, the node might not populate if we don't have traversal permissions on parents.
     // getNodeAtPath handles traversal checks implicitly (returns null if blocked).
 
-    const node = getNodeAtPath(path);
+    const node = getNodeAtPath(path, activeUser);
 
     if (node) {
-      // Find current user object to check specific read permission on the target
+      // Find acting user object to check specific read permission on the target
       // We need 'read' to list contents in Finder
-      const userObj = users.find(u => u.username === currentUser);
+      const userObj = users.find(u => u.username === activeUser);
       if (userObj) {
         if (!checkPermissions(node, userObj, 'read')) {
           toast.error(`Permission denied: ${node.name}`);
@@ -190,7 +191,7 @@ export function FileManager({ initialPath, onOpenApp }: { initialPath?: string; 
     setHistoryIndex(prev => prev + 1);
     setCurrentPath(path);
     feedback.folder();
-  }, [historyIndex, getNodeAtPath, users, currentUser]);
+  }, [historyIndex, getNodeAtPath, users, activeUser]);
 
   // Handle item double-click
   const handleItemDoubleClick = useCallback((item: FileNode) => {
@@ -205,13 +206,13 @@ export function FileManager({ initialPath, onOpenApp }: { initialPath?: string; 
       if (isMusic) {
         const fullPath = currentPath === '/' ? `/${item.name}` : `${currentPath}/${item.name}`;
         playFile(fullPath);
-        if (onOpenApp) onOpenApp('music');
+        if (onOpenApp) onOpenApp('music', undefined, activeUser);
       } else if (isText) {
         const fullPath = currentPath === '/' ? `/${item.name}` : `${currentPath}/${item.name}`;
-        if (onOpenApp) onOpenApp('notepad', { path: fullPath });
+        if (onOpenApp) onOpenApp('notepad', { path: fullPath }, activeUser);
       }
     }
-  }, [currentPath, navigateTo, playFile, onOpenApp]);
+  }, [currentPath, navigateTo, playFile, onOpenApp, activeUser]);
 
   // Go back in history
   const goBack = useCallback(() => {
@@ -284,7 +285,7 @@ export function FileManager({ initialPath, onOpenApp }: { initialPath?: string; 
 
         console.log('Moving to:', destPath);
         // Execute robust ID-based move
-        const success = moveNodeById(data.id, destPath);
+        const success = moveNodeById(data.id, destPath, activeUser);
         if (success) {
           toast.success(`Moved ${data.name} to ${targetItem.name}`);
         } else {
@@ -295,7 +296,7 @@ export function FileManager({ initialPath, onOpenApp }: { initialPath?: string; 
       console.error('Failed to parse drag data', err);
       toast.error('Move failed: Invalid data');
     }
-  }, [currentPath, moveNodeById]);
+  }, [currentPath, moveNodeById, activeUser]);
 
   // Sidebar Drop Logic
   const handleSidebarDragOver = useCallback((e: React.DragEvent) => {
@@ -308,7 +309,7 @@ export function FileManager({ initialPath, onOpenApp }: { initialPath?: string; 
     try {
       const data = JSON.parse(e.dataTransfer.getData('application/json'));
       if (data.id) {
-        const success = moveNodeById(data.id, targetPath);
+        const success = moveNodeById(data.id, targetPath, activeUser);
         if (success) {
           toast.success(`Moved to ${targetPath.split('/').pop()}`);
         } else {
@@ -319,7 +320,7 @@ export function FileManager({ initialPath, onOpenApp }: { initialPath?: string; 
       console.error('Failed to drop on sidebar', err);
       toast.error('Failed to process drop');
     }
-  }, [moveNodeById]);
+  }, [moveNodeById, activeUser]);
 
   // Helper to create sidebar action props
   const sidebarDropProps = useCallback((path: string) => ({
@@ -329,7 +330,7 @@ export function FileManager({ initialPath, onOpenApp }: { initialPath?: string; 
 
   // Sidebar configuration
   const fileManagerSidebar = useMemo(() => {
-    const trashNode = getNodeAtPath(`${homePath}/.Trash`);
+    const trashNode = getNodeAtPath(`${homePath}/.Trash`, activeUser);
     const isTrashEmpty = !trashNode?.children || trashNode.children.length === 0;
 
     return {
@@ -421,7 +422,7 @@ export function FileManager({ initialPath, onOpenApp }: { initialPath?: string; 
         },
       ]
     };
-  }, [homePath, navigateTo, sidebarDropProps, getNodeAtPath]);
+  }, [homePath, navigateTo, sidebarDropProps, getNodeAtPath, activeUser]);
 
   const toolbar = (
     <div className="flex items-center w-full gap-2 px-0">
@@ -450,7 +451,7 @@ export function FileManager({ initialPath, onOpenApp }: { initialPath?: string; 
               const item = items.find(i => i.id === selectedItem);
               if (item) {
                 const fullPath = currentPath === '/' ? `/${item.name}` : `${currentPath}/${item.name}`;
-                moveToTrash(fullPath);
+                moveToTrash(fullPath, activeUser);
                 setSelectedItem(null);
                 toast.success('Moved to Trash');
               }
@@ -592,12 +593,12 @@ export function FileManager({ initialPath, onOpenApp }: { initialPath?: string; 
     try {
       const data = JSON.parse(e.dataTransfer.getData('application/json'));
       if (data.id) {
-        moveNodeById(data.id, currentPath);
+        moveNodeById(data.id, currentPath, activeUser);
       }
     } catch (err) {
       console.error('Failed to handle container drop', err);
     }
-  }, [moveNodeById, currentPath]);
+  }, [moveNodeById, currentPath, activeUser]);
 
   const content = (
     <div

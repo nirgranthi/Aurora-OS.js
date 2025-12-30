@@ -15,7 +15,7 @@ import { Notepad } from './apps/Notepad';
 import { PlaceholderApp } from './apps/PlaceholderApp';
 import { useAppContext } from './AppContext';
 import { useFileSystem, type FileSystemContextType } from './FileSystemContext';
-import { useMusic } from './MusicContext';
+import { useMusic, MusicProvider } from './MusicContext';
 import { Toaster } from './ui/sonner';
 import { getGridConfig, gridToPixel, pixelToGrid, findNextFreeCell, gridPosToKey, rearrangeGrid, type GridPosition } from '../utils/gridSystem';
 import { feedback } from '../services/soundFeedback';
@@ -160,17 +160,17 @@ export default function OS() {
         }
     }, [desktopIcons, iconGridPositions]);
 
-    const openWindowRef = useRef<(type: string, data?: { path?: string }) => void>(() => { });
+    const openWindowRef = useRef<(type: string, data?: { path?: string }, owner?: string) => void>(() => { });
 
     // Helper to generate content
-    const getAppContent = useCallback((type: string, data?: any): { content: React.ReactNode, title: string } => {
+    const getAppContent = useCallback((type: string, data?: any, owner?: string): { content: React.ReactNode, title: string } => {
         let content: React.ReactNode;
         let title: string;
 
         switch (type) {
             case 'finder':
                 title = 'Finder';
-                content = <FileManager initialPath={data?.path} onOpenApp={openWindowRef.current} />;
+                content = <FileManager owner={owner} initialPath={data?.path} onOpenApp={openWindowRef.current} />;
                 break;
             case 'settings':
                 title = 'System Settings';
@@ -178,28 +178,32 @@ export default function OS() {
                 break;
             case 'photos':
                 title = 'Photos';
-                content = <Photos />;
+                content = <Photos owner={owner} />;
                 break;
             case 'music':
                 title = 'Music';
-                content = <Music />;
+                content = (
+                    <MusicProvider owner={owner}>
+                        <Music owner={owner} initialPath={data?.path} />
+                    </MusicProvider>
+                );
                 break;
             case 'messages':
                 title = 'Messages';
-                content = <Messages />;
+                content = <Messages owner={owner} />;
                 break;
             case 'browser':
                 title = 'Browser';
-                content = <Browser />;
+                content = <Browser owner={owner} />;
                 break;
             case 'terminal':
                 title = 'Terminal';
                 // Need to forward the ref logic if terminal is special
-                content = <Terminal onLaunchApp={(id, args) => openWindowRef.current(id, { path: args?.[0] })} />;
+                content = <Terminal onLaunchApp={(id, args, owner) => openWindowRef.current(id, { path: args?.[0] }, owner)} />;
                 break;
             case 'trash':
                 title = 'Trash';
-                content = <FileManager initialPath="~/.Trash" onOpenApp={openWindowRef.current} />;
+                content = <FileManager owner={owner} initialPath="~/.Trash" onOpenApp={openWindowRef.current} />;
                 break;
             case 'dev-center':
                 title = 'DEV Center';
@@ -207,7 +211,7 @@ export default function OS() {
                 break;
             case 'notepad':
                 title = 'Notepad';
-                content = <Notepad />;
+                content = <Notepad owner={owner} initialPath={data?.path} />;
                 break;
             default:
                 title = type.charAt(0).toUpperCase() + type.slice(1);

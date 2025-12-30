@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, memo } from 'react';
 import pkg from '../../package.json';
-import { Apple, Wifi, Battery } from 'lucide-react';
+import { Orbit, Wifi, Battery } from 'lucide-react';
 import { useThemeColors } from '../hooks/useThemeColors';
 import { CreditsDrawer } from './Credits/CreditsDrawer';
 import { cn } from './ui/utils';
@@ -69,7 +69,7 @@ function MenuBarComponent({ focusedApp, onOpenApp }: MenuBarProps) {
   const clickCountRef = useRef(0);
   const lastClickTimeRef = useRef(0);
 
-  const handleAppleClick = () => {
+  const handleSystemClick = () => {
     const now = Date.now();
     if (now - lastClickTimeRef.current > 2000) {
       // Reset if too slow
@@ -182,9 +182,9 @@ function MenuBarComponent({ focusedApp, onOpenApp }: MenuBarProps) {
           <MenubarMenu>
             <MenubarTrigger
               className="bg-transparent focus:bg-white/10 data-[state=open]:bg-white/10 px-2 py-0.5 h-7 rounded-sm cursor-default"
-              onClick={handleAppleClick}
+              onClick={handleSystemClick}
             >
-              <Apple className="w-4 h-4 fill-current" />
+              <Orbit className="w-4 h-4 text-white/90" />
             </MenubarTrigger>
 
             {/* Hidden Credits Drawer */}

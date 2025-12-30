@@ -14,8 +14,8 @@ import { useState, useEffect, useCallback } from 'react';
  *   currentPlaylist: null 
  * });
  */
-export function useAppStorage<T>(appId: string, initialState: T): [T, (value: T | ((prev: T) => T)) => void, () => void] {
-    const storageKey = `aurora-os-app-${appId}`;
+export function useAppStorage<T>(appId: string, initialState: T, owner?: string): [T, (value: T | ((prev: T) => T)) => void, () => void] {
+    const storageKey = owner ? `aurora-os-app-${appId}-${owner}` : `aurora-os-app-${appId}`;
 
     // Load initial state from localStorage or use default
     const [state, setStateInternal] = useState<T>(() => {

@@ -8,6 +8,7 @@ interface CreditsDrawerProps {
 }
 
 import { validateIntegrity } from '../../utils/integrity';
+import { ConnectivityBadge } from '../ui/ConnectivityBadge';
 
 // ... imports
 
@@ -25,6 +26,9 @@ export function CreditsDrawer({ isOpen, onClose }: CreditsDrawerProps) {
                             ) : (
                                 <AlertTriangle className="w-16 h-16 text-red-500 animate-pulse" />
                             )}
+                        </div>
+                        <div className="flex justify-center mb-4 text-[10px] transform scale-90">
+                            <ConnectivityBadge />
                         </div>
                         <DrawerTitle className="text-2xl text-center font-bold text-white mb-2">
                             {isSecure ? 'Aurora OS Insurance Policy' : 'System Integrity Compromised'}

@@ -1,16 +1,15 @@
 import _pkg from '../../package.json';
 const pkg = _pkg as any;
 
-// Critical Constants - The "Identity" of the project
+// Critical Constants - Hashed identity values of the project
 // Modifying these values in package.json without a dev key will trigger Safe Mode.
 const EXPECTED_IDENTITY = {
-    name: 'aurora-os-js',
-    productName: 'Aurora OS',
-    author: 'Cătălin-Robert Drăgoiu',
-    license: 'AGPL-3.0',
+    name: 1163609978, // Hash of 'aurora-os-js'
+    author: 579195497, // Hash of 'Cătălin-Robert Drăgoiu'
+    license: 3563245919, // Hash of 'AGPL-3.0'
 };
 
-// Simple DJB2 hash for the dev key
+// Simple DJB2 hash for the dev key and identity verification
 const hashString = (str: string) => {
     let hash = 5381;
     for (let i = 0; i < str.length; i++) {
@@ -39,11 +38,11 @@ export const validateIntegrity = (): boolean => {
         console.error('Integrity Check: storage access failed', e);
     }
 
-    // 2. Validate Identity
+    // 2. Validate Identity using hashes
     const isIdentityValid =
-        pkg.name === EXPECTED_IDENTITY.name &&
-        pkg.author === EXPECTED_IDENTITY.author &&
-        pkg.license === EXPECTED_IDENTITY.license;
+        hashString(pkg.name) === EXPECTED_IDENTITY.name &&
+        hashString(pkg.author) === EXPECTED_IDENTITY.author &&
+        hashString(pkg.license) === EXPECTED_IDENTITY.license;
     // checking productName might be too strict if they just want to config it, 
     // but 'name' and 'author' are strict IP markers.
 
@@ -52,9 +51,9 @@ export const validateIntegrity = (): boolean => {
         console.table({
             expected: EXPECTED_IDENTITY,
             actual: {
-                name: pkg.name,
-                author: pkg.author,
-                license: pkg.license
+                name: hashString(pkg.name),
+                author: hashString(pkg.author),
+                license: hashString(pkg.license)
             }
         });
         return false;

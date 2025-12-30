@@ -15,12 +15,21 @@ export function useFileSystemQueries(
 ) {
     const userObj = getCurrentUser(currentUser);
 
-    const resolvePath = useCallback((path: string): string => {
-        let resolved = path.replace(/^~/, homePath);
+    const resolvePath = useCallback((path: string, asUser?: string): string => {
+        // Resolve home path for the acting user
+        let userHome = homePath;
+        if (asUser) {
+            const actingUserObj = users.find(u => u.username === asUser);
+            if (actingUserObj) {
+                userHome = actingUserObj.homeDir;
+            }
+        }
+
+        let resolved = path.replace(/^~/, userHome);
         const userDirs = ['Desktop', 'Documents', 'Downloads', 'Pictures', 'Music', 'Videos'];
         for (const dir of userDirs) {
             if (resolved.startsWith(`/${dir}`)) {
-                resolved = resolved.replace(`/${dir}`, `${homePath}/${dir}`);
+                resolved = resolved.replace(`/${dir}`, `${userHome}/${dir}`);
                 break;
             }
         }
@@ -37,10 +46,10 @@ export function useFileSystemQueries(
             }
         }
         return '/' + stack.join('/');
-    }, [homePath, currentPath]);
+    }, [homePath, currentPath, users]);
 
     const getNodeAtPath = useCallback((path: string, asUser?: string): FileNode | null => {
-        const resolved = resolvePath(path);
+        const resolved = resolvePath(path, asUser);
         if (resolved === '/') return fileSystem;
         const parts = resolved.split('/').filter(p => p);
         let current: FileNode | null = fileSystem;

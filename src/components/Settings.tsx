@@ -59,8 +59,8 @@ const presetColors = [
   { name: 'Fuchsia', value: '#d946ef' },  // Fuchsia-500 (Neon Pink)
 ];
 
-export function Settings() {
-  const [activeSection, setActiveSection] = useSessionStorage('settings-active-section', 'appearance');
+export function Settings({ owner }: { owner?: string }) {
+  const [activeSection, setActiveSection] = useSessionStorage('settings-active-section', 'appearance', owner);
 
   // Check for pending section request (Deep Linking)
   useEffect(() => {
@@ -105,6 +105,8 @@ export function Settings() {
     setWallpaper
   } = useAppContext();
   const { users, addUser, deleteUser, currentUser } = useFileSystem();
+  const { activeUser: desktopUser } = useAppContext();
+  const activeUser = owner || desktopUser;
   const [customColor, setCustomColor] = useState(accentColor);
   const [newUsername, setNewUsername] = useState('');
   const [newFullName, setNewFullName] = useState('');
@@ -499,7 +501,7 @@ export function Settings() {
                     <GlassButton
                       disabled={!newUsername || !newFullName}
                       onClick={() => {
-                        if (addUser(newUsername, newFullName, newPassword)) {
+                        if (addUser(newUsername, newFullName, newPassword, activeUser)) {
                           setNewUsername('');
                           setNewFullName('');
                           setNewPassword('');
@@ -540,7 +542,7 @@ export function Settings() {
                       <button
                         onClick={() => {
                           if (confirm(`Are you sure you want to delete ${user.username}?`)) {
-                            deleteUser(user.username);
+                            deleteUser(user.username, activeUser);
                           }
                         }}
                         className="p-2 text-white/40 hover:text-red-400 hover:bg-white/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"

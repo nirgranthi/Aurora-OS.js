@@ -18,12 +18,12 @@ const quickLinks = [
   { id: 6, name: 'Dribbble', color: 'bg-pink-500' },
 ];
 
-export function Browser() {
+export function Browser({ owner }: { owner?: string }) {
   // Persisted state
   const [appState, setAppState] = useAppStorage('browser', {
     url: 'browser://welcome',
     bookmarks: [] as string[],
-  });
+  }, owner);
 
   const [tabs] = useState(mockTabs);
 

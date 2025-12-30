@@ -2,12 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import {
     User,
     Group,
-    parsePasswd,
     createUserHome,
     ensureIds,
     deepCloneFileSystem,
     FileNode
 } from '../../utils/fileSystemUtils';
+import { verifyUserPassword } from '../../utils/authUtils';
 import {
     checkMigrationNeeded,
     migrateUsers,
@@ -86,54 +86,20 @@ export function useAuth(fileSystem: FileNode, setFileSystem: React.Dispatch<Reac
     }, [users]);
 
     const login = useCallback((username: string, password?: string) => {
-        // 1. File Authority: Try to read /etc/passwd from current filesystem
-        let targetUser: User | undefined;
-        const etc = fileSystem.children?.find(c => c.name === 'etc');
-        if (etc && etc.children) {
-            const passwdFile = etc.children.find(c => c.name === 'passwd');
-            if (passwdFile && passwdFile.content) {
-                try {
-                    const fileUsers = parsePasswd(passwdFile.content);
-                    targetUser = fileUsers.find(u => u.username === username);
-                } catch {
-                    console.warn('Auth: /etc/passwd corrupted, falling back to memory');
-                }
-            }
-        }
+        const isValid = verifyUserPassword(username, password || '', fileSystem, users);
 
-        // 2. Fallback: Memory
-        if (!targetUser) {
-            targetUser = users.find(u => u.username === username);
-        }
-
-        if (targetUser) {
-            // Gameplay Mechanic Restoration:
-            // 1. If /etc/passwd has a specific password (hacked/edited), use it.
-            // 2. If /etc/passwd has 'x' (shadow placeholder), fall back to memory.
-            // 3. This allows "hacking" the file to lock users out, while keeping 'x' safe.
-            const memoryUser = users.find(u => u.username === username);
-
-            const filePassword = targetUser.password;
-            const memoryPassword = memoryUser?.password;
-
-            // Decision Matrix:
-            // - File says "secret" -> Use "secret" (Hack worked)
-            // - File says "x" -> Use Memory (Standard behavior)
-            // - File missing -> Use Memory (Race condition fallback)
-
-            const authoritativePassword = (filePassword && filePassword !== 'x')
-                ? filePassword
-                : memoryPassword;
-
-            if (authoritativePassword && authoritativePassword !== password) {
-                notify.system('error', 'Auth', 'Incorrect password');
-                return false;
-            }
+        if (isValid) {
             setCurrentUser(username);
             notify.system('success', 'Auth', `Logged in as ${username}`);
             return true;
         } else {
-            notify.system('error', 'Auth', 'User not found');
+            // Check if user even exists to give better error
+            const userExists = users.some(u => u.username === username);
+            if (userExists) {
+                notify.system('error', 'Auth', 'Incorrect password');
+            } else {
+                notify.system('error', 'Auth', 'User not found');
+            }
             return false;
         }
     }, [fileSystem, users]);
@@ -143,7 +109,13 @@ export function useAuth(fileSystem: FileNode, setFileSystem: React.Dispatch<Reac
         notify.system('success', 'Auth', 'Logged out');
     }, []);
 
-    const addUser = useCallback((username: string, fullName: string, password?: string): boolean => {
+    const addUser = useCallback((username: string, fullName: string, password?: string, asUser?: string): boolean => {
+        const actingUser = getCurrentUser(asUser || currentUser);
+        if (actingUser.username !== 'root') {
+            notify.system('error', 'Permission Denied', 'Only root can add users');
+            return false;
+        }
+
         if (users.some(u => u.username === username)) return false;
         const maxUid = Math.max(...users.map(u => u.uid));
         const newUid = maxUid < 1000 ? 1000 : maxUid + 1;
@@ -174,9 +146,15 @@ export function useAuth(fileSystem: FileNode, setFileSystem: React.Dispatch<Reac
             return newFS;
         });
         return true;
-    }, [users, setFileSystem]);
+    }, [users, setFileSystem, getCurrentUser, currentUser]);
 
-    const deleteUser = useCallback((username: string): boolean => {
+    const deleteUser = useCallback((username: string, asUser?: string): boolean => {
+        const actingUser = getCurrentUser(asUser || currentUser);
+        if (actingUser.username !== 'root') {
+            notify.system('error', 'Permission Denied', 'Only root can delete users');
+            return false;
+        }
+
         if (username === 'root' || username === 'user') {
             notify.system('error', 'User Management', 'Cannot delete default system users');
             return false;
@@ -185,7 +163,7 @@ export function useAuth(fileSystem: FileNode, setFileSystem: React.Dispatch<Reac
         if (!target) return false;
         setUsers(prev => prev.filter(u => u.username !== username));
         return true;
-    }, [users]);
+    }, [users, getCurrentUser, currentUser]);
 
     const addGroup = useCallback((groupName: string, members: string[] = []): boolean => {
         if (groups.some(g => g.groupName === groupName)) return false;
@@ -231,10 +209,12 @@ export function useAuth(fileSystem: FileNode, setFileSystem: React.Dispatch<Reac
         getCurrentUser,
         login,
         logout,
+        addUnits: addUser, // Alias or keep as is? Let's fix the typo in return if any
         addUser,
         deleteUser,
         addGroup,
         deleteGroup,
-        resetAuthState
+        resetAuthState,
+        verifyUserPassword: (u: string, p: string) => verifyUserPassword(u, p, fileSystem, users)
     };
 }

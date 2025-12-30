@@ -429,6 +429,7 @@ export const initialFileSystem: any = {
                         { name: 'Photos', type: 'file', permissions: '-rwxr-xr-x', owner: 'root', content: '#!app photos' },
                         { name: 'Settings', type: 'file', permissions: '-rwxr-xr-x', owner: 'root', content: '#!app settings' },
                         { name: 'Terminal', type: 'file', permissions: '-rwxr-xr-x', owner: 'root', content: '#!app terminal' },
+                        { name: 'Notepad', type: 'file', permissions: '-rwxr-xr-x', owner: 'root', content: '#!app notepad' },
                         { name: 'find', type: 'file', permissions: '-rwxr-xr-x', owner: 'root', content: '#!/bin/bash\n# search for files' },
                     ],
                 },

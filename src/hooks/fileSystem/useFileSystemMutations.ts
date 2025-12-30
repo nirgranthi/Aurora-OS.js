@@ -151,17 +151,19 @@ export function useFileSystemMutations({
         return moveNode(path, destPath, asUser);
     }, [resolvePath, getNodeAtPath, moveNode, deleteNode]);
 
-    const moveNodeById = useCallback((id: string, destParentPath: string): boolean => {
+    const moveNodeById = useCallback((id: string, destParentPath: string, asUser?: string): boolean => {
         const result = findNodeAndParent(fileSystem, id);
         if (!result) return false;
         const { node: nodeToMove, parent: sourceParent } = result;
-        const destParent = getNodeAtPath(resolvePath(destParentPath));
-        if (!checkPermissions(sourceParent, userObj, 'write')) {
+        const destParent = getNodeAtPath(resolvePath(destParentPath), asUser);
+        const actingUser = asUser ? users.find(u => u.username === asUser) || userObj : userObj;
+
+        if (!checkPermissions(sourceParent, actingUser, 'write')) {
             notify.system('error', 'Permission Denied', `Cannot move from ${sourceParent.name}`);
             return false;
         }
         if (!destParent || destParent.type !== 'directory' || !destParent.children) return false;
-        if (!checkPermissions(destParent, userObj, 'write')) {
+        if (!checkPermissions(destParent, actingUser, 'write')) {
             notify.system('error', 'Permission Denied', `Cannot move to ${destParent.name}`);
             return false;
         }
@@ -201,7 +203,7 @@ export function useFileSystemMutations({
             return newFS;
         });
         return true;
-    }, [fileSystem, resolvePath, getNodeAtPath, userObj, setFileSystem]);
+    }, [fileSystem, resolvePath, getNodeAtPath, userObj, users, setFileSystem]);
 
     const emptyTrash = useCallback(() => {
         setFileSystem(prevFS => {

@@ -21,10 +21,12 @@ interface FilePickerProps {
     title?: string;
     defaultPath?: string;
     extension?: string;
+    owner?: string;
 }
 
-export function FilePicker({ isOpen, onClose, onSelect, mode, title, defaultPath, extension }: FilePickerProps) {
+export function FilePicker({ isOpen, onClose, onSelect, mode, title, defaultPath, extension, owner }: FilePickerProps) {
     const { listDirectory, homePath, getNodeAtPath, users, currentUser } = useFileSystem();
+    const actingUser = (owner || currentUser) ?? undefined;
     const { accentColor } = useAppContext();
     const { windowBackground, titleBarBackground, blurStyle } = useThemeColors();
 
@@ -33,20 +35,20 @@ export function FilePicker({ isOpen, onClose, onSelect, mode, title, defaultPath
     const [filename, setFilename] = useState('');
 
     const items = useMemo(() => {
-        const allItems = listDirectory(currentPath) || [];
+        const allItems = listDirectory(currentPath, actingUser) || [];
         return allItems
             .filter(item => !item.name.startsWith('.'))
             .sort((a, b) => {
                 if (a.type === b.type) return a.name.localeCompare(b.name);
                 return a.type === 'directory' ? -1 : 1;
             });
-    }, [currentPath, listDirectory]);
+    }, [currentPath, listDirectory, actingUser]);
 
     const handleNavigate = (path: string) => {
-        const node = getNodeAtPath(path);
+        const node = getNodeAtPath(path, actingUser);
 
         if (node) {
-            const userObj = users.find(u => u.username === currentUser);
+            const userObj = users.find(u => u.username === actingUser);
             if (userObj) {
                 if (!checkPermissions(node, userObj, 'read')) {
                     toast.error(`Permission denied: ${node.name}`);

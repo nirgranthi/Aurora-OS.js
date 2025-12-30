@@ -5,9 +5,10 @@ export const cd: TerminalCommand = {
     name: 'cd',
     description: 'Change directory',
     usage: 'cd <path>',
-    execute: ({ args, fileSystem, resolvePath, setCurrentPath }) => {
+    execute: ({ args, fileSystem, resolvePath, setCurrentPath, terminalUser }) => {
         const { getNodeAtPath, users, currentUser, homePath } = fileSystem;
-        const userObj = users.find(u => u.username === currentUser) || {
+        const activeUser = terminalUser || currentUser || 'user';
+        const userObj = users.find(u => u.username === activeUser) || {
             username: 'nobody', uid: 65534, gid: 65534, fullName: 'Nobody', homeDir: '/', shell: ''
         };
 

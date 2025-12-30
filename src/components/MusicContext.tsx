@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useRef, useCallback } f
 import { Howl } from 'howler';
 import { soundManager } from '../services/sound';
 import { useFileSystem } from './FileSystemContext';
+import { useAppContext } from './AppContext';
 import { useSessionStorage } from '../hooks/useSessionStorage';
 
 export interface Song {
@@ -62,13 +63,24 @@ const STORAGE_INDEX = 'aurora-os-app-music-index';
 const STORAGE_SEEK = 'aurora-os-app-music-seek';
 const STORAGE_RECENT = 'aurora-os-app-music-recent';
 
-export function MusicProvider({ children }: { children: React.ReactNode }) {
+export function MusicProvider({ children, owner }: { children: React.ReactNode, owner?: string }) {
     const { readFile, getNodeAtPath } = useFileSystem();
+    const { activeUser: desktopUser } = useAppContext();
+    const activeUser = owner || desktopUser;
+
+    const getKeys = (user: string) => ({
+        QUEUE: `${STORAGE_QUEUE}-${user}`,
+        INDEX: `${STORAGE_INDEX}-${user}`,
+        SEEK: `${STORAGE_SEEK}-${user}`,
+        RECENT: `${STORAGE_RECENT}-${user}`
+    });
+
+    const keys = getKeys(activeUser || 'guest');
 
     // 1. Storage & State
     const [playlist, setPlaylistInternal] = useState<Song[]>(() => {
         try {
-            const saved = localStorage.getItem(STORAGE_QUEUE);
+            const saved = localStorage.getItem(getKeys(activeUser || 'guest').QUEUE);
             return saved ? JSON.parse(saved) : [];
         } catch { return []; }
     });
@@ -77,7 +89,7 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
 
     const [currentIndex, setCurrentIndex] = useState(() => {
         try {
-            const saved = localStorage.getItem(STORAGE_INDEX);
+            const saved = localStorage.getItem(getKeys(activeUser || 'guest').INDEX);
             return saved ? parseInt(saved, 10) : -1;
         } catch { return -1; }
     });
@@ -86,7 +98,7 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
     const [isMusicOpen, setMusicOpen] = useState(false);
     const [recent, setRecent] = useState<Song[]>(() => {
         try {
-            const saved = localStorage.getItem(STORAGE_RECENT);
+            const saved = localStorage.getItem(getKeys(activeUser || 'guest').RECENT);
             if (saved) {
                 const parsed = JSON.parse(saved) as Song[];
                 // Sanitize: 
@@ -104,23 +116,23 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
         } catch { return []; }
     });
 
-    const [activeCategory, setActiveCategory] = useSessionStorage<string>('music-active-category', 'songs');
+    const [activeCategory, setActiveCategory] = useSessionStorage<string>('music-active-category', 'songs', activeUser);
 
     const soundRef = useRef<Howl | null>(null);
     const [volume, setVolumeState] = useState(soundManager.getVolume('music') * 100);
 
     // 2. Persistence & Validation
     useEffect(() => {
-        localStorage.setItem(STORAGE_QUEUE, JSON.stringify(playlist));
-    }, [playlist]);
+        localStorage.setItem(keys.QUEUE, JSON.stringify(playlist));
+    }, [playlist, keys.QUEUE]);
 
     useEffect(() => {
-        localStorage.setItem(STORAGE_INDEX, currentIndex.toString());
-    }, [currentIndex]);
+        localStorage.setItem(keys.INDEX, currentIndex.toString());
+    }, [currentIndex, keys.INDEX]);
 
     useEffect(() => {
-        localStorage.setItem(STORAGE_RECENT, JSON.stringify(recent));
-    }, [recent]);
+        localStorage.setItem(keys.RECENT, JSON.stringify(recent));
+    }, [recent, keys.RECENT]);
 
     // Active Category is now handled by useSessionStorage, no manual effect needed for simple persistence.
     // However, if we wanted to sync to 'STORAGE_ACTIVE_CATEGORY' (the old key) we could, but we want session behavior.
@@ -212,10 +224,10 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
             setIsPlaying(false);
             const seek = soundRef.current.seek();
             if (typeof seek === 'number') {
-                localStorage.setItem(STORAGE_SEEK, seek.toString());
+                localStorage.setItem(keys.SEEK, seek.toString());
             }
         }
-    }, []);
+    }, [keys.SEEK]);
 
     const playSoundImplementation = useCallback((song: Song, autoPlay: boolean, seekTo?: number) => {
         if (soundRef.current) soundRef.current.unload();
@@ -268,7 +280,7 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
     const playSong = useCallback((song: Song, newPlaylist?: Song[]) => {
         // ZOMBIE CHECK: Validate file existence for Ad-Hoc / Recent files
         if (!song.path.startsWith('~/Music/')) {
-            const node = getNodeAtPath(song.path);
+            const node = getNodeAtPath(song.path, activeUser);
             if (!node) {
                 // File is GONE (Zombie)
                 // Remove from Recent and stop
@@ -319,12 +331,12 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
                 playSoundImplementation(targetPlaylist[idx], true);
             }
         }
-    }, [playlist, currentSong, isPlaying, setPlaylist, getNodeAtPath, playSoundImplementation]);
+    }, [playlist, currentSong, isPlaying, setPlaylist, getNodeAtPath, playSoundImplementation, activeUser]);
 
     const playFile = useCallback((path: string) => {
-        const node = getNodeAtPath(path);
+        const node = getNodeAtPath(path, activeUser);
         if (node && node.type === 'file') {
-            const content = readFile(path);
+            const content = readFile(path, activeUser);
             const meta = getSafeMeta(node.name);
             const song: Song = {
                 id: node.id,
@@ -338,7 +350,7 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
             playSong(song);
             setActiveCategory('recent');
         }
-    }, [getNodeAtPath, readFile, playSong, setActiveCategory]); // playSong includes playSoundImplementation linkage
+    }, [getNodeAtPath, activeUser, readFile, playSong, setActiveCategory]); // playSong includes playSoundImplementation linkage
 
 
     const togglePlay = useCallback(() => {
@@ -373,11 +385,11 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
     // Restore Session Trigger (On Load)
     useEffect(() => {
         if (currentIndex !== -1 && playlist[currentIndex] && !soundRef.current) {
-            const savedSeek = localStorage.getItem(STORAGE_SEEK);
+            const savedSeek = localStorage.getItem(keys.SEEK);
             const seekTo = savedSeek ? parseFloat(savedSeek) : 0;
             playSoundImplementation(playlist[currentIndex], false, seekTo);
         }
-    }, [currentIndex, playlist, playSoundImplementation]);
+    }, [currentIndex, playlist, playSoundImplementation, keys.SEEK]);
 
     return (
         <MusicContext.Provider value={{

@@ -31,21 +31,22 @@ export interface FileSystemContextType {
   createFile: (path: string, name: string, content?: string, asUser?: string) => boolean;
   createDirectory: (path: string, name: string, asUser?: string) => boolean;
   deleteNode: (path: string, asUser?: string) => boolean;
-  addUser: (username: string, fullName: string, password?: string) => boolean;
-  deleteUser: (username: string) => boolean;
+  addUser: (username: string, fullName: string, password?: string, asUser?: string) => boolean;
+  deleteUser: (username: string, asUser?: string) => boolean;
   writeFile: (path: string, content: string, asUser?: string) => boolean;
   readFile: (path: string, asUser?: string) => string | null;
   listDirectory: (path: string, asUser?: string) => FileNode[] | null;
   moveNode: (fromPath: string, toPath: string, asUser?: string) => boolean;
-  moveNodeById: (id: string, destParentPath: string) => boolean;
+  moveNodeById: (id: string, destParentPath: string, asUser?: string) => boolean;
   moveToTrash: (path: string, asUser?: string) => boolean;
   emptyTrash: () => void;
-  resolvePath: (path: string) => string;
+  resolvePath: (path: string, asUser?: string) => string;
   resetFileSystem: () => void;
   login: (username: string, password?: string) => boolean;
   logout: () => void;
   chmod: (path: string, mode: string, asUser?: string) => boolean;
   chown: (path: string, owner: string, group?: string, asUser?: string) => boolean;
+  verifyPassword: (username: string, passwordToTry: string) => boolean;
   groups: Group[];
   addGroup: (groupName: string, members?: string[]) => boolean;
   deleteGroup: (groupName: string) => boolean;
@@ -76,7 +77,8 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
     deleteUser,
     addGroup,
     deleteGroup,
-    resetAuthState
+    resetAuthState,
+    verifyUserPassword
   } = useAuth(fileSystem, setFileSystem);
 
   // 3. Path Management
@@ -215,6 +217,7 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
     logout,
     chmod,
     chown,
+    verifyPassword: verifyUserPassword,
     groups,
     addGroup,
     deleteGroup

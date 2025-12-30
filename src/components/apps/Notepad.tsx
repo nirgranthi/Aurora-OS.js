@@ -7,6 +7,12 @@ import Prism from 'prismjs';
 import 'prismjs/components/prism-markdown';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-typescript';
+import 'prismjs/components/prism-jsx';
+import 'prismjs/components/prism-tsx';
+import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-css';
+import 'prismjs/components/prism-markup'; // HTML
 import 'prismjs/themes/prism-tomorrow.css'; // Dark theme
 
 import {
@@ -20,8 +26,24 @@ import {
     Bold,
     Italic,
     List,
-    Type
+    Type,
+    Check,
+    ChevronsUpDown
 } from 'lucide-react';
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from '../ui/command';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '../ui/popover';
+import { cn } from '../ui/utils';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -43,7 +65,7 @@ interface Tab {
     path?: string;
     content: string;
     isModified: boolean;
-    context: 'markdown' | 'txt';
+    context: string; // Dynamic language/context
 }
 
 // ... imports
@@ -53,9 +75,53 @@ import { STORAGE_KEYS } from '../../utils/memory';
 
 // ... interface
 
-export function Notepad() {
-    const { readFile, createFile, writeFile } = useFileSystem();
-    const { accentColor, activeUser } = useAppContext();
+interface NotepadProps {
+    owner?: string;
+    initialPath?: string;
+}
+
+const extensionToLanguage = (ext: string): string => {
+    switch (ext) {
+        case 'md': return 'markdown';
+        case 'json': return 'json';
+        case 'js': case 'jsx': return 'javascript';
+        case 'ts': return 'typescript';
+        case 'tsx': return 'tsx';
+        case 'css': return 'css';
+        case 'html': case 'htm': return 'markup';
+        default: return 'txt';
+    }
+};
+
+const getDisplayName = (context: string): string => {
+    switch (context) {
+        case 'markdown': return 'Markdown';
+        case 'javascript': return 'JavaScript';
+        case 'typescript': return 'TypeScript';
+        case 'tsx': return 'TSX';
+        case 'json': return 'JSON';
+        case 'css': return 'CSS';
+        case 'markup': return 'HTML';
+        case 'txt': return 'Plain Text';
+        default: return context.charAt(0).toUpperCase() + context.slice(1);
+    }
+};
+
+const SUPPORTED_LANGUAGES = [
+    { value: 'markdown', label: 'Markdown' },
+    { value: 'javascript', label: 'JavaScript' },
+    { value: 'typescript', label: 'TypeScript' },
+    { value: 'tsx', label: 'TSX' },
+    { value: 'json', label: 'JSON' },
+    { value: 'css', label: 'CSS' },
+    { value: 'markup', label: 'HTML' },
+    { value: 'txt', label: 'Plain Text' },
+];
+
+export function Notepad({ owner, initialPath }: NotepadProps) {
+    const { readFile, createFile, writeFile, getNodeAtPath } = useFileSystem();
+    const { accentColor, activeUser: desktopUser } = useAppContext();
+    const activeUser = owner || desktopUser;
     const windowContext = useWindow();
 
     // State
@@ -142,14 +208,13 @@ export function Notepad() {
         return () => windowContext.setBeforeClose(null);
     }, [windowContext]); // checkUnsaved is stable, tabsRef is stable.
 
-    // -- Window Data Interception (File Opening) --
+    // -- Window Data / Initial Path Interception (File Opening) --
     const tabsRefForOpening = useRef(tabs);
     useEffect(() => { tabsRefForOpening.current = tabs; }, [tabs]);
 
     useEffect(() => {
-        if (windowContext?.data?.path) {
-            const path = windowContext.data.path;
-
+        const path = initialPath || windowContext?.data?.path;
+        if (path) {
             // Use ref to avoid closure staleness and dependency on tabs
             const currentTabs = tabsRefForOpening.current;
             const existingTab = currentTabs.find(t => t.path === path);
@@ -160,36 +225,40 @@ export function Notepad() {
                 setTimeout(() => setActiveTabId(tid), 0);
             } else {
                 // Open new tab
-                const name = path.split('/').pop() || 'Untitled';
-                const newId = crypto.randomUUID();
+                const node = getNodeAtPath(path, activeUser);
+                if (node && node.type === 'file') {
+                    const name = node.name;
+                    const newId = node.id;
 
-                // Read content
-                const content = readFile(path) || '';
-                const extension = name.split('.').pop()?.toLowerCase();
-                const context = extension === 'md' ? 'markdown' : 'txt';
+                    // Read content with user context
+                    const content = readFile(path, activeUser) || '';
+                    const extension = name.split('.').pop()?.toLowerCase() || '';
+                    const context = extensionToLanguage(extension);
 
-                const newTab: Tab = {
-                    id: newId,
-                    name,
-                    path,
-                    content,
-                    isModified: false,
-                    context
-                };
+                    const newTab: Tab = {
+                        id: newId,
+                        name,
+                        path,
+                        content,
+                        isModified: false,
+                        context
+                    };
 
-                // If the only tab was the initial blank "Untitled 1" and it was empty/unmodified, replace it?
-                setTimeout(() => {
-                    setTabs(prev => {
-                        if (prev.length === 1 && !prev[0].path && !prev[0].isModified && prev[0].content === '') {
-                            return [newTab];
-                        }
-                        return [...prev, newTab];
-                    });
-                    setActiveTabId(newId);
-                }, 0);
+                    // If the only tab was the initial blank "Untitled 1" and it was empty/unmodified, replace it.
+                    setTimeout(() => {
+                        setTabs(prev => {
+                            if (prev.length === 1 && !prev[0].path && !prev[0].isModified && prev[0].content === '') {
+                                return [newTab];
+                            }
+                            if (prev.find(t => t.id === newId)) return prev;
+                            return [...prev, newTab];
+                        });
+                        setActiveTabId(newId);
+                    }, 0);
+                }
             }
         }
-    }, [windowContext?.data, readFile]);
+    }, [windowContext?.data, initialPath, activeUser, readFile, getNodeAtPath]);
 
     // -- Tab Management --
     const handleNewTab = () => {
@@ -234,24 +303,17 @@ export function Notepad() {
         ));
     };
 
-    const toggleContext = () => {
-        const newContext = activeTab.context === 'markdown' ? 'txt' : 'markdown';
-        setTabs(tabs.map(t =>
-            t.id === activeTabId
-                ? { ...t, context: newContext }
-                : t
-        ));
-        toast.info(`Switched to ${newContext === 'markdown' ? 'Markdown' : 'Plain Text'} `);
-    };
-
     // -- File I/O --
     const handleFileSelect = (path: string) => {
         if (filePickerMode === 'open') {
-            const content = readFile(path);
+            const node = getNodeAtPath(path, activeUser);
+            if (!node || node.type !== 'file') return;
+
+            const content = readFile(path, activeUser);
             if (content !== null) {
                 const name = path.split('/').pop() || 'Untitled';
-                const isTxt = name.endsWith('.txt');
-                const context = isTxt ? 'txt' : 'markdown';
+                const extension = name.split('.').pop()?.toLowerCase() || '';
+                const context = extensionToLanguage(extension);
 
                 // Check if we should replace current empty tab or open new
                 if (activeTab.content === '' && !activeTab.path && !activeTab.isModified) {
@@ -271,20 +333,20 @@ export function Notepad() {
         } else if (filePickerMode === 'save') {
             // Save logic
             // Try updating first (overwrite), then create if distinct
-            let success = writeFile(path, activeTab.content);
+            let success = writeFile(path, activeTab.content, activeUser);
 
             if (!success) {
                 // If writeFile failed, maybe it doesn't exist, try create
                 const name = path.split('/').pop() || 'Untitled';
                 const dir = path.substring(0, path.lastIndexOf('/')) || '/';
-                success = createFile(dir, name, activeTab.content);
+                success = createFile(dir, name, activeTab.content, activeUser);
             }
 
             if (success) {
                 const name = path.split('/').pop() || 'Untitled';
                 // Update context based on saved extension
-                const isTxt = name.endsWith('.txt');
-                const context = isTxt ? 'txt' : 'markdown';
+                const extension = name.split('.').pop()?.toLowerCase() || '';
+                const context = extensionToLanguage(extension);
 
                 setTabs(tabs.map(t =>
                     t.id === activeTabId
@@ -302,7 +364,7 @@ export function Notepad() {
     const handleSave = () => {
         if (activeTab.path) {
             // Quick Save using writeFile (updates existing)
-            const success = writeFile(activeTab.path, activeTab.content);
+            const success = writeFile(activeTab.path, activeTab.content, activeUser);
             if (success) {
                 setTabs(tabs.map(t =>
                     t.id === activeTabId
@@ -393,10 +455,11 @@ export function Notepad() {
 
     // Highlight function for Prism
     const highlight = useCallback((code: string) => {
-        if (activeTab.context === 'txt') {
+        const lang = activeTab.context;
+        if (lang === 'txt' || !Prism.languages[lang]) {
             return code;
         }
-        return Prism.highlight(code, Prism.languages.markdown, 'markdown');
+        return Prism.highlight(code, Prism.languages[lang], lang);
     }, [activeTab.context]);
 
     return (
@@ -484,7 +547,7 @@ export function Notepad() {
                                     )}
                                 </div>
 
-                                {activeTab.context === 'markdown' && (
+                                {(activeTab.context === 'markdown' || activeTab.context === 'markup') && (
                                     <button
                                         onClick={() => setIsPreviewMode(!isPreviewMode)}
                                         style={{ backgroundColor: isPreviewMode ? accentColor : undefined }}
@@ -513,46 +576,57 @@ export function Notepad() {
 
                         {/* Editor / Preview Area */}
                         {isPreviewMode ? (
-                            <div className="flex-1 overflow-y-auto p-8 text-white">
-                                <ReactMarkdown
-                                    remarkPlugins={[remarkGfm]}
-                                    components={{
-                                        h1: ({ node: _node, ...props }) => <h1 className="text-3xl font-bold mb-4 border-b border-white/20 pb-2" style={{ color: accentColor }} {...props} />,
-                                        h2: ({ node: _node, ...props }) => <h2 className="text-2xl font-bold mb-3 border-b border-white/10 pb-1" style={{ color: accentColor }} {...props} />,
-                                        h3: ({ node: _node, ...props }) => <h3 className="text-xl font-bold mb-2" style={{ color: accentColor }} {...props} />,
-                                        p: ({ node: _node, ...props }) => <p className="mb-4 text-white/90 leading-relaxed" {...props} />,
-                                        ul: ({ node: _node, ...props }) => <ul className="list-disc pl-6 mb-4 space-y-1" {...props} />,
-                                        ol: ({ node: _node, ...props }) => <ol className="list-decimal pl-6 mb-4 space-y-1" {...props} />,
-                                        li: ({ node: _node, ...props }) => <li className="text-white/90" {...props} />,
-                                        blockquote: ({ node: _node, ...props }) => <blockquote className="border-l-4 pl-4 italic my-4 text-white/70" style={{ borderColor: accentColor }} {...props} />,
-                                        code: ({ node: _node, className, children, ...props }) => {
-                                            const match = /language-(\w+)/.exec(className || '')
-                                            return match ? (
-                                                <div className="rounded-md overflow-hidden my-4 border border-white/10 bg-black/30">
-                                                    <div className="px-3 py-1 bg-white/5 border-b border-white/5 text-xs text-white/50">{match[1]}</div>
-                                                    <pre className="p-3 overflow-x-auto text-sm font-mono text-white/90 m-0">
-                                                        <code className={className} {...props}>{children}</code>
-                                                    </pre>
-                                                </div>
-                                            ) : (
-                                                <code
-                                                    className="rounded px-1.5 py-0.5 text-sm font-mono font-medium"
-                                                    style={{
-                                                        backgroundColor: `${accentColor}20`,
-                                                        color: accentColor
-                                                    }}
-                                                    {...props}
-                                                >
-                                                    {children}
-                                                </code>
-                                            )
-                                        },
-                                        a: ({ node: _node, ...props }) => <a className="text-blue-400 hover:underline" style={{ color: accentColor }} {...props} />,
-                                    }}
-                                >
-                                    {activeTab.content}
-                                </ReactMarkdown>
-                            </div>
+                            activeTab.context === 'markdown' ? (
+                                <div className="flex-1 overflow-y-auto p-8 text-white">
+                                    <ReactMarkdown
+                                        remarkPlugins={[remarkGfm]}
+                                        components={{
+                                            h1: ({ node: _node, ...props }) => <h1 className="text-3xl font-bold mb-4 border-b border-white/20 pb-2" style={{ color: accentColor }} {...props} />,
+                                            h2: ({ node: _node, ...props }) => <h2 className="text-2xl font-bold mb-3 border-b border-white/10 pb-1" style={{ color: accentColor }} {...props} />,
+                                            h3: ({ node: _node, ...props }) => <h3 className="text-xl font-bold mb-2" style={{ color: accentColor }} {...props} />,
+                                            p: ({ node: _node, ...props }) => <p className="mb-4 text-white/90 leading-relaxed" {...props} />,
+                                            ul: ({ node: _node, ...props }) => <ul className="list-disc pl-6 mb-4 space-y-1" {...props} />,
+                                            ol: ({ node: _node, ...props }) => <ol className="list-decimal pl-6 mb-4 space-y-1" {...props} />,
+                                            li: ({ node: _node, ...props }) => <li className="text-white/90" {...props} />,
+                                            blockquote: ({ node: _node, ...props }) => <blockquote className="border-l-4 pl-4 italic my-4 text-white/70" style={{ borderColor: accentColor }} {...props} />,
+                                            code: ({ node: _node, className, children, ...props }) => {
+                                                const match = /language-(\w+)/.exec(className || '')
+                                                return match ? (
+                                                    <div className="rounded-md overflow-hidden my-4 border border-white/10 bg-black/30">
+                                                        <div className="px-3 py-1 bg-white/5 border-b border-white/5 text-xs text-white/50">{match[1]}</div>
+                                                        <pre className="p-3 overflow-x-auto text-sm font-mono text-white/90 m-0">
+                                                            <code className={className} {...props}>{children}</code>
+                                                        </pre>
+                                                    </div>
+                                                ) : (
+                                                    <code
+                                                        className="rounded px-1.5 py-0.5 text-sm font-mono font-medium"
+                                                        style={{
+                                                            backgroundColor: `${accentColor}20`,
+                                                            color: accentColor
+                                                        }}
+                                                        {...props}
+                                                    >
+                                                        {children}
+                                                    </code>
+                                                )
+                                            },
+                                            a: ({ node: _node, ...props }) => <a className="text-blue-400 hover:underline" style={{ color: accentColor }} {...props} />,
+                                        }}
+                                    >
+                                        {activeTab.content}
+                                    </ReactMarkdown>
+                                </div>
+                            ) : (
+                                <div className="flex-1 overflow-hidden">
+                                    <iframe
+                                        srcDoc={activeTab.content}
+                                        title="HTML Preview"
+                                        sandbox="allow-scripts"
+                                        className="w-full h-full border-none bg-white"
+                                    />
+                                </div>
+                            )
                         ) : (
                             <div className="flex-1 overflow-y-auto relative font-mono text-sm prism-editor cursor-text text-white caret-white" onClick={() => {
                                 // Focus helper
@@ -584,13 +658,88 @@ export function Notepad() {
                                 <span>{activeTab.content.length} chars</span>
                                 <span>Ln {activeTab.content.split('\n').length}</span>
                             </div>
-                            <div
-                                className="font-mono hover:text-white cursor-pointer hover:underline transition-colors select-none"
-                                onClick={toggleContext}
-                                title="Click to switch context"
-                            >
-                                {activeTab.context === 'txt' ? 'Plain Text' : 'Markdown'}
-                            </div>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <div
+                                        className="font-mono hover:text-white cursor-pointer transition-colors select-none flex items-center gap-1"
+                                        style={{
+                                            color: 'rgba(255, 255, 255, 0.5)'
+                                        }}
+                                        title="Click to switch context"
+                                    >
+                                        {getDisplayName(activeTab.context)}
+                                        <ChevronsUpDown className="size-3 opacity-50" />
+                                    </div>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                    className="w-[200px] p-0 z-[10001]"
+                                    align="end"
+                                    style={{
+                                        background: 'rgba(28, 28, 30, 0.95)',
+                                        backdropFilter: 'blur(20px)',
+                                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)'
+                                    }}
+                                >
+                                    <Command className="bg-transparent text-white">
+                                        <CommandInput
+                                            placeholder="Search language..."
+                                            className="h-8 text-[11px] border-b border-white/10"
+                                            style={{
+                                                color: 'white',
+                                                caretColor: accentColor
+                                            }}
+                                        />
+                                        <CommandList className="max-h-[200px]">
+                                            <CommandEmpty className="text-[11px] py-2 text-white/40">No language found.</CommandEmpty>
+                                            <CommandGroup>
+                                                {SUPPORTED_LANGUAGES.map((lang) => (
+                                                    <CommandItem
+                                                        key={lang.value}
+                                                        value={lang.value}
+                                                        onSelect={(currentValue) => {
+                                                            setTabs(tabs.map(t =>
+                                                                t.id === activeTabId
+                                                                    ? { ...t, context: currentValue }
+                                                                    : t
+                                                            ));
+                                                            toast.info(`Switched to ${lang.label}`);
+                                                        }}
+                                                        className="text-[11px] cursor-pointer transition-all duration-150"
+                                                        style={{
+                                                            color: activeTab.context === lang.value ? accentColor : 'rgba(255, 255, 255, 0.7)',
+                                                            backgroundColor: activeTab.context === lang.value ? `${accentColor}15` : 'transparent'
+                                                        }}
+                                                        onMouseEnter={(e) => {
+                                                            if (activeTab.context !== lang.value) {
+                                                                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                                                                e.currentTarget.style.color = 'white';
+                                                            }
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            if (activeTab.context !== lang.value) {
+                                                                e.currentTarget.style.backgroundColor = 'transparent';
+                                                                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                                                            }
+                                                        }}
+                                                    >
+                                                        <Check
+                                                            className={cn(
+                                                                "mr-2 h-3 w-3 transition-opacity",
+                                                                activeTab.context === lang.value ? "opacity-100" : "opacity-0"
+                                                            )}
+                                                            style={{
+                                                                color: accentColor
+                                                            }}
+                                                        />
+                                                        {lang.label}
+                                                    </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
                         </div>
                     </div>
                 }
@@ -604,10 +753,10 @@ export function Notepad() {
                     defaultPath={activeTab.path ? activeTab.path.substring(0, activeTab.path.lastIndexOf('/')) : undefined}
                     extension={
                         // If we are in txt mode, suggest .txt. If MD, suggest .md
-                        // But don't enforce it strictly if user changed it manually? 
                         // FilePicker handles extension as default/fallback.
-                        activeTab.context === 'txt' ? '.txt' : '.md'
+                        activeTab.context === 'txt' ? '.txt' : (activeTab.context === 'markdown' ? '.md' : `.${activeTab.context}`)
                     }
+                    owner={activeUser}
                 />
             )}
 
