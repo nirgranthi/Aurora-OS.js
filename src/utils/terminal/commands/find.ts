@@ -30,8 +30,10 @@ export const find: TerminalCommand = {
                 const childPath = path === '/' ? `/${child.name}` : `${path}/${child.name}`;
 
                 // Check match
-                // Simple glob to regex
-                const regex = new RegExp('^' + namePattern.replace(/\./g, '\\.').replace(/\*/g, '.*') + '$');
+                // Escape all regex characters first
+                const escapedPattern = namePattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                // Re-enable wildcard support by converting \* back to .*
+                const regex = new RegExp('^' + escapedPattern.replace(/\\\*/g, '.*') + '$');
                 if (regex.test(child.name)) {
                     results.push(childPath);
                 }
