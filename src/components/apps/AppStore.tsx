@@ -14,7 +14,7 @@ interface AppStoreProps {
     owner?: string;
 }
 
-export function AppStore({ owner: _owner }: AppStoreProps) {
+export function AppStore({ owner }: AppStoreProps) {
     const { installedApps, installApp, uninstallApp } = useFileSystem();
     const { accentColor } = useAppContext();
     const [searchQuery, setSearchQuery] = useState('');
@@ -47,11 +47,11 @@ export function AppStore({ owner: _owner }: AppStoreProps) {
     }, [searchQuery, selectedCategory]);
 
     const handleInstall = (appId: string) => {
-        installApp(appId);
+        installApp(appId, owner);
     };
 
     const handleUninstall = (appId: string) => {
-        uninstallApp(appId);
+        uninstallApp(appId, owner);
     };
 
     return (
