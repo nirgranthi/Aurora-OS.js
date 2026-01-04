@@ -1,4 +1,4 @@
-import { Mail, Calendar, Video, LucideIcon, FileQuestion } from 'lucide-react';
+import { Mail, Calendar, LucideIcon, FileQuestion } from 'lucide-react';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { EmptyState } from '../ui/empty-state';
 
@@ -8,14 +8,12 @@ interface PlaceholderAppProps {
 
 const APP_ICONS: Record<string, LucideIcon> = {
     'Mail': Mail,
-    'Calendar': Calendar,
-    'Videos': Video
+    'Calendar': Calendar
 };
 
 const APP_DESCRIPTIONS: Record<string, string> = {
     'Mail': 'Manage your emails, contacts, and calendar events.',
-    'Calendar': 'Schedule meetings, events, and reminders.',
-    'Videos': 'Watch your favorite movies and video clips.'
+    'Calendar': 'Schedule meetings, events, and reminders.'
 };
 
 export function PlaceholderApp({ title }: PlaceholderAppProps) {

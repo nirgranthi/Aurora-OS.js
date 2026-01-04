@@ -135,5 +135,4 @@ win-unpacked
 *.njsproj
 *.sln
 *.sw?
-.agent/
 .DS_Store

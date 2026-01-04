@@ -12,6 +12,7 @@ import { Browser } from './apps/Browser';
 import { Terminal } from './apps/Terminal';
 import { DevCenter } from './apps/DevCenter';
 import { Notepad } from './apps/Notepad';
+import { Calendar } from './apps/Calendar';
 import { PlaceholderApp } from './apps/PlaceholderApp';
 import { AppStore } from './apps/AppStore';
 import { useAppContext } from './AppContext';
@@ -210,6 +211,10 @@ export default function OS() {
             case 'notepad':
                 title = 'Notepad';
                 content = <Notepad owner={owner} initialPath={data?.path} />;
+                break;
+            case 'calendar':
+                title = 'Calendar';
+                content = <Calendar owner={owner} />;
                 break;
             case 'appstore':
                 title = 'App Store';

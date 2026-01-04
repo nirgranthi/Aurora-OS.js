@@ -1,6 +1,6 @@
 # Aurora OS.js
 
-[![Version](https://img.shields.io/badge/Version-v0.7.8-blue)](https://github.com/mental-os/Aurora-OS.js) ![Roadmap Status](<https://img.shields.io/badge/Roadmap-Stage%200%20(OS%20Foundation)-blue>) [![Build (Main)](<https://img.shields.io/github/actions/workflow/status/mental-os/Aurora-OS.js/ci.yml?branch=main&label=Build%20(Main)&logo=github>)](https://github.com/mental-os/Aurora-OS.js/actions/workflows/ci.yml) [![Build (Nightly)](<https://img.shields.io/github/actions/workflow/status/mental-os/Aurora-OS.js/ci.yml?branch=nightly&label=Build%20(Nightly)&logo=github>)](https://github.com/mental-os/Aurora-OS.js/actions/workflows/ci.yml) [![GitHub Pages](https://github.com/mental-os/Aurora-OS.js/actions/workflows/deploy.yml/badge.svg)](https://github.com/mental-os/Aurora-OS.js/actions/workflows/deploy.yml)
+[![Version](https://img.shields.io/badge/Version-v0.7.9-blue)](https://github.com/mental-os/Aurora-OS.js) ![Roadmap Status](<https://img.shields.io/badge/Roadmap-Stage%200%20(OS%20Foundation)-blue>) [![Build (Main)](<https://img.shields.io/github/actions/workflow/status/mental-os/Aurora-OS.js/ci.yml?branch=main&label=Build%20(Main)&logo=github>)](https://github.com/mental-os/Aurora-OS.js/actions/workflows/ci.yml) [![Build (Nightly)](<https://img.shields.io/github/actions/workflow/status/mental-os/Aurora-OS.js/ci.yml?branch=nightly&label=Build%20(Nightly)&logo=github>)](https://github.com/mental-os/Aurora-OS.js/actions/workflows/ci.yml) [![GitHub Pages](https://github.com/mental-os/Aurora-OS.js/actions/workflows/deploy.yml/badge.svg)](https://github.com/mental-os/Aurora-OS.js/actions/workflows/deploy.yml)
 
 ![Social media image for Aurora OS.js hacking simulator game project](.github/openGraph.jpg)
 
@@ -76,6 +76,7 @@ This is the ideal phase to influence direction, architecture, and gameplay syste
 ## 🚀 Getting Started
 
 > **Prerequisite**: Node.js 24.0.0+ is required.
+> **Browser**: Chromium-based browsers (Chrome, Edge, Brave, etc.)
 
 ```bash
 npm install
@@ -84,21 +85,29 @@ npm run dev
 
 Or use the [GitHub Pages](https://mental-os.github.io/Aurora-OS.js) (LIVE DEMO)
 
-## Release Notes (v0.7.8)
+## Release Notes (v0.7.9)
 
-### Desktop & Filesystem Experience
+### Added
 
-- **Multi-Selection**: Added drag-selection and key-down selection support in both Finder and Desktop.
-- **Enhanced Drag & Drop**: Fixed dragging multiple files between Finder and Desktop, ensuring seamless file management.
-- **Grid Fluency**: Improved Desktop grid logic for smoother icon snapping and collision handling.
-- **Smart User Provisioning**: New users (and Guest) now start with clean, empty home directories, while the default user retains sample content.
+- **Calendar App**: Core functionality (add, remove, modify events). File-dependent (`~/.config/calendar.json`) to enhance gameplay and hackability.
+- **Documentation**: Added `CONTRIBUTORS.md` and `CONTRIBUTORS.md` references.
 
-### System Stability & Core
+### Improved
 
-- **App Store**: Fixed permission issues when launching newly installed apps via Terminal.
-- **Music App**: Fixed infinite scanning loops and improved directory targeting (`~/Music` or `~/`).
-- **Login Screen**: Polished user avatars to eliminate visual artifacts and improved UI consistency.
-- **Modern Standards**: Improved default support for ES2022 across the development environment.
+- **UI Immersion**: Text is now not selectable by default, except in input areas (text areas, fields).
+- **App Responsive Design**: Sidebar now intelligently switches between condensed and relaxed modes based on window width.
+- **Notifications**: Replaced debugging "toasts" with stylized notifications (success, warning, error).
+- **Text Highlight**: Global text selection now follows the system accent color (including input fields).
+- **Agentic IDE**: Updated `.gitignore` to include `.agent/rules/codeQuality.md` for better context awareness.
+
+### Removed
+
+- **Videos App (placeholder)**: Removed to avoid false impressions; video files are not currently a game world element.
+- **Videos Home Directory**: Cleaned up `~/Videos`.
+
+### Known Issues
+
+- **react-day-picker**: Regressed to 8.10.1 as 9.13.0 caused conflicts with `shadcn` dependencies.
 
 ### [View full version history](HISTORY.md)
 
@@ -108,6 +117,7 @@ Or use the [GitHub Pages](https://mental-os.github.io/Aurora-OS.js) (LIVE DEMO)
 
 - Discord (soon)
 - [mental.os() Universe](https://instagram.com/mental.os)
+- [Contributors](CONTRIBUTORS.md)
 
 ### Other links
 

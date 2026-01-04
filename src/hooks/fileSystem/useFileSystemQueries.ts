@@ -26,7 +26,7 @@ export function useFileSystemQueries(
         }
 
         let resolved = path.replace(/^~/, userHome);
-        const userDirs = ['Desktop', 'Documents', 'Downloads', 'Pictures', 'Music', 'Videos'];
+        const userDirs = ['Desktop', 'Documents', 'Downloads', 'Pictures', 'Music'];
         for (const dir of userDirs) {
             if (resolved.startsWith(`/${dir}`)) {
                 resolved = resolved.replace(`/${dir}`, `${userHome}/${dir}`);

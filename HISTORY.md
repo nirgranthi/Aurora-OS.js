@@ -1,3 +1,27 @@
+## v0.7.9
+
+### Added
+
+- **Calendar App**: Core functionality (add, remove, modify events). File-dependent (`~/.config/calendar.json`) to enhance gameplay and hackability.
+- **Documentation**: Added `CONTRIBUTORS.md` and `CONTRIBUTORS.md` references.
+
+### Improved
+
+- **UI Immersion**: Text is now not selectable by default, except in input areas (text areas, fields).
+- **App Responsive Design**: Sidebar now intelligently switches between condensed and relaxed modes based on window width.
+- **Notifications**: Replaced debugging "toasts" with stylized notifications (success, warning, error).
+- **Text Highlight**: Global text selection now follows the system accent color (including input fields).
+- **Agentic IDE**: Updated `.gitignore` to include `.agent/rules/codeQuality.md` for better context awareness.
+
+### Removed
+
+- **Videos App (placeholder)**: Removed to avoid false impressions; video files are not currently a game world element.
+- **Videos Home Directory**: Cleaned up `~/Videos`.
+
+### Known Issues
+
+- **react-day-picker**: Regressed to 8.10.1 as 9.13.0 caused conflicts with `shadcn` dependencies.
+
 ## v0.7.8
 
 ### Desktop & Filesystem Experience

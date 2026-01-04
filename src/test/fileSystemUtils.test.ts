@@ -84,7 +84,6 @@ user:1234:1000:1000:User:/home/user:/bin/bash`;
             expect(folderNames).toContain('Downloads');
             expect(folderNames).toContain('Music');
             expect(folderNames).toContain('Pictures');
-            expect(folderNames).toContain('Videos');
 
             // CRITICAL: Check that Music is empty (no default files)
             const music = home.children?.find((c: any) => c.name === 'Music');

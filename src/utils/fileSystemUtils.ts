@@ -165,7 +165,6 @@ export function createUserHome(username: string, permissions: string = 'drwxr-x-
                 owner: username,
                 permissions: 'drwxr-xr-x'
             },
-            { name: 'Videos', type: 'directory', children: [], owner: username, permissions: 'drwxr-xr-x' },
             { name: '.Config', type: 'directory', children: [], owner: username, permissions: 'drwx------' },
             { name: '.Trash', type: 'directory', children: [], owner: username, permissions: 'drwx------' },
         ],
@@ -453,7 +452,6 @@ export const initialFileSystem: any = {
                             owner: 'user',
                             permissions: 'drwxr-xr-x'
                         },
-                        { name: 'Videos', type: 'directory', children: [], owner: 'user', permissions: 'drwxr-xr-x' },
                         { name: '.Config', type: 'directory', children: [], owner: 'user', permissions: 'drwx------' },
                         { name: '.Trash', type: 'directory', children: [], owner: 'user', permissions: 'drwx------' },
                     ],

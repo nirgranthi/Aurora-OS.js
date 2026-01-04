@@ -1,5 +1,5 @@
 import { ComponentType } from 'react';
-import { LucideIcon, FolderOpen, Settings, Mail, Calendar, Image, Music, Video, Terminal, Globe, MessageSquare, FileText, Code, ShoppingBag } from 'lucide-react';
+import { LucideIcon, FolderOpen, Settings, Mail, Calendar, Image, Music, Terminal, Globe, MessageSquare, FileText, Code, ShoppingBag } from 'lucide-react';
 import { FileManager, finderMenuConfig } from '../components/FileManager';
 import { Settings as SettingsApp, settingsMenuConfig } from '../components/Settings';
 import { Photos, photosMenuConfig } from '../components/apps/Photos';
@@ -10,8 +10,9 @@ import { Terminal as TerminalApp, terminalMenuConfig } from '../components/apps/
 import { DevCenter, devCenterMenuConfig } from '../components/apps/DevCenter';
 import { Notepad, notepadMenuConfig } from '../components/apps/Notepad';
 import { PlaceholderApp } from '../components/apps/PlaceholderApp';
+import { Calendar as CalendarApp } from '../components/apps/Calendar';
 import { AppStore as AppStoreComponent, appStoreMenuConfig } from '../components/apps/AppStore';
-import { mailMenuConfig, calendarMenuConfig, videosMenuConfig } from './appMenuConfigs';
+import { mailMenuConfig, calendarMenuConfig } from './appMenuConfigs';
 
 import { AppMenuConfig } from '../types';
 
@@ -147,7 +148,7 @@ export const APP_REGISTRY: Record<string, AppMetadata> = {
         iconSolid: '#ef4444',
         category: 'productivity',
         isCore: false,
-        component: PlaceholderApp,
+        component: CalendarApp,
         dockOrder: 6,
         menu: calendarMenuConfig,
     },
@@ -177,19 +178,7 @@ export const APP_REGISTRY: Record<string, AppMetadata> = {
         dockOrder: 8,
         menu: musicMenuConfig,
     },
-    videos: {
-        id: 'videos',
-        name: 'Videos',
-        description: 'Watch movies and clips',
-        icon: Video,
-        iconColor: 'from-orange-400 to-orange-500',
-        iconSolid: '#f97316',
-        category: 'media',
-        isCore: false,
-        component: PlaceholderApp,
-        dockOrder: 9,
-        menu: videosMenuConfig,
-    },
+
     'dev-center': {
         id: 'dev-center',
         name: 'DevCenter',

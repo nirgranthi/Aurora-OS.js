@@ -30,16 +30,4 @@ export const calendarMenuConfig: AppMenuConfig = {
     }
 };
 
-export const videosMenuConfig: AppMenuConfig = {
-    menus: ['File', 'Edit', 'View', 'Playback', 'Window', 'Help'],
-    items: {
-        'Playback': [
-            { label: 'Play/Pause', shortcut: 'Space', action: 'play-pause' },
-            { type: 'separator' },
-            { label: 'Increase Volume', shortcut: '⌘↑', action: 'volume-up' },
-            { label: 'Decrease Volume', shortcut: '⌘↓', action: 'volume-down' },
-            { type: 'separator' },
-            { label: 'Enter Full Screen', shortcut: '⇧⌘F', action: 'fullscreen' }
-        ]
-    }
-};
+
