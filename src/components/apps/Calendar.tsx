@@ -284,7 +284,7 @@ export function Calendar({ owner }: CalendarProps) {
     };
 
     loadEvents();
-  }, [activeUser, readFile, createFile, createDirectory, configFile, configDir, userHome]);
+  }, [activeUser, readFile, createFile, createDirectory, configFile, configDir, userHome, t]);
 
   // Save Events (Write-through)
   const saveEventsToDisk = (newEvents: HydratedCalendarEvent[]) => {

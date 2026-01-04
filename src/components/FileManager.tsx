@@ -175,7 +175,7 @@ export function FileManager({ initialPath, onOpenApp, owner }: { initialPath?: s
     setHistoryIndex(prev => prev + 1);
     setCurrentPath(path);
     feedback.folder();
-  }, [historyIndex, getNodeAtPath, users, activeUser]);
+  }, [historyIndex, getNodeAtPath, users, activeUser, t]);
 
   // Handle item double-click
   const handleItemDoubleClick = useCallback((item: FileNode) => {
@@ -210,7 +210,7 @@ export function FileManager({ initialPath, onOpenApp, owner }: { initialPath?: s
         }
       }
     }
-  }, [currentPath, navigateTo, onOpenApp, activeUser, getNodeAtPath, resolvePath]);
+  }, [currentPath, navigateTo, onOpenApp, activeUser, getNodeAtPath, resolvePath, t]);
 
   // Go back in history
   const goBack = useCallback(() => {
@@ -376,7 +376,7 @@ export function FileManager({ initialPath, onOpenApp, owner }: { initialPath?: s
       console.error('Failed to parse drag data', err);
       toast.error(t('fileManager.toasts.moveFailedInvalidData'));
     }
-  }, [currentPath, moveNodeById, activeUser]);
+  }, [currentPath, moveNodeById, activeUser, t]);
 
   // Sidebar Drop Logic
   const handleSidebarDragOver = useCallback((e: React.DragEvent) => {
@@ -404,7 +404,7 @@ export function FileManager({ initialPath, onOpenApp, owner }: { initialPath?: s
       console.error('Failed to drop on sidebar', err);
       toast.error(t('fileManager.toasts.failedToProcessDrop'));
     }
-  }, [moveNodeById, activeUser]);
+  }, [moveNodeById, activeUser, t]);
 
   // Helper to create sidebar action props
   const sidebarDropProps = useCallback((path: string) => ({

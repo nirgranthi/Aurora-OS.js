@@ -46,7 +46,7 @@ export function AppStore({ owner }: AppStoreProps) {
         }
 
         return apps;
-    }, [searchQuery, selectedCategory]);
+    }, [searchQuery, selectedCategory, t]);
 
     const handleInstall = (appId: string) => {
         installApp(appId, owner);
