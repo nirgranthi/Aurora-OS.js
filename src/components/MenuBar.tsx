@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, memo } from 'react';
 import pkg from '../../package.json';
 import { Orbit, Wifi, Battery } from 'lucide-react';
 import { useThemeColors } from '../hooks/useThemeColors';
+import { useFullscreen } from '../hooks/useFullscreen';
 import { CreditsDrawer } from './Credits/CreditsDrawer';
 import { cn } from './ui/utils';
 import { useAppContext } from './AppContext';
@@ -52,6 +53,9 @@ function MenuBarComponent({ focusedApp, onOpenApp }: MenuBarProps) {
   const [showCredits, setShowCredits] = useState(false);
   const clickCountRef = useRef(0);
   const lastClickTimeRef = useRef(0);
+
+  // Fullscreen management
+  const { toggleFullscreen: toggleFullscreenBase } = useFullscreen();
 
   const handleSystemClick = () => {
     const now = Date.now();
@@ -161,7 +165,7 @@ function MenuBarComponent({ focusedApp, onOpenApp }: MenuBarProps) {
         return (
           <>
             <MenubarItem>Reload <MenubarShortcut>⌘R</MenubarShortcut></MenubarItem>
-            <MenubarItem>Toggle Fullscreen <MenubarShortcut>F11</MenubarShortcut></MenubarItem>
+            <MenubarItem onClick={toggleFullscreenBase}>Toggle Fullscreen <MenubarShortcut>F11</MenubarShortcut></MenubarItem>
           </>
         );
       case 'Window':

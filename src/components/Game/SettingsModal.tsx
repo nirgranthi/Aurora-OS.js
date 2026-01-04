@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Volume2, Monitor, RefreshCw, Trash2, X, VolumeX } from 'lucide-react';
 import pkg from '../../../package.json';
@@ -6,6 +6,7 @@ import { cn } from '../ui/utils';
 import { feedback } from '../../services/soundFeedback';
 import { soundManager } from '../../services/sound';
 import { useFileSystem } from '../FileSystemContext';
+import { useFullscreen } from '../../hooks/useFullscreen';
 
 interface SettingsModalProps {
     onClose: () => void;
@@ -13,30 +14,19 @@ interface SettingsModalProps {
 
 export function SettingsModal({ onClose }: SettingsModalProps) {
     const [volume, setVolume] = useState(soundManager.getVolume('master') * 100);
-    const [isFullscreen, setIsFullscreen] = useState(false);
     const { resetFileSystem } = useFileSystem();
 
-    // Sync fullscreen state
-    useEffect(() => {
-        const checkFullscreen = () => setIsFullscreen(!!document.fullscreenElement);
-        checkFullscreen();
-        document.addEventListener('fullscreenchange', checkFullscreen);
-        return () => document.removeEventListener('fullscreenchange', checkFullscreen);
-    }, []);
+    // Fullscreen management
+    const { isFullscreen, toggleFullscreen: toggleFullscreenBase } = useFullscreen();
+    const toggleFullscreen = () => {
+        feedback.click();
+        toggleFullscreenBase();
+    };
 
     const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newVol = parseInt(e.target.value);
         setVolume(newVol);
         soundManager.setVolume('master', newVol / 100);
-    };
-
-    const toggleFullscreen = () => {
-        feedback.click();
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(() => { });
-        } else {
-            document.exitFullscreen().catch(() => { });
-        }
     };
 
     const handleSoftReset = () => {
