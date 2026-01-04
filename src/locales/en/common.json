@@ -1,0 +1,12 @@
+{
+  "common": {
+    "welcome": "Welcome to Aurora OS",
+    "login": "Login",
+    "unknown_error": "An unknown error occurred"
+  },
+  "apps": {
+    "finder": {
+      "name": "Finder"
+    }
+  }
+}
