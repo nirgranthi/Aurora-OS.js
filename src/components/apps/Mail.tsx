@@ -39,13 +39,25 @@ export interface Email {
 
 // --- Security Helpers ---
 const stripHtml = (html: string) => {
-  if (typeof window === 'undefined') return html.replace(/<[^>]*>?/gm, '');
-  try {
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    return doc.body.textContent || "";
-  } catch {
-    return html.replace(/<[^>]*>?/gm, '');
+  if (typeof window !== 'undefined') {
+    try {
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      return doc.body.textContent || "";
+    } catch {
+      // Fallback
+    }
   }
+
+  // Robust recursive fallback to handle nested tags (e.g. <<script>script>)
+  // This satisfies CodeQL's "Incomplete multi-character sanitization" alert.
+  let result = html;
+  let previous;
+  do {
+    previous = result;
+    result = result.replace(/<[^>]*>?/gm, '');
+  } while (result !== previous);
+
+  return result;
 };
 
 export function Mail({ owner }: { owner?: string }) {
