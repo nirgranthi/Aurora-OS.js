@@ -62,10 +62,15 @@ export function useFileSystemState() {
         setFileSystem(deepCloneFileSystem(initialFileSystem));
     }, []);
 
+    const saveNow = useCallback(() => {
+        saveFileSystemToStorage(fileSystem);
+    }, [fileSystem]);
+
     return {
         fileSystem,
         setFileSystem,
         isSafeMode,
-        resetFileSystemState
+        resetFileSystemState,
+        saveNow
     };
 }

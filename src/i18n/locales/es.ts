@@ -14,7 +14,7 @@ export const es: TranslationDict = {
         label: 'Nuevo bucle',
         desc: 'Empezar de cero (borra los datos)',
       },
-    mail: 'Correo',
+      mail: 'Correo',
       settings: {
         label: 'BIOS',
         desc: 'Configurar parámetros globales',
@@ -22,6 +22,12 @@ export const es: TranslationDict = {
       exit: {
         label: 'Apagar',
         desc: 'Terminar sesión',
+        confirm: {
+          title: 'Apagado del Sistema',
+          message: '¿Estás seguro de que quieres apagar el sistema? El progreso no guardado puede perderse.',
+          cancel: 'Cancelar',
+          confirm: 'Apagar',
+        },
       },
     },
     bios: {

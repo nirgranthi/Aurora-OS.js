@@ -6,6 +6,7 @@ import { feedback } from '../../services/soundFeedback';
 import { GameScreenLayout } from './GameScreenLayout';
 import { SettingsModal } from './SettingsModal';
 import { useI18n } from '../../i18n/index';
+import { useFileSystem } from '../FileSystemContext';
 
 interface MainMenuProps {
     onNewGame: () => void;
@@ -18,6 +19,7 @@ export function MainMenu({ onNewGame, onContinue, canContinue }: MainMenuProps) 
     const [selected, setSelected] = useState(canContinue ? 0 : 1);
     const [showSettings, setShowSettings] = useState(false);
     const [showExitConfirm, setShowExitConfirm] = useState(false);
+    const { saveFileSystem } = useFileSystem();
 
     // Keyboard navigation could be added here for true "game" feel
 
@@ -130,11 +132,11 @@ export function MainMenu({ onNewGame, onContinue, canContinue }: MainMenuProps) 
                             <div className="p-4 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 shadow-inner">
                                 <Power className="w-8 h-8" />
                             </div>
-                            
+
                             <div className="space-y-2">
-                                <h3 className="text-xl font-bold text-white tracking-wide">System Shutdown</h3>
+                                <h3 className="text-xl font-bold text-white tracking-wide">{t('game.mainMenu.exit.confirm.title')}</h3>
                                 <p className="text-sm text-white/50">
-                                    Are you sure you want to shut down the system? Unsaved progress may be lost.
+                                    {t('game.mainMenu.exit.confirm.message')}
                                 </p>
                             </div>
 
@@ -146,16 +148,17 @@ export function MainMenu({ onNewGame, onContinue, canContinue }: MainMenuProps) 
                                     }}
                                     className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium transition-colors text-sm"
                                 >
-                                    Cancel
+                                    {t('game.mainMenu.exit.confirm.cancel')}
                                 </button>
                                 <button
                                     onClick={() => {
                                         feedback.click();
+                                        saveFileSystem();
                                         window.close();
                                     }}
                                     className="px-4 py-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-200 hover:text-white font-medium transition-all shadow-[0_0_15px_rgba(239,68,68,0.2)] hover:shadow-[0_0_25px_rgba(239,68,68,0.4)] text-sm"
                                 >
-                                    Shutdown
+                                    {t('game.mainMenu.exit.confirm.confirm')}
                                 </button>
                             </div>
                         </div>

@@ -93,6 +93,7 @@ export interface FileSystemContextType {
   installApp: (appId: string, asUser?: string) => boolean;
   uninstallApp: (appId: string, asUser?: string) => boolean;
   isAppInstalled: (appId: string) => boolean;
+  saveFileSystem: () => void;
 }
 
 const FileSystemContext = createContext<FileSystemContextType | undefined>(
@@ -101,7 +102,7 @@ const FileSystemContext = createContext<FileSystemContextType | undefined>(
 
 export function FileSystemProvider({ children }: { children: ReactNode }) {
   // 1. State & Persistence
-  const { fileSystem, setFileSystem, isSafeMode, resetFileSystemState } =
+  const { fileSystem, setFileSystem, isSafeMode, resetFileSystemState, saveNow } =
     useFileSystemState();
 
   // 2. Auth & User Management
@@ -130,8 +131,8 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
     currentUser === "root"
       ? "/root"
       : currentUser
-      ? `/home/${currentUser}`
-      : "/";
+        ? `/home/${currentUser}`
+        : "/";
   const [currentPath, setCurrentPath] = useState(homePath);
 
   // Update currentPath when user logs in if currently at root or undefined
@@ -425,6 +426,7 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
     installApp,
     uninstallApp,
     isAppInstalled,
+    saveFileSystem: saveNow,
   }), [
     fileSystem,
     isSafeMode,
@@ -463,6 +465,7 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
     installApp,
     uninstallApp,
     isAppInstalled,
+    saveNow,
   ]);
 
   return (

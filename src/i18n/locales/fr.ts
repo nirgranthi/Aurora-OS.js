@@ -14,7 +14,7 @@ export const fr: TranslationDict = {
         label: 'Nouvelle boucle',
         desc: 'Repartir à zéro (efface les données)',
       },
-    mail: 'Courrier',
+      mail: 'Courrier',
       settings: {
         label: 'BIOS',
         desc: 'Configurer les paramètres globaux',
@@ -22,6 +22,12 @@ export const fr: TranslationDict = {
       exit: {
         label: 'Éteindre',
         desc: 'Terminer la session',
+        confirm: {
+          title: 'Arrêt du Système',
+          message: 'Êtes-vous sûr de vouloir éteindre le système ? Les progrès non sauvegardés peuvent être perdus.',
+          cancel: 'Annuler',
+          confirm: 'Éteindre',
+        },
       },
     },
     bios: {

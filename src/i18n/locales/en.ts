@@ -21,6 +21,12 @@ export const en: TranslationDict = {
       exit: {
         label: 'Shutdown',
         desc: 'Terminate session',
+        confirm: {
+          title: 'System Shutdown',
+          message: 'Are you sure you want to shut down the system? Unsaved progress may be lost.',
+          cancel: 'Cancel',
+          confirm: 'Shutdown',
+        },
       },
     },
     bios: {
