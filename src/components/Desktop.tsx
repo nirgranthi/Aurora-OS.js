@@ -1,4 +1,4 @@
-import { useState, useEffect, memo, useRef } from 'react';
+import { useState, useEffect, memo, useRef, forwardRef } from 'react';
 import { useAppContext } from './AppContext';
 
 export interface DesktopIcon {
@@ -11,14 +11,20 @@ export interface DesktopIcon {
 // import { lightenColor } from '../utils/colors';
 import { FileIcon } from './ui/FileIcon';
 import { useFileSystem } from './FileSystemContext';
-import { ContextMenuItem } from '../types';
+import { ContextMenuItem as ContextMenuItemType } from '../types';
 import { useI18n } from '../i18n';
 import {
   ContextMenu,
   ContextMenuTrigger,
   ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
 } from './ui/context-menu';
 import { renderContextMenuItems } from './ui/context-menu-utils';
+// import { checkPermissions } from '../utils/fileSystemUtils';
+import { FolderOpen, Trash2, Clipboard, Image as ImageIcon, Scissors, Copy, Info } from 'lucide-react';
+import { notify } from '../services/notifications';
 import defaultWallpaper from '../assets/images/background.png';
 import orbitWallpaper from '../assets/images/wallpaper-orbit.png';
 import meshWallpaper from '../assets/images/wallpaper-mesh.png';
@@ -43,19 +49,64 @@ interface DesktopProps {
 const emptyImage = new Image();
 emptyImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
-const desktopContextMenu: ContextMenuItem[] = [
-  { type: 'item', labelKey: 'menubar.items.newFolder', label: 'New Folder', action: 'new-folder' },
-  { type: 'item', labelKey: 'menubar.items.paste', label: 'Paste', action: 'paste', disabled: true },
+const desktopContextMenu: ContextMenuItemType[] = [
+  { type: 'item', labelKey: 'menubar.items.newFolder', label: 'New Folder', action: 'new-folder', icon: FolderOpen },
+  { type: 'item', labelKey: 'menubar.items.paste', label: 'Paste', action: 'paste', disabled: true, icon: Clipboard },
   { type: 'separator' },
-  { type: 'item', labelKey: 'menubar.items.changeWallpaper', label: 'Change Wallpaper', action: 'change-wallpaper' },
+  { type: 'item', labelKey: 'menubar.items.changeWallpaper', label: 'Change Wallpaper', action: 'change-wallpaper', icon: ImageIcon },
 ];
 
 function DesktopComponent({ onDoubleClick, icons, onUpdateIconsPositions, onIconDoubleClick, onOpenApp }: DesktopProps) {
-  const { accentColor, reduceMotion, disableShadows, wallpaper } = useAppContext();
-  const { moveNodeById, createDirectory, resolvePath } = useFileSystem();
+  const { accentColor, reduceMotion, disableShadows, wallpaper, activeUser } = useAppContext();
+  const { moveNodeById, createDirectory, resolvePath, clipboard, copyNodes, cutNodes, pasteNodes, moveToTrash, getNodeAtPath } = useFileSystem();
   const { t } = useI18n();
 
-  // Desktop Context Menu Action Listener
+  // Helpers
+  const handleCopy = (id: string) => {
+      copyNodes([id], activeUser);
+  };
+
+  const handleCut = (id: string) => {
+      cutNodes([id], activeUser);
+  };
+
+
+
+  const handleMoveToTrash = (name: string) => {
+      const fullPath = resolvePath(`~/Desktop/${name}`);
+      moveToTrash(fullPath, activeUser);
+  };
+
+  const handleGetInfo = (name: string) => {
+      const fullPath = resolvePath(`~/Desktop/${name}`);
+      const node = getNodeAtPath(fullPath, activeUser);
+       if (node) {
+           const modDate = node.modified ? new Date(node.modified).toLocaleDateString() : 'N/A';
+           const details = (
+               <div className="flex flex-col gap-1 mt-1">
+                   <div className="grid grid-cols-[60px_1fr] gap-x-2">
+                       <span className="text-white/50">{t('fileManager.details.type')}:</span>
+                       <span className="text-white/90">{node.type}</span>
+                       <span className="text-white/50">{t('fileManager.details.owner')}:</span>
+                       <span className="text-white/90">{node.owner}</span>
+                       <span className="text-white/50">{t('fileManager.details.permissions')}:</span>
+                       <span className="text-white/90 font-mono text-[11px]">{node.permissions || 'N/A'}</span>
+                       <span className="text-white/50">{t('fileManager.details.modified')}:</span>
+                       <span className="text-white/90">{modDate}</span>
+                       {node.size !== undefined && (
+                           <>
+                               <span className="text-white/50">{t('fileManager.details.size')}:</span>
+                               <span className="text-white/90">{t('fileManager.details.bytes', { count: node.size })}</span>
+                           </>
+                       )}
+                   </div>
+               </div>
+           );
+           notify.system('success', node.name || t('notifications.subtitles.info'), details, t('notifications.subtitles.info'));
+       } else {
+           notify.system('error', t('notifications.subtitles.error'), t('fileManager.toasts.couldNotGetInfo'), t('notifications.subtitles.error'));
+       }
+  };
   useEffect(() => {
     const handleMenuAction = (e: CustomEvent) => {
       const { action, appId } = e.detail;
@@ -63,7 +114,10 @@ function DesktopComponent({ onDoubleClick, icons, onUpdateIconsPositions, onIcon
 
       switch (action) {
         case 'new-folder':
-          createDirectory(resolvePath('~/Desktop'), 'New Folder');
+          createDirectory(resolvePath('~/Desktop'), 'New Folder', activeUser);
+          break;
+        case 'paste':
+          pasteNodes(resolvePath('~/Desktop'), activeUser);
           break;
         case 'change-wallpaper':
           // Open Settings -> Wallpapers section (via event + app open)
@@ -75,7 +129,7 @@ function DesktopComponent({ onDoubleClick, icons, onUpdateIconsPositions, onIcon
 
     window.addEventListener('app-menu-action', handleMenuAction as EventListener);
     return () => window.removeEventListener('app-menu-action', handleMenuAction as EventListener);
-  }, [createDirectory, resolvePath, onOpenApp]);
+  }, [createDirectory, resolvePath, onOpenApp, activeUser, pasteNodes]);
 
   // Selection State
 
@@ -156,7 +210,7 @@ function DesktopComponent({ onDoubleClick, icons, onUpdateIconsPositions, onIcon
         const idsToMove: string[] = data.ids || [data.id];
 
         idsToMove.forEach(id => {
-           moveNodeById(id, '~/Desktop');
+           moveNodeById(id, '~/Desktop', undefined, data.sourceUser);
         });
       }
     } catch (err) {
@@ -270,7 +324,8 @@ function DesktopComponent({ onDoubleClick, icons, onUpdateIconsPositions, onIcon
       ids: itemsToDrag, // Multi-item support
       name: icon.name,
       type: icon.type === 'folder' ? 'directory' : 'file',
-      source: 'desktop'
+      source: 'desktop',
+      sourceUser: activeUser // Pass source user context!
     }));
   };
 
@@ -305,25 +360,60 @@ function DesktopComponent({ onDoubleClick, icons, onUpdateIconsPositions, onIcon
 
           {/* Desktop Icons */}
           {icons.map((icon) => (
-            <DesktopIconItem
-              key={icon.id}
-              icon={icon}
-              selected={selectedIcons.has(icon.id)}
-              dragging={draggingIcons.includes(icon.id)}
-              dragDelta={dragDelta}
-              reduceMotion={reduceMotion}
-              disableShadows={disableShadows}
-              accentColor={accentColor}
-              onMouseDown={handleIconMouseDown}
-              onDragStart={handleNativeDragStart}
-              onDragEnd={handleDragEnd}
-              onDoubleClick={onIconDoubleClick}
-            />
+            <ContextMenu key={icon.id}>
+             <ContextMenuTrigger asChild>
+                <DesktopIconItem
+                  icon={icon}
+                  selected={selectedIcons.has(icon.id)}
+                  dragging={draggingIcons.includes(icon.id)}
+                  dragDelta={dragDelta}
+                  reduceMotion={reduceMotion}
+                  disableShadows={disableShadows}
+                  accentColor={accentColor}
+                  onMouseDown={handleIconMouseDown}
+                  onDragStart={handleNativeDragStart}
+                  onDragEnd={handleDragEnd}
+                  onDoubleClick={onIconDoubleClick}
+                />
+             </ContextMenuTrigger>
+             <ContextMenuContent className="w-48">
+                <ContextMenuItem onClick={() => onIconDoubleClick(icon.id)}>
+                    <FolderOpen className="mr-2 h-4 w-4" /> {t('menubar.items.open') || 'Open'}
+                </ContextMenuItem>
+                <ContextMenuItem onClick={() => handleCopy(icon.id)}>
+                    <Copy className="mr-2 h-4 w-4" /> {t('menubar.items.copy') || 'Copy'} <ContextMenuShortcut>⌘C</ContextMenuShortcut>
+                </ContextMenuItem>
+                <ContextMenuItem onClick={() => handleCut(icon.id)}>
+                    <Scissors className="mr-2 h-4 w-4" /> {t('menubar.items.cut') || 'Cut'} <ContextMenuShortcut>⌘X</ContextMenuShortcut>
+                </ContextMenuItem>
+                <ContextMenuSeparator />
+                <ContextMenuItem onClick={() => handleGetInfo(icon.name)}>
+                    <Info className="mr-2 h-4 w-4" /> {t('menubar.items.getInfo') || 'Get Info'}
+                </ContextMenuItem>
+                <ContextMenuSeparator />
+                <ContextMenuItem 
+                    onClick={() => handleMoveToTrash(icon.name)}
+                    className="text-red-400 focus:text-red-400 focus:bg-red-500/20"
+                >
+                    <Trash2 className="mr-2 h-4 w-4" /> {t('menubar.items.moveToTrash') || 'Move to Trash'}
+                </ContextMenuItem>
+             </ContextMenuContent>
+            </ContextMenu>
           ))}
         </div>
       </ContextMenuTrigger>
-      <ContextMenuContent>
-        {renderContextMenuItems(desktopContextMenu, t, 'desktop', 'desktop')}
+      <ContextMenuContent className="w-56">
+        {renderContextMenuItems(
+          desktopContextMenu.map(item => {
+            if (item.type === 'item' && item.action === 'paste') {
+               return { ...item, disabled: clipboard.items.length === 0 };
+            }
+            return item;
+          }),
+          t,
+          'desktop',
+          'desktop'
+        )}
       </ContextMenuContent>
     </ContextMenu>
   );
@@ -344,7 +434,9 @@ interface DesktopIconItemProps {
   onDoubleClick: (id: string) => void;
 }
 
-const DesktopIconItem = memo(function DesktopIconItem({
+// ... (other imports)
+
+const DesktopIconItem = memo(forwardRef<HTMLDivElement, DesktopIconItemProps>(function DesktopIconItem({
   icon,
   selected,
   dragging,
@@ -356,7 +448,7 @@ const DesktopIconItem = memo(function DesktopIconItem({
   onDragStart,
   onDragEnd,
   onDoubleClick
-}: DesktopIconItemProps) {
+}, ref) {
   // Calculate temporary position if being dragged
   const position = dragging
     ? { x: icon.position.x + dragDelta.x, y: icon.position.y + dragDelta.y }
@@ -364,6 +456,7 @@ const DesktopIconItem = memo(function DesktopIconItem({
 
   return (
     <div
+      ref={ref}
       draggable
       onDragStart={(e) => onDragStart(e, icon)}
       onDragEnd={onDragEnd}
@@ -399,6 +492,6 @@ const DesktopIconItem = memo(function DesktopIconItem({
       </div>
     </div>
   );
-});
+}));
 
 export const Desktop = memo(DesktopComponent);

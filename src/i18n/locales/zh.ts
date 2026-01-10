@@ -75,6 +75,7 @@ export const zh: TranslationDict = {
 	a11y: {
 		common: {
 			close: '关闭',
+			open: '打开',
 		},
 		sidebar: {
 			toggleSidebar: '切换侧边栏',
@@ -245,6 +246,7 @@ export const zh: TranslationDict = {
 			validation: '验证',
 			success: '成功',
 			error: '错误',
+			info: '信息',
 			warning: '警告',
 		},
 	},
@@ -512,6 +514,11 @@ export const zh: TranslationDict = {
 		details: {
 			items: '{{count}} 个项目',
 			bytes: '{{count}} 字节',
+			type: '类型',
+			owner: '所有者',
+			permissions: '权限',
+			modified: '修改日期',
+			size: '大小',
 		},
 		sidebar: {
 			favorites: '收藏',
@@ -534,11 +541,19 @@ export const zh: TranslationDict = {
 			permissionDenied: '权限被拒绝：{{name}}',
 			musicNotInstalled: '音乐应用未安装。请从应用商店安装。',
 			notepadNotInstalled: '记事本未安装。请从应用商店安装。',
+			movedItem: '已移动 1 个项目',
 			movedItems: '已移动 {{count}} 个项目',
+			movedItemTo: '已将 1 个项目移动到 {{target}}',
 			movedItemsTo: '已将 {{count}} 个项目移动到 {{target}}',
-			movedItemsToTrash: '已将 {{count}} 个项目移到废纸篓',
+			movedItemToTrash: '已将 1 个项目移动到废纸篓',
+			movedItemsToTrash: '已将 {{count}} 个项目移动到废纸篓',
 			moveFailedInvalidData: '移动失败：无效数据',
 			failedToProcessDrop: '处理拖放失败',
+			couldNotGetInfo: '无法获取信息',
+		},
+		search: {
+			noResultsTitle: '未找到结果',
+			noResultsDesc: '未找到 "{{query}}" 的结果',
 		},
 	},
 	messages: {

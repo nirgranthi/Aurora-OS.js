@@ -71,6 +71,7 @@ export const fr: TranslationDict = {
   a11y: {
     common: {
       close: 'Fermer',
+      open: 'Ouvrir',
     },
     sidebar: {
       toggleSidebar: 'Basculer la barre latérale',
@@ -301,6 +302,7 @@ export const fr: TranslationDict = {
       validation: 'Validation',
       success: 'Succès',
       error: 'Erreur',
+      info: 'Infos',
       warning: 'Avertissement',
     },
   },
@@ -572,6 +574,11 @@ export const fr: TranslationDict = {
     details: {
       items: '{{count}} éléments',
       bytes: '{{count}} octets',
+      type: 'Type',
+      owner: 'Propriétaire',
+      permissions: 'Permissions',
+      modified: 'Modifié',
+      size: 'Taille',
     },
     sidebar: {
       favorites: 'Favoris',
@@ -594,11 +601,19 @@ export const fr: TranslationDict = {
       permissionDenied: 'Permission refusée : {{name}}',
       musicNotInstalled: 'L’app Musique n’est pas installée. Installez-la depuis l’App Store.',
       notepadNotInstalled: 'L’app Notes n’est pas installée. Installez-la depuis l’App Store.',
+      movedItem: '1 élément déplacé',
       movedItems: '{{count}} éléments déplacés',
+      movedItemTo: '1 élément déplacé vers {{target}}',
       movedItemsTo: '{{count}} éléments déplacés vers {{target}}',
+      movedItemToTrash: '1 élément déplacé vers la corbeille',
       movedItemsToTrash: '{{count}} éléments déplacés vers la corbeille',
       moveFailedInvalidData: 'Déplacement impossible : données invalides',
       failedToProcessDrop: 'Impossible de traiter le dépôt',
+      couldNotGetInfo: 'Impossible de récupérer les informations',
+    },
+    search: {
+      noResultsTitle: 'Aucun résultat trouvé',
+      noResultsDesc: 'Aucun résultat trouvé pour "{{query}}"',
     },
   },
   messages: {

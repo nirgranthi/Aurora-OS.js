@@ -1,4 +1,4 @@
-
+import React from 'react';
 import { toast } from 'sonner';
 import { soundManager } from '@/services/sound';
 import { SystemToast } from '@/components/ui/notifications/SystemToast';
@@ -6,7 +6,7 @@ import { SystemToast } from '@/components/ui/notifications/SystemToast';
 type NotificationType = 'success' | 'warning' | 'error';
 
 export const notify = {
-    system: (type: NotificationType, source: string, message: string, subtitle?: string) => {
+    system: (type: NotificationType, source: string, message: React.ReactNode, subtitle?: string) => {
         // Play sound
         soundManager.play(type);
 

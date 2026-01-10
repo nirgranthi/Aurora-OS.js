@@ -44,6 +44,7 @@ export const renderContextMenuItems = (items: ContextMenuItem[], t: (key: string
           }
         }}
       >
+        {item.icon && <item.icon className="mr-2 h-4 w-4" />}
         {item.labelKey ? t(item.labelKey, { appName }) : item.label}
       </UIContextMenuItem>
     );

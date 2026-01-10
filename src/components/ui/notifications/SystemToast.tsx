@@ -5,7 +5,7 @@ import { useThemeColors } from '@/hooks/useThemeColors';
 interface SystemToastProps {
     type: 'success' | 'warning' | 'error';
     source: string;
-    message: string;
+    message: React.ReactNode;
     subtitle?: string;
 }
 
@@ -33,9 +33,9 @@ export function SystemToast({ type, source, message, subtitle }: SystemToastProp
                 </span>
                 <span className="text-[11px] text-white/40 font-medium">{subtitle || 'now'}</span>
             </div>
-            <p className="text-[13px] text-white/70 leading-snug mt-1 pl-[26px]">
+            <div className="text-[13px] text-white/70 leading-snug mt-1 pl-[26px]">
                 {message}
-            </p>
+            </div>
         </div>
     );
 }

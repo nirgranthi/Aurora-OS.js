@@ -70,6 +70,7 @@ export const de: TranslationDict = {
   a11y: {
     common: {
       close: 'Schließen',
+      open: 'Öffnen',
     },
     sidebar: {
       toggleSidebar: 'Seitenleiste umschalten',
@@ -235,6 +236,7 @@ export const de: TranslationDict = {
       validation: 'Validierung',
       success: 'Erfolg',
       error: 'Fehler',
+      info: 'Info',
       warning: 'Warnung',
     },
   },
@@ -505,6 +507,11 @@ export const de: TranslationDict = {
     details: {
       items: '{{count}} Elemente',
       bytes: '{{count}} Bytes',
+      type: 'Typ',
+      owner: 'Besitzer',
+      permissions: 'Berechtigungen',
+      modified: 'Geändert',
+      size: 'Größe',
     },
     sidebar: {
       favorites: 'Favoriten',
@@ -527,11 +534,19 @@ export const de: TranslationDict = {
       permissionDenied: 'Zugriff verweigert: {{name}}',
       musicNotInstalled: 'Die Musik-App ist nicht installiert. Installiere sie im App Store.',
       notepadNotInstalled: 'Notizblock ist nicht installiert. Installiere ihn im App Store.',
+      movedItem: '1 Element verschoben',
       movedItems: '{{count}} Elemente verschoben',
+      movedItemTo: '1 Element nach {{target}} verschoben',
       movedItemsTo: '{{count}} Elemente nach {{target}} verschoben',
+      movedItemToTrash: '1 Element in den Papierkorb verschoben',
       movedItemsToTrash: '{{count}} Elemente in den Papierkorb verschoben',
       moveFailedInvalidData: 'Verschieben fehlgeschlagen: Ungültige Daten',
       failedToProcessDrop: 'Ablage konnte nicht verarbeitet werden',
+      couldNotGetInfo: 'Informationen konnten nicht abgerufen werden',
+    },
+    search: {
+      noResultsTitle: 'Keine Ergebnisse gefunden',
+      noResultsDesc: 'Keine Ergebnisse für "{{query}}" gefunden',
     },
   },
   messages: {

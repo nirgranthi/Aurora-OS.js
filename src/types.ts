@@ -21,6 +21,7 @@ export type ContextMenuItem =
     | {
         type?: 'item';
         label: string;
+        icon?: any; // LucideIcon or similar
         labelKey?: string;
         action?: string;
         shortcut?: string;

@@ -70,6 +70,7 @@ export const pt: TranslationDict = {
   a11y: {
     common: {
       close: 'Fechar',
+      open: 'Abrir',
     },
     sidebar: {
       toggleSidebar: 'Alternar barra lateral',
@@ -241,6 +242,7 @@ export const pt: TranslationDict = {
       validation: 'Validação',
       success: 'Sucesso',
       error: 'Erro',
+      info: 'Informações',
       warning: 'Aviso',
     },
   },
@@ -511,6 +513,11 @@ export const pt: TranslationDict = {
     details: {
       items: '{{count}} itens',
       bytes: '{{count}} bytes',
+      type: 'Tipo',
+      owner: 'Proprietário',
+      permissions: 'Permissões',
+      modified: 'Modificado',
+      size: 'Tamanho',
     },
     sidebar: {
       favorites: 'Favoritos',
@@ -533,11 +540,19 @@ export const pt: TranslationDict = {
       permissionDenied: 'Permissão negada: {{name}}',
       musicNotInstalled: 'O app Música não está instalado. Instale na Loja de Apps.',
       notepadNotInstalled: 'O Bloco de Notas não está instalado. Instale na Loja de Apps.',
+      movedItem: '1 item movido',
       movedItems: '{{count}} itens movidos',
+      movedItemTo: '1 item movido para {{target}}',
       movedItemsTo: '{{count}} itens movidos para {{target}}',
+      movedItemToTrash: '1 item movido para a lixeira',
       movedItemsToTrash: '{{count}} itens movidos para a lixeira',
       moveFailedInvalidData: 'Falha ao mover: dados inválidos',
       failedToProcessDrop: 'Falha ao processar o arrastar-e-soltar',
+      couldNotGetInfo: 'Não foi possível recuperar as informações',
+    },
+    search: {
+      noResultsTitle: 'Nenhum resultado encontrado',
+      noResultsDesc: 'Nenhum resultado encontrado para "{{query}}"',
     },
   },
   messages: {

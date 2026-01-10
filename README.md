@@ -108,15 +108,23 @@ Or use the [GitHub Pages](https://mental-os.github.io/Aurora-OS.js) (LIVE DEMO)
 ### Added
 
 - **Context menu**: Each APP feeds context menu information the same way they feed Menu Bar items. Some apps may not have/require context menu items.
+- **Finder**: Recursive search functionality aware of the current location.
 
 ### Improved
 
 - **Standardized System Notifications**: All feedback notifications (errors, warnings, etc.) now use the same system notification component `notification.tsx`. These are different than App notifications that will go into the notification center (applet).
-- **Translation Script**: `.scripts/check-i18n.js` script find automatically missing or extra keys in translations as well as all the files in `/src/i18n/locales`.
+- **Finder**: Show item count in the sidebar for Favorites and for Locations sections.
+  debar is aware of the existing folders in user's home directory.
+- **Finder/Desktop**: Context menu copy/paste functionality.
+- **Finder/Desktop**: Improved "Get Info" diagnostic display with rich, internationalized details (Permissions, Owner, Modified, Size).
+- **Translation System**: `.scripts/check-i18n.js` script find automatically missing or extra keys in translations as well as all the files in `/src/i18n/locales`. Aditional workflow for translations is added in [TRANSLATION.md](TRANSLATION.md).
 
 ### Fixed
 
--
+- **Finder**: Drag-to-move to same location bug.
+- **Finder**: Drag-to-move from one window to another now corectly checks for permissions (applies to Desktop too).
+- **Finder**: Drop highlight issue when it stayed active in some cases.
+- **Finder**: Terminal not passing the correct home path to Finder (eg. `su guest` > `finder ~` should open Finder as guest in `/home/guest`, but it opened in `/home/[user]`).
 
 ### [View full version history](HISTORY.md)
 

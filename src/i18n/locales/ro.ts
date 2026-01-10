@@ -70,6 +70,7 @@ export const ro: TranslationDict = {
     a11y: {
         common: {
             close: 'Închide',
+            open: 'Deschide',
         },
         sidebar: {
             toggleSidebar: 'Comută Bara Laterală',
@@ -299,6 +300,7 @@ export const ro: TranslationDict = {
             validation: 'Validare',
             success: 'Succes',
             error: 'Eroare',
+            info: 'Informații',
             warning: 'Avertisment',
         },
     },
@@ -569,6 +571,11 @@ export const ro: TranslationDict = {
         details: {
             items: '{{count}} elemente',
             bytes: '{{count}} octeți',
+            type: 'Tip',
+            owner: 'Proprietar',
+            permissions: 'Permisiuni',
+            modified: 'Modificat',
+            size: 'Mărime',
         },
         sidebar: {
             favorites: 'Favorite',
@@ -591,11 +598,19 @@ export const ro: TranslationDict = {
             permissionDenied: 'Permisiune refuzată: {{name}}',
             musicNotInstalled: 'Muzica nu este instalată. Instaleaz-o din App Store.',
             notepadNotInstalled: 'Notepad nu este instalat. Instalează-l din App Store.',
+            movedItem: '1 element mutat',
             movedItems: 'S-au mutat {{count}} elemente',
+            movedItemTo: '1 element mutat în {{target}}',
             movedItemsTo: 'S-au mutat {{count}} elemente în {{target}}',
+            movedItemToTrash: '1 element mutat la Gunoi',
             movedItemsToTrash: 'S-au mutat {{count}} elemente la Gunoi',
             moveFailedInvalidData: 'Mutare eșuată: Date invalide',
             failedToProcessDrop: 'Nu s-a putut procesa plasarea',
+            couldNotGetInfo: 'Nu s-au putut obține informațiile',
+        },
+        search: {
+            noResultsTitle: 'Niciun rezultat găsit',
+            noResultsDesc: 'Niciun rezultat găsit pentru "{{query}}"',
         },
     },
     messages: {

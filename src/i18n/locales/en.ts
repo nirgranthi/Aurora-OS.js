@@ -77,6 +77,7 @@ export const en: TranslationDict = {
   a11y: {
     common: {
       close: 'Close',
+      open: 'Open',
     },
     sidebar: {
       toggleSidebar: 'Toggle Sidebar',
@@ -248,6 +249,7 @@ export const en: TranslationDict = {
       validation: 'Validation',
       success: 'Success',
       error: 'Error',
+      info: 'Info',
       warning: 'Warning',
     },
   },
@@ -515,6 +517,11 @@ export const en: TranslationDict = {
     details: {
       items: '{{count}} items',
       bytes: '{{count}} bytes',
+      type: 'Type',
+      owner: 'Owner',
+      permissions: 'Permissions',
+      modified: 'Modified',
+      size: 'Size',
     },
     sidebar: {
       favorites: 'Favorites',
@@ -537,11 +544,19 @@ export const en: TranslationDict = {
       permissionDenied: 'Permission denied: {{name}}',
       musicNotInstalled: 'Music app is not installed. Install it from the App Store.',
       notepadNotInstalled: 'Notepad is not installed. Install it from the App Store.',
+      movedItem: 'Moved 1 item',
       movedItems: 'Moved {{count}} items',
+      movedItemTo: 'Moved 1 item to {{target}}',
       movedItemsTo: 'Moved {{count}} items to {{target}}',
+      movedItemToTrash: 'Moved 1 item to Trash',
       movedItemsToTrash: 'Moved {{count}} items to Trash',
       moveFailedInvalidData: 'Move failed: Invalid data',
       failedToProcessDrop: 'Failed to process drop',
+      couldNotGetInfo: 'Could not retrieve information',
+    },
+    search: {
+      noResultsTitle: 'No results found',
+      noResultsDesc: 'No results found for "{{query}}"',
     },
   },
   messages: {
