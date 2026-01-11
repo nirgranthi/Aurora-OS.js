@@ -127,10 +127,16 @@ Or use the [GitHub Pages](https://mental-os.github.io/Aurora-OS.js) (LIVE DEMO)
 - **Architecture**: Standardized internal imports to use absolute `@/` alias.
 - **Multi-User**: Enhanced app isolation (local providers) for `sudo`/`su` sessions.
 - **Localization**: Achieved 100% translation parity across all 7 supported languages.
+- **Calendar**: Added drag & drop support.
+- **Calendar**: Added dynamic categories support `(.config/calendar.json)`.
+- **Calendar first event**: aka. "Loop Started" event is now set to follow the onboarding complition time.
+- **Time source**: now influence Calendar app (local time vs. server time).
+- **Modals**: such as "Open File" or "Create/Edit Event" blurs the background.
 
 ### Fixed
 
 - **System Stability**: Resolved "System Critical Error" caused by React Context duplication.
+- **Drag & Drop**: Fixed drag-and-drop support system-wide (Finder, Calendar, etc.) avoiding double-click triggers (browsers limitation).
 - **Finder**: Fixed double-click launch reliability and "Open Folder" case-sensitivity issues.
 - **Session**: Prevented apps from auto-playing/opening content when restoring old sessions.
 

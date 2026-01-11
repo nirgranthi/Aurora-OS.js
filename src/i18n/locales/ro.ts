@@ -839,6 +839,7 @@ export const ro: TranslationDict = {
         },
         actions: {
             createEvent: 'Creează Eveniment',
+            createCategory: 'Creează Categorie',
             clear: 'Șterge',
             delete: 'Șterge',
             cancel: 'Anulează',
@@ -846,6 +847,7 @@ export const ro: TranslationDict = {
         },
         loadingEvents: 'Se încarcă evenimente...',
         toasts: {
+            cannotDeleteSystemCategory: 'Categoriile de sistem nu pot fi șterse',
             eventDeleted: 'Eveniment șters',
             eventSaved: 'Eveniment salvat',
             requiredFields: 'Te rog completează câmpurile obligatorii',

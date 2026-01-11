@@ -775,6 +775,7 @@ export const de: TranslationDict = {
     },
     actions: {
       createEvent: 'Termin erstellen',
+      createCategory: 'Kategorie erstellen',
       clear: 'Löschen',
       delete: 'Entfernen',
       cancel: 'Abbrechen',
@@ -782,6 +783,7 @@ export const de: TranslationDict = {
     },
     loadingEvents: 'Termine werden geladen...',
     toasts: {
+      cannotDeleteSystemCategory: 'Systemkategorien können nicht gelöscht werden',
       eventDeleted: 'Termin gelöscht',
       eventSaved: 'Termin gespeichert',
       requiredFields: 'Bitte Pflichtfelder ausfüllen',

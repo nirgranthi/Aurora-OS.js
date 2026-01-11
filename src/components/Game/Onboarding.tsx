@@ -145,6 +145,7 @@ export function Onboarding({ onContinue }: OnboardingProps) {
                  // 5. Mark Complete & Save
                  try {
                      localStorage.setItem(STORAGE_KEYS.LANGUAGE, locale);
+                     localStorage.setItem(STORAGE_KEYS.INSTALL_DATE, new Date().toISOString());
                  } catch (e) { console.warn(e) }
                  
                  setOnboardingComplete(true);

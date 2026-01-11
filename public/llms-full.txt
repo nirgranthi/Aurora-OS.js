@@ -50,6 +50,10 @@
     - **Realism**: Global mute (`Howler.mute(true)`) silences the system without stopping background processes (e.g., music keep "playing" silently).
     - **Binary Metadata**: Custom ID3 parser (`src/utils/id3Parser.ts`) extracts professional tags (TIT2, TPE1, TALB) from MP3 files.
     - **Asset Fetching**: Metadata resolution for local assets uses `fetch` with `Range: bytes=0-512KB` to efficiently read headers without full downloads.
+
+7.  **System Initialization**:
+    - **Timestamp**: `STORAGE_KEYS.INSTALL_DATE` is set upon Onboarding completion to mark the exact "System Install Time".
+    - **Usage**: Used by Calendar for historical accuracy of the "Loop Started" event.
     </architecture_mechanics>
 
 <critical_rules>

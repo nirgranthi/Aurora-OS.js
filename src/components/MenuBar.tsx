@@ -11,7 +11,7 @@ import { AudioApplet } from '@/components/AudioApplet';
 import { NotificationCenter } from '@/components/NotificationCenter';
 import { BatteryApplet } from '@/components/BatteryApplet';
 import { MemoryApplet } from '@/components/MemoryApplet';
-import { hardReset, clearSession, STORAGE_KEYS } from '@/utils/memory';
+import { hardReset, clearSession } from '@/utils/memory';
 import {
   Menubar,
   MenubarMenu,
@@ -34,19 +34,9 @@ interface MenuBarProps {
 
 function MenuBarComponent({ focusedApp, onOpenApp }: MenuBarProps) {
   const { menuBarBackground, blurStyle, getBackgroundColor } = useThemeColors();
-  const { devMode, disableShadows, setIsLocked, locale } = useAppContext();
+  const { devMode, disableShadows, setIsLocked, locale, timeMode, setTimeMode } = useAppContext();
   const { logout, currentUser } = useFileSystem();
   const { t } = useI18n();
-  const [timeMode, setTimeMode] = useState<'server' | 'local'>(() => {
-    // Initialize from storage or default to 'server'
-    const saved = localStorage.getItem(STORAGE_KEYS.TIME_MODE);
-    return (saved === 'local' || saved === 'server') ? saved : 'server';
-  });
-
-  // Persist preference
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.TIME_MODE, timeMode);
-  }, [timeMode]);
 
   const [currentTime, setCurrentTime] = useState('');
   const [currentDate, setCurrentDate] = useState('');
@@ -401,7 +391,7 @@ function MenuBarComponent({ focusedApp, onOpenApp }: MenuBarProps) {
         <NotificationCenter />
 
         <button 
-          onClick={() => setTimeMode(prev => prev === 'server' ? 'local' : 'server')}
+          onClick={() => setTimeMode(timeMode === 'server' ? 'local' : 'server')}
           className="text-white/90 text-xs font-medium flex items-center gap-2 hover:bg-white/10 px-2 py-1 rounded transition-colors"
           title={timeMode === 'server' ? t('menubar.system.serverTime') : t('menubar.system.localTime')}
         >

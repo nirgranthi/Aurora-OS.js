@@ -782,6 +782,7 @@ export const zh: TranslationDict = {
 		},
 		actions: {
 			createEvent: '创建事件',
+			createCategory: '创建类别',
 			clear: '清除',
 			delete: '删除',
 			cancel: '取消',
@@ -789,6 +790,7 @@ export const zh: TranslationDict = {
 		},
 		loadingEvents: '正在加载事件...',
 		toasts: {
+			cannotDeleteSystemCategory: '系统类别无法删除',
 			eventDeleted: '事件已删除',
 			eventSaved: '事件已保存',
 			requiredFields: '请填写必填字段',

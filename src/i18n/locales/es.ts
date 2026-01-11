@@ -840,6 +840,7 @@ export const es: TranslationDict = {
     },
     actions: {
       createEvent: 'Crear evento',
+      createCategory: 'Crear categoría',
       clear: 'Limpiar',
       delete: 'Eliminar',
       cancel: 'Cancelar',
@@ -847,6 +848,7 @@ export const es: TranslationDict = {
     },
     loadingEvents: 'Cargando eventos...',
     toasts: {
+      cannotDeleteSystemCategory: 'No se pueden eliminar las categorías del sistema',
       eventDeleted: 'Evento eliminado',
       eventSaved: 'Evento guardado',
       requiredFields: 'Completa los campos obligatorios',

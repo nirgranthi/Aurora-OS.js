@@ -405,7 +405,7 @@ export function Notepad({ id, owner, initialPath }: NotepadProps) {
   const { t } = useI18n();
   const { readFile, createFile, writeFile, getNodeAtPath } = useFileSystem();
   const { accentColor, activeUser: desktopUser } = useAppContext();
-  const { titleBarBackground, blurStyle } = useThemeColors();
+  const { titleBarBackground, blurStyle, windowBackground } = useThemeColors();
   const activeUser = owner || desktopUser;
   const windowContext = useWindow();
 
@@ -1219,7 +1219,14 @@ export function Notepad({ id, owner, initialPath }: NotepadProps) {
         open={!!pendingCloseTabId}
         onOpenChange={(open) => !open && setPendingCloseTabId(null)}
       >
-        <AlertDialogContent className="bg-[#1E1E1E] border-white/10 text-white">
+        <AlertDialogContent 
+          overlayClassName="bg-black/20 backdrop-blur-[12px]"
+          className="border-white/10 text-white bg-transparent shadow-2xl"
+          style={{
+            background: windowBackground,
+            ...blurStyle
+          }}
+        >
           <AlertDialogHeader>
             <AlertDialogTitle>
               {t("notepad.dialog.unsaved.title")}

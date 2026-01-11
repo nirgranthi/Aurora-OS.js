@@ -785,6 +785,7 @@ export const en: TranslationDict = {
     },
     actions: {
       createEvent: 'Create Event',
+      createCategory: 'Create Category',
       clear: 'Clear',
       delete: 'Delete',
       cancel: 'Cancel',
@@ -792,6 +793,7 @@ export const en: TranslationDict = {
     },
     loadingEvents: 'Loading events...',
     toasts: {
+      cannotDeleteSystemCategory: 'System categories cannot be deleted',
       eventDeleted: 'Event deleted',
       eventSaved: 'Event saved',
       requiredFields: 'Please fill in required fields',
@@ -861,6 +863,7 @@ export const en: TranslationDict = {
         notes: 'Initial filesystem.',
       },
     },
+
   },
   devCenter: {
     appTitle: 'DevCenter',
