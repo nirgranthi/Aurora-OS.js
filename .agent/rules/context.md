@@ -72,6 +72,7 @@ trigger: always_on
 - **I18n**: All UI strings MUST use `useI18n()`. definition: `src/i18n/locales/en.ts`.
 - **Accessibility**: All `Dialog` or `AlertDialog` components MUST include a `Title` and `Description`. Use `sr-only` class to hide them if they clash with visual design but are required for A11y.
 - **Docs Sync**: On architecture changes, update `.agent/rules/context.md` & `public/llms-full.txt`.
+- **URL Security**: User-provided URLs (images, media) MUST be sanitized via `getSafeImageUrl(url)` to prevent XSS and satisfy CodeQL taint tracking.
 
 </critical_rules>
 
