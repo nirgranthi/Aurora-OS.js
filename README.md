@@ -30,7 +30,7 @@ Even in its current proof‑of‑concept state, Aurora OS already solves the har
   - **Mail**: Email client simulation with attachments and multiple mailboxes.
   - **Calendar**: Event management with drag & drop support.
   - **Messages**: Chat interface simulation.
-- � **Localization**: Fully translated in English, German, Spanish, French, Portuguese, Romanian, and Chinese.
+- � **Localization**: Fully translated in English, German, Spanish, French, Portuguese, Romanian, Chinese, Russian, Japanese, Polish, Korean, and Turkish.
 
 ## 🧭 Where This Is Going
 
@@ -138,7 +138,7 @@ Or use the [GitHub Pages](https://mental-os.github.io/Aurora-OS.js) (LIVE DEMO)
 
 - **Architecture**: Standardized internal imports to use absolute `@/` alias.
 - **Multi-User**: Enhanced app isolation (local providers) for `sudo`/`su` sessions.
-- **Localization**: Achieved 100% translation parity across all 7 supported languages (EN, DE, ES, FR, PT, RO, ZH).
+- **Localization**: Achieved 100% translation parity across all 12 supported languages (EN, DE, ES, FR, PT, RO, ZH, RU, JA, PL, KO, TR).
 - **Audio**: Added dedicated Ambiance channel with independent volume control and hierarchical settings persistence.
 - **Boot Sequence**: Improved startup sounds with high-quality assets for Intro (`computerStart`) and BIOS (`biosStart`).
 - **DevCenter**: Complete UI overhaul with new Apps debugging section, enhanced File System explorer with detailed file properties, and unified glassmorphism aesthetic with system accent colors.

@@ -116,7 +116,7 @@ trigger: always_on
 - **Security**: Check permissions via `checkPermissions(node, user, 'read'|'write'|'execute')`.
 - **UI Integrity**: Use `forwardRef` for any component used with `<ContextMenuTrigger asChild>` to ensure Radix UI ref handling works.
 - **I18n**: All UI strings MUST use `useI18n()`. definition: `src/i18n/locales/en.ts`.
-- **I18n Sync**: Maintain strict sync across all 7 locales (`en`, `de`, `es`, `fr`, `pt`, `ro`, `zh`). Run `/update-translations` after changes.
+- **I18n Sync**: Maintain strict sync across all 12 locales (`en`, `de`, `es`, `fr`, `pt`, `ro`, `zh`, `ru`, `ja`, `pl`, `ko`, `tr`). Run `/update-translations` and `.scripts/sync-i18n.js` after changes.
 - **Accessibility**: All `Dialog` or `AlertDialog` components MUST include a `Title` and `Description`. Use `sr-only` class to hide them if they clash with visual design but are required for A11y.
 - **Standards**: All imports should user the @ alias for the /src folder and ALL FEATURES added should have a matching debug way in Dev Center.
 - **Docs Sync**: On architecture changes, update `.agent/rules/context.md` & `public/llms-full.txt`.

@@ -16,7 +16,7 @@ export function DevStatusWindow({ className }: DevStatusWindowProps) {
             initial={{ x: 40, y: 40, opacity: 0 }}
             animate={{ x: 0, y: 0, opacity: 1 }}
             className={cn(
-                "fixed top-12 left-12 z-[60] w-72 pointer-events-auto",
+                "fixed top-12 left-12 z-60 w-72 pointer-events-auto",
                 "bg-black font-mono text-white overflow-hidden",
                 // Double stroke style: white (main) -> black (outer) + shadow
                 // We removed the innermost 1px black shadow so the white title bar stays clean
@@ -54,7 +54,7 @@ export function DevStatusWindow({ className }: DevStatusWindowProps) {
                         target="_blank"
                         rel="noreferrer"
                         onClick={() => feedback.click()}
-                        className="flex items-center justify-center gap-2 py-2 bg-white text-black text-[10px] font-bold uppercase tracking-widest hover:bg-white/90 transition-all border-2 border-transparent hover:border-black"
+                        className="flex items-center justify-center gap-2 py-2 bg-white text-black text-[10px] font-bold uppercase tracking-widest hover:bg-transparent hover:border-white hover:text-white transition-all border-2 border-transparent"
                     >
                         <MessageSquare className="w-3 h-3" />
                         Join Discord

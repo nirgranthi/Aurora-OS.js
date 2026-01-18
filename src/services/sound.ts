@@ -1,18 +1,18 @@
 import { Howl, Howler } from 'howler';
-import { STORAGE_KEYS } from '../utils/memory';
+import { STORAGE_KEYS } from '@/utils/memory';
 
 // Sound constants
-import successSound from '../assets/sounds/success.mp3';
-import warningSound from '../assets/sounds/warning.mp3';
-import errorSound from '../assets/sounds/error.mp3';
-import folderSound from '../assets/sounds/folder.wav';
-import windowOpenSound from '../assets/sounds/window-open.wav';
-import windowCloseSound from '../assets/sounds/window-close.wav';
-import clickSound from '../assets/sounds/click.wav';
-import hoverSound from '../assets/sounds/hover.wav';
-import ambianceSound from '../assets/sounds/ambience.mp3';
-import computerStartSound from '../assets/sounds/computerStart.mp3';
-import biosStartSound from '../assets/sounds/biosStart.mp3';
+import successSound from '@/assets/sounds/success.mp3';
+import warningSound from '@/assets/sounds/warning.mp3';
+import errorSound from '@/assets/sounds/error.mp3';
+import folderSound from '@/assets/sounds/folder.wav';
+import windowOpenSound from '@/assets/sounds/window-open.wav';
+import windowCloseSound from '@/assets/sounds/window-close.wav';
+import clickSound from '@/assets/sounds/click.wav';
+import hoverSound from '@/assets/sounds/hover.wav';
+import ambianceSound from '@/assets/sounds/ambience.mp3';
+import computerStartSound from '@/assets/sounds/computerStart.mp3';
+import biosStartSound from '@/assets/sounds/biosStart.mp3';
 
 const SOUNDS = {
 
@@ -67,12 +67,12 @@ interface VolumeState {
 }
 
 const DEFAULT_VOLUMES: VolumeState = {
-    master: 0.75,
-    system: 0.5,
+    master: 0.9,
+    system: 0.75,
     ui: 0.6,
-    feedback: 0.25,
-    music: 0.75,
-    ambiance: 0.2,
+    feedback: 0.5,
+    music: 0.9,
+    ambiance: 0.25,
 };
 
 const STORAGE_KEY = STORAGE_KEYS.SOUND;

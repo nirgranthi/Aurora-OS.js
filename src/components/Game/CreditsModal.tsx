@@ -268,7 +268,7 @@ export function CreditsModal({ onClose }: CreditsModalProps) {
                                         <div className="space-y-4 max-w-md">
                                             <h3 className="text-2xl font-bold uppercase tracking-widest text-white">Contribute</h3>
                                             <p className="text-white/60 leading-relaxed text-sm">
-                                                <a href={pkg.homepage} target="_blank" rel="noreferrer" className="text-white hover:text-(--accent-user) underline decoration-white/30 hover:decoration-(--accent-user)">{pkg.build.productName}</a> is shared with {pkg.license} license.<br />
+                                                <a href={pkg.homepage} target="_blank" rel="noreferrer" className="text-white hover:text-(--accent-user) decoration-white/30 hover:decoration-(--accent-user)">{pkg.build.productName}</a> is shared with {pkg.license} license.<br />
                                                 Help us squash bugs, improve performance, or design the next big feature.
                                             </p>
                                         </div>
@@ -277,7 +277,7 @@ export function CreditsModal({ onClose }: CreditsModalProps) {
                                             target="_blank"
                                             rel="noreferrer"
                                             onClick={() => feedback.click()}
-                                            className="px-8 py-3 bg-white text-black font-bold uppercase tracking-widest hover:bg-white/90 transition-all border-2 border-transparent hover:border-white shadow-[4px_4px_0_0_rgba(0,0,0,0.5)]"
+                                            className="px-8 py-3 bg-white text-black font-bold uppercase tracking-widest hover:bg-transparent transition-all border-2 border-transparent hover:border-white hover:text-white shadow-[4px_4px_0_0_rgba(0,0,0,0.5)]"
                                         >
                                             Report Issue on GitHub
                                         </a>

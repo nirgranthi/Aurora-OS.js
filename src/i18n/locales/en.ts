@@ -11,6 +11,12 @@ export const en: TranslationDict = {
   time: {
     yesterday: 'Yesterday',
   },
+  common: {
+    name: 'Name',
+    color: 'Color',
+    cancel: 'Cancel',
+    save: 'Save',
+  },
   game: {
     intro: {
       initialize: 'Initialize System',
@@ -43,14 +49,11 @@ export const en: TranslationDict = {
           confirm: 'Shutdown',
         },
       },
-      credits: {
-        label: 'Credits',
-        desc: 'System Architects',
-      },
+      credits: {},
     },
     bios: {
       title: 'BIOS Settings',
-      masterVolume: 'Master Volume',
+
       fullScreen: 'Full Screen',
       immersiveMode: 'Immersive mode',
       fullScreenEnter: 'Enter',
@@ -62,10 +65,7 @@ export const en: TranslationDict = {
       factoryResetHint: 'Wipe All Data',
       factoryResetConfirm:
         'FACTORY RESET: This will wipe ALL data, users, and files appropriately. This cannot be undone. Are you sure?',
-      footer: {
-        biosConfiguration: 'BIOS Configuration',
-        moreSettings: 'More settings can be found once logged in.',
-      },
+
     },
     footer: {
       originalDistribution: 'Original Distribution',
@@ -226,30 +226,13 @@ export const en: TranslationDict = {
   },
   notifications: {
     title: 'Notifications',
+    titles: {
+      permissionDenied: 'Permission Denied',
+    },
     clearAll: 'Clear All',
-    time: {
-      minutesAgo: '{{minutes}}m ago',
-      hoursAgo: '{{hours}}h ago',
-    },
+
     new: 'New',
-    items: {
-      newEmail: {
-        title: 'New Email',
-        message: 'You have {{count}} unread messages',
-      },
-      meetingReminder: {
-        title: 'Meeting Reminder',
-        message: 'Team sync in {{minutes}} minutes',
-      },
-      newMessage: {
-        title: 'New Message',
-        message: '{{sender}}: Hey, are you available?',
-      },
-      downloadComplete: {
-        title: 'Download Complete',
-        message: '{{filename}} is ready',
-      },
-    },
+
     subtitles: {
       appMissing: 'APP Missing',
       permissionDenied: 'Permission Denied',
@@ -259,9 +242,7 @@ export const en: TranslationDict = {
       trash: 'Trash',
       failed: 'Failed',
       ui: 'Interface',
-      export: 'Export',
-      import: 'Import',
-      clipboard: 'Clipboard',
+
       validation: 'Validation',
       success: 'Success',
       error: 'Error',
@@ -324,20 +305,15 @@ export const en: TranslationDict = {
     restoreSuccess: '{{app}} restored successfully',
     restoreError: 'Failed to restore {{app}}',
     restorePermissionDenied: 'Admin privileges required to restore apps',
+    installingWarning: 'Please wait while the application is installed.',
   },
   browser: {
     menu: {
       newTab: 'New Tab',
       closeTab: 'Close Tab',
-      stop: 'Stop',
-      zoomIn: 'Zoom In',
-      zoomOut: 'Zoom Out',
-      showFullHistory: 'Show Full History',
+
     },
-    tabs: {
-      welcome: 'Welcome to Browser',
-      newTab: 'New Tab',
-    },
+
     welcome: {
       searchPlaceholder: 'Search websites or enter address...',
       favorites: 'Favorites',
@@ -599,17 +575,17 @@ export const en: TranslationDict = {
       conversationsTitle: 'Conversations',
       allMessages: 'All Messages',
       unread: 'Unread',
-      groups: 'Groups',
+
       starred: 'Starred',
-      archived: 'Archived',
+
     },
     search: {
       placeholder: 'Search conversations...',
     },
     menu: {
       newMessage: 'New Message',
-      deleteConversation: 'Delete Conversation',
-      muteNotifications: 'Mute Notifications',
+
+
     },
     auth: {
       welcomeBack: 'Welcome Back',
@@ -665,14 +641,9 @@ export const en: TranslationDict = {
       allPhotos: 'All Photos',
       favorites: 'Favorites',
       recent: 'Recent',
-      people: 'People',
-      places: 'Places',
+
     },
-    albums: {
-      vacation2024: 'Vacation 2024',
-      family: 'Family',
-      nature: 'Nature',
-    },
+
     menu: {
       slideshow: 'Slideshow',
       rotateClockwise: 'Rotate Clockwise',
@@ -700,7 +671,7 @@ export const en: TranslationDict = {
     },
     folders: {
       pictures: 'Pictures',
-      home: 'Home',
+
     },
   },
   mail: {
@@ -754,7 +725,7 @@ export const en: TranslationDict = {
       daysAgo: '{{days}}d ago',
     },
     attachments: {
-      title: 'Attachments',
+
       count: '{{count}} attachment',
       count_plural: '{{count}} attachments',
       download: 'Download',
@@ -937,7 +908,7 @@ export const en: TranslationDict = {
 
   },
   devCenter: {
-    appTitle: 'DevCenter',
+
     sidebar: {
       generalTitle: 'General',
       dashboard: 'Dashboard',
@@ -946,10 +917,10 @@ export const en: TranslationDict = {
       systemTitle: 'System',
       storage: 'Storage',
       fileSystem: 'File System',
-      systemLogs: 'System Logs',
-      toolsTitle: 'Tools',
+
+
       appsTitle: 'Apps', // New title
-      editor: 'Editor',
+
       performance: 'Performance',
     },
     dashboard: {
@@ -959,22 +930,15 @@ export const en: TranslationDict = {
     ui: {
       title: 'User Interface & Feedback',
       notificationsTitle: 'Notifications',
-      systemNotifications: 'System Notifications',
+
       successToast: 'Success Toast',
-      successDescription: 'Triggers a success notification with sound',
-      successMessage: 'Operation completed successfully',
+
       warningToast: 'Warning Toast',
-      warningDescription: 'Triggers a warning notification with sound',
-      warningMessage: 'System resources are running low',
+
       errorToast: 'Error Toast',
-      errorDescription: 'Triggers an error notification with sound',
-      errorMessage: 'Failed to connect to server',
+
       soundFeedback: 'Sound Feedback',
-      click: 'Click',
-      hover: 'Hover',
-      folderOpen: 'Folder Open',
-      windowOpen: 'Window Open',
-      windowClose: 'Window Close',
+
       buttons: {
         success: 'Success',
         warning: 'Warning',
@@ -982,6 +946,8 @@ export const en: TranslationDict = {
         app: 'App Notification',
         open: 'Open',
         close: 'Close',
+        click: 'Click',
+        hover: 'Hover',
       },
     },
     storage: {
@@ -1001,46 +967,27 @@ export const en: TranslationDict = {
       hardMemory: 'Hard Memory (Filesystem)',
       keysCount: '{{count}} keys',
       localStorageKeys: 'Local Storage Keys',
-      noKeysFound: 'No keys found in local storage',
-      deletedKey: 'Deleted key: {{key}}',
+
     },
-    clipboard: {
-      toastTitle: 'Clipboard',
-      copySuccess: 'Copied to clipboard',
-      copyValue: 'Copy value',
-    },
+
     filesystem: {
       title: 'File System Debugger',
-      toastTitle: 'FileSystem',
-      resetButton: 'Reset FS',
-      resetConfirm: 'Reset entire filesystem? This cannot be undone.',
-      resetSuccess: 'Filesystem reset to initial state',
+
     },
-    logs: {
-      title: 'System Logs',
-      kernelInitialized: '[System] Kernel initialized...',
-      loadingDrivers: '[System] Loading drivers...',
-      userLoggedIn: "[Auth] User '{{username}}' logged in",
-      launched: '[App] DevCenter launched',
-    },
-    editor: {
-      title: 'Code Editor',
-      description: 'Monaco editor integration coming soon.',
-    },
+
+
     performance: {
       title: 'Performance Monitor',
-      description: 'Real-time CPU/RAM metrics coming soon.',
+
     },
     menu: {
       resetFilesystem: 'Reset Filesystem',
-      clearLogs: 'Clear Logs',
+
       runDiagnostics: 'Run Diagnostics',
     },
 
     messages: {
-      title: 'Messages Debugger',
-      accounts: '{{count}} Accounts',
-      messages: '{{count}} Messages',
+
       createValues: {
         title: 'Create / Reset Account',
         username: 'Username',
@@ -1055,7 +1002,7 @@ export const en: TranslationDict = {
         delete: 'Delete Account',
         deleteConfirm: 'Delete account {{username}}? This cannot be undone.',
         deleteSuccess: 'Account {{username}} deleted',
-        deleteError: 'Failed to delete account',
+
       },
       sendMessage: {
         title: 'Send Inter-User Message',
@@ -1162,7 +1109,7 @@ export const en: TranslationDict = {
       },
     },
     about: {
-      systemInformation: 'System Information',
+
       version: 'Version',
       framework: 'Framework',
       electron: 'Electron',
