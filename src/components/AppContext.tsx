@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { STORAGE_KEYS } from '../utils/memory';
 import { SUPPORTED_LOCALES } from '@/i18n/types.ts';
+import { DEFAULT_SYSTEM_MEMORY_GB } from '@/config/systemConfig';
 
 type ThemeMode = 'neutral' | 'shades' | 'contrast';
 
@@ -27,12 +28,19 @@ interface AppContextType {
   setDevMode: (enabled: boolean) => void;
   exposeRoot: boolean;
   setExposeRoot: (enabled: boolean) => void;
+  
+  // System Resources
+  totalMemoryGB: number;
+  setTotalMemoryGB: (gb: number) => void;
 
   // Localization
   locale: AppLocale;
   setLocale: (locale: AppLocale) => void;
   onboardingComplete: boolean;
   setOnboardingComplete: (complete: boolean) => void;
+
+  // System Reset
+  resetSystemConfig: () => void;
 
   // Lock user session without logging out
   isLocked: boolean;
@@ -84,6 +92,7 @@ interface UserPreferences {
 interface SystemConfig {
   devMode: boolean;
   exposeRoot: boolean;
+  totalMemoryGB: number;
   locale: AppLocale;
   onboardingComplete: boolean;
   blurEnabled: boolean;
@@ -143,6 +152,7 @@ function detectDefaultLocale(): AppLocale {
 const DEFAULT_SYSTEM_CONFIG: SystemConfig = {
   devMode: false,
   exposeRoot: false,
+  totalMemoryGB: DEFAULT_SYSTEM_MEMORY_GB,
   locale: detectDefaultLocale(),
   onboardingComplete: false,
   blurEnabled: true,
@@ -246,6 +256,7 @@ function loadSystemConfig(): SystemConfig {
       if ('reduceMotion' in legacyParsed) { migrated.reduceMotion = legacyParsed.reduceMotion; hasMigration = true; }
       if ('disableShadows' in legacyParsed) { migrated.disableShadows = legacyParsed.disableShadows; hasMigration = true; }
       if ('disableGradients' in legacyParsed) { migrated.disableGradients = legacyParsed.disableGradients; hasMigration = true; }
+      if ('totalMemoryGB' in legacyParsed) { migrated.totalMemoryGB = legacyParsed.totalMemoryGB; hasMigration = true; }
 
       if (hasMigration) {
         console.log('Migrated system config from legacy storage');
@@ -276,7 +287,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Destructure for easy access (User preferences take precedence/contain the effective value)
   const { accentColor, themeMode, wallpaper, blurEnabled, reduceMotion, disableShadows, disableGradients } = preferences;
-  const { devMode, exposeRoot, locale, onboardingComplete, wifiEnabled, bluetoothEnabled, wifiNetwork, bluetoothDevice, networkConfigMode, networkIP, networkGateway, networkSubnetMask, networkDNS } = systemConfig;
+  const { devMode, exposeRoot, locale, onboardingComplete, totalMemoryGB, wifiEnabled, bluetoothEnabled, wifiNetwork, bluetoothDevice, networkConfigMode, networkIP, networkGateway, networkSubnetMask, networkDNS } = systemConfig;
 
   // Function to switch context to a different user
   const switchUser = useCallback((username: string) => {
@@ -332,6 +343,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Setters for System Config
   const setDevMode = (enabled: boolean) => setSystemConfig(s => ({ ...s, devMode: enabled }));
   const setExposeRoot = (enabled: boolean) => setSystemConfig(s => ({ ...s, exposeRoot: enabled }));
+  const setTotalMemoryGB = (gb: number) => setSystemConfig(s => ({ ...s, totalMemoryGB: gb }));
   const setLocale = useCallback((newLocale: AppLocale) => setSystemConfig(s => ({ ...s, locale: newLocale })), []);
   const setOnboardingComplete = (complete: boolean) => setSystemConfig(s => ({ ...s, onboardingComplete: complete }));
   const setWifiEnabled = (enabled: boolean) => setSystemConfig(s => ({ ...s, wifiEnabled: enabled }));
@@ -343,6 +355,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const setNetworkGateway = (gateway: string) => setSystemConfig(s => ({ ...s, networkGateway: gateway }));
   const setNetworkSubnetMask = (mask: string) => setSystemConfig(s => ({ ...s, networkSubnetMask: mask }));
   const setNetworkDNS = (dns: string) => setSystemConfig(s => ({ ...s, networkDNS: dns }));
+
+  const resetSystemConfig = useCallback(() => {
+    setSystemConfig(DEFAULT_SYSTEM_CONFIG);
+    localStorage.removeItem(SYSTEM_CONFIG_KEY);
+    // Also clear all user preferences by resetting active user to root and clearing keys
+    // Implementation detail: The GameRoot handles hard FS reset, here we just handle config
+  }, []);
 
   // Sync locale from Electron if available and not explicitly stored
   useEffect(() => {
@@ -422,6 +441,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setDevMode,
       exposeRoot,
       setExposeRoot,
+      totalMemoryGB,
+      setTotalMemoryGB,
       locale,
       setLocale,
       onboardingComplete,
@@ -444,6 +465,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setNetworkSubnetMask,
       networkDNS,
       setNetworkDNS,
+      resetSystemConfig,
       switchUser,
       activeUser,
       isLocked,
