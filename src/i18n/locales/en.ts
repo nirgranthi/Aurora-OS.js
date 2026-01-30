@@ -318,6 +318,8 @@ export const en: TranslationDict = {
     },
 
     welcome: {
+      title: 'Browser',
+      description: 'Search for information or enter a URL to start browsing.',
       searchPlaceholder: 'Search websites or enter address...',
       favorites: 'Favorites',
       recentActivity: 'Recent Activity',

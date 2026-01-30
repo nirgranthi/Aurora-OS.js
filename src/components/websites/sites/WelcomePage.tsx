@@ -31,7 +31,7 @@ export function WelcomePage({ onNavigate }: WebsiteProps) {
   };
 
   return (
-    <div className="min-h-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-8">
+    <div className="min-h-full text-white p-8">
       <div className="max-w-4xl mx-auto">
         {/* Search Box */}
         <div className="mt-24 mb-16">

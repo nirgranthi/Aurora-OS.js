@@ -126,6 +126,8 @@ Or use the [GitHub Pages](https://mental-os.github.io/Aurora-OS.js) (LIVE DEMO)
 ### Improved
 
 - **Window Performance**: Implemented "Safe" closing animations and optimized z-index handling to reduce layout thrashing.
+- **Browser UI**: to match the OS theme and dynamic colors.
+- **Browser's websites**: Improved layout and responsiveness for all the available websites.
 - **Context Awareness**: Updated AI agent documentation (`context.md`) to reflect the latest architecture mechanics.
 
 ### Fixed
