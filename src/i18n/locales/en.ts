@@ -251,6 +251,7 @@ export const en: TranslationDict = {
     },
     empty: 'No notifications',
     clearApp: 'Clear all from this app',
+    messageFrom: 'Message from {{sender}}',
   },
   memory: {
     title: 'Memory',
@@ -646,7 +647,7 @@ export const en: TranslationDict = {
       allPhotos: 'All Photos',
       favorites: 'Favorites',
       recent: 'Recent',
-
+      userLibrary: "{{user}}'s Library",
     },
 
     menu: {
@@ -676,7 +677,8 @@ export const en: TranslationDict = {
     },
     folders: {
       pictures: 'Pictures',
-
+      recent: 'Recent',
+      misc: 'Misc',
     },
   },
   mail: {

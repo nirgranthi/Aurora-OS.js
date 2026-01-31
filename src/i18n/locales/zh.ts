@@ -45,9 +45,8 @@ export const zh: TranslationDict = {
       "credits": {}
     },
     "bios": {
-      "hardwareAcceleration": "硬件加速",
-
       "title": "BIOS 设置",
+      "hardwareAcceleration": "硬件加速",
       "fullScreen": "全屏",
       "immersiveMode": "沉浸模式",
       "fullScreenEnter": "进入",
@@ -234,7 +233,8 @@ export const zh: TranslationDict = {
       "fileError": "文件错误"
     },
     "empty": "暂无通知",
-    "clearApp": "清除此应用所有通知"
+    "clearApp": "清除此应用所有通知",
+    "messageFrom": "Message from {{sender}}"
   },
   "memory": {
     "title": "内存",
@@ -300,6 +300,8 @@ export const zh: TranslationDict = {
       "closeTab": "关闭标签页"
     },
     "welcome": {
+      "title": "Browser",
+      "description": "Search for information or enter a URL to start browsing.",
       "searchPlaceholder": "搜索网站或输入地址...",
       "favorites": "收藏",
       "recentActivity": "最近活动"
@@ -621,7 +623,8 @@ export const zh: TranslationDict = {
     "library": {
       "allPhotos": "所有照片",
       "favorites": "收藏",
-      "recent": "最近"
+      "recent": "最近",
+      "userLibrary": "{{user}}'s Library"
     },
     "menu": {
       "slideshow": "幻灯片",
@@ -649,7 +652,9 @@ export const zh: TranslationDict = {
       "openHome": "打开主目录"
     },
     "folders": {
-      "pictures": "图片"
+      "pictures": "图片",
+      "recent": "Recent",
+      "misc": "Misc"
     }
   },
   "mail": {
@@ -938,7 +943,6 @@ export const zh: TranslationDict = {
       "title": "文件系统调试器"
     },
     "performance": {
-
       "title": "性能监视器"
     },
     "menu": {
@@ -1019,9 +1023,6 @@ export const zh: TranslationDict = {
       "wallpaperUse": "使用"
     },
     "performance": {
-      "gpuTitle": "使用图形加速",
-      "gpuDescription": "可用时使用硬件加速（需要重启）",
-
       "blurTitle": "模糊与透明度",
       "blurDescription": "启用玻璃模糊效果和窗口透明度",
       "reduceMotionTitle": "减少动画",
@@ -1029,7 +1030,9 @@ export const zh: TranslationDict = {
       "disableShadowsTitle": "禁用阴影",
       "disableShadowsDescription": "移除窗口阴影以提高渲染性能",
       "disableGradientsTitle": "禁用渐变",
-      "disableGradientsDescription": "使用纯色代替图标渐变"
+      "disableGradientsDescription": "使用纯色代替图标渐变",
+      "gpuTitle": "使用图形加速",
+      "gpuDescription": "可用时使用硬件加速（需要重启）"
     },
     "placeholders": {
       "displaysTitle": "显示器设置",

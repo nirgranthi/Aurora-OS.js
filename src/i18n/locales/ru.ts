@@ -45,9 +45,8 @@ export const ru: TranslationDict = {
       "credits": {}
     },
     "bios": {
-      "hardwareAcceleration": "Аппаратное ускорение",
-
       "title": "Настройки BIOS",
+      "hardwareAcceleration": "Аппаратное ускорение",
       "fullScreen": "Полноэкранный режим",
       "immersiveMode": "Иммерсивный режим",
       "fullScreenEnter": "Войти",
@@ -234,7 +233,8 @@ export const ru: TranslationDict = {
       "fileError": "Ошибка файла"
     },
     "empty": "Нет уведомлений",
-    "clearApp": "Очистить все от этого приложения"
+    "clearApp": "Очистить все от этого приложения",
+    "messageFrom": "Message from {{sender}}"
   },
   "memory": {
     "title": "Память",
@@ -300,6 +300,8 @@ export const ru: TranslationDict = {
       "closeTab": "Закрыть вкладку"
     },
     "welcome": {
+      "title": "Browser",
+      "description": "Search for information or enter a URL to start browsing.",
       "searchPlaceholder": "Искать веб-сайты или ввести адрес...",
       "favorites": "Избранное",
       "recentActivity": "Недавняя активность"
@@ -621,7 +623,8 @@ export const ru: TranslationDict = {
     "library": {
       "allPhotos": "Все фото",
       "favorites": "Избранное",
-      "recent": "Недавние"
+      "recent": "Недавние",
+      "userLibrary": "{{user}}'s Library"
     },
     "menu": {
       "slideshow": "Слайд-шоу",
@@ -649,7 +652,9 @@ export const ru: TranslationDict = {
       "openHome": "Открыть домашнюю директорию"
     },
     "folders": {
-      "pictures": "Изображения"
+      "pictures": "Изображения",
+      "recent": "Recent",
+      "misc": "Misc"
     }
   },
   "mail": {
@@ -938,7 +943,6 @@ export const ru: TranslationDict = {
       "title": "Отладчик файловой системы"
     },
     "performance": {
-
       "title": "Монитор производительности"
     },
     "menu": {
@@ -1019,9 +1023,6 @@ export const ru: TranslationDict = {
       "wallpaperUse": "Использовать"
     },
     "performance": {
-      "gpuTitle": "Использовать графическое ускорение",
-      "gpuDescription": "Использовать аппаратное ускорение, если доступно (требуется перезагрузка)",
-
       "blurTitle": "Размытие и Прозрачность",
       "blurDescription": "Включить эффект размытия стекла и прозрачность окон",
       "reduceMotionTitle": "Уменьшить движение",
@@ -1029,7 +1030,9 @@ export const ru: TranslationDict = {
       "disableShadowsTitle": "Отключить тени",
       "disableShadowsDescription": "Убрать тени окон для улучшения отрисовки",
       "disableGradientsTitle": "Отключить градиенты",
-      "disableGradientsDescription": "Использовать сплошные цвета вместо градиентов для значков"
+      "disableGradientsDescription": "Использовать сплошные цвета вместо градиентов для значков",
+      "gpuTitle": "Использовать графическое ускорение",
+      "gpuDescription": "Использовать аппаратное ускорение, если доступно (требуется перезагрузка)"
     },
     "placeholders": {
       "displaysTitle": "Настройки дисплея",

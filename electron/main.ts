@@ -74,6 +74,24 @@ function createWindow() {
         }
         return { action: 'deny' };
     });
+
+    // --- SECURITY HARDENING (Game Mode) ---
+    if (!process.env.VITE_DEV_SERVER_URL) {
+        // Disable DevTools in production
+        mainWindow.webContents.on('devtools-opened', () => {
+            mainWindow.webContents.closeDevTools();
+        });
+
+        // Block all keyboard shortcuts for DevTools
+        mainWindow.webContents.on('before-input-event', (event, input) => {
+            if (input.control && input.shift && input.key.toLowerCase() === 'i') {
+                event.preventDefault();
+            }
+            if (input.key === 'F12') {
+                event.preventDefault();
+            }
+        });
+    }
 }
 
 // OS specific behaviors

@@ -45,9 +45,8 @@ export const fr: TranslationDict = {
       "credits": {}
     },
     "bios": {
-      "hardwareAcceleration": "Accélération matérielle",
-
       "title": "Réglages BIOS",
+      "hardwareAcceleration": "Accélération matérielle",
       "fullScreen": "Plein écran",
       "immersiveMode": "Mode immersif",
       "fullScreenEnter": "Entrer",
@@ -234,7 +233,8 @@ export const fr: TranslationDict = {
       "fileError": "Erreur de fichier"
     },
     "empty": "Aucune notification",
-    "clearApp": "Tout effacer de cette application"
+    "clearApp": "Tout effacer de cette application",
+    "messageFrom": "Message de {{sender}}"
   },
   "memory": {
     "title": "Mémoire",
@@ -300,6 +300,8 @@ export const fr: TranslationDict = {
       "closeTab": "Fermer l’onglet"
     },
     "welcome": {
+      "title": "Navigateur",
+      "description": "Recherchez des informations ou saisissez une URL pour commencer à naviguer.",
       "searchPlaceholder": "Rechercher des sites web ou saisir une adresse...",
       "favorites": "Favoris",
       "recentActivity": "Activité récente"
@@ -621,7 +623,8 @@ export const fr: TranslationDict = {
     "library": {
       "allPhotos": "Toutes les photos",
       "favorites": "Favoris",
-      "recent": "Récents"
+      "recent": "Récents",
+      "userLibrary": "Bibliothèque de {{user}}"
     },
     "menu": {
       "slideshow": "Diaporama",
@@ -649,7 +652,9 @@ export const fr: TranslationDict = {
       "openHome": "Ouvrir le dossier personnel"
     },
     "folders": {
-      "pictures": "Images"
+      "pictures": "Images",
+      "recent": "Récents",
+      "misc": "Divers"
     }
   },
   "mail": {
@@ -938,7 +943,6 @@ export const fr: TranslationDict = {
       "title": "Débogueur du système de fichiers"
     },
     "performance": {
-
       "title": "Moniteur de performance"
     },
     "menu": {
@@ -1019,9 +1023,6 @@ export const fr: TranslationDict = {
       "wallpaperUse": "Utiliser"
     },
     "performance": {
-      "gpuTitle": "Utiliser l'accélération graphique",
-      "gpuDescription": "Utiliser l'accélération matérielle si disponible (redémarrage requis)",
-
       "blurTitle": "Flou et transparence",
       "blurDescription": "Active l’effet de verre et la transparence des fenêtres",
       "reduceMotionTitle": "Réduire les animations",
@@ -1029,7 +1030,9 @@ export const fr: TranslationDict = {
       "disableShadowsTitle": "Désactiver les ombres",
       "disableShadowsDescription": "Supprime les ombres des fenêtres pour améliorer les performances",
       "disableGradientsTitle": "Désactiver les dégradés",
-      "disableGradientsDescription": "Utilise des couleurs unies à la place des dégradés pour les icônes"
+      "disableGradientsDescription": "Utilise des couleurs unies à la place des dégradés pour les icônes",
+      "gpuTitle": "Utiliser l'accélération graphique",
+      "gpuDescription": "Utiliser l'accélération matérielle si disponible (redémarrage requis)"
     },
     "placeholders": {
       "displaysTitle": "Paramètres d’affichage",

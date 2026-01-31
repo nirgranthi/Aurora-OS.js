@@ -45,9 +45,8 @@ export const ro: TranslationDict = {
       "credits": {}
     },
     "bios": {
-      "hardwareAcceleration": "Accelerare Hardware",
-
       "title": "Setări BIOS",
+      "hardwareAcceleration": "Accelerare Hardware",
       "fullScreen": "Ecran Complet",
       "immersiveMode": "Mod Imersiv",
       "fullScreenEnter": "Intră",
@@ -234,7 +233,8 @@ export const ro: TranslationDict = {
       "fileError": "Eroare fișier"
     },
     "empty": "Nu există notificări",
-    "clearApp": "Șterge tot de la această aplicație"
+    "clearApp": "Șterge tot de la această aplicație",
+    "messageFrom": "Message from {{sender}}"
   },
   "memory": {
     "title": "Memorie",
@@ -300,6 +300,8 @@ export const ro: TranslationDict = {
       "closeTab": "Închide Tab"
     },
     "welcome": {
+      "title": "Browser",
+      "description": "Search for information or enter a URL to start browsing.",
       "searchPlaceholder": "Caută site-uri web sau introdu o adresă...",
       "favorites": "Favorite",
       "recentActivity": "Activitate recentă"
@@ -621,7 +623,8 @@ export const ro: TranslationDict = {
     "library": {
       "allPhotos": "Toate Fotografiile",
       "favorites": "Favorite",
-      "recent": "Recente"
+      "recent": "Recente",
+      "userLibrary": "{{user}}'s Library"
     },
     "menu": {
       "slideshow": "Diaporamă",
@@ -649,7 +652,9 @@ export const ro: TranslationDict = {
       "openHome": "Deschide Directorul Acasă"
     },
     "folders": {
-      "pictures": "Imagini"
+      "pictures": "Imagini",
+      "recent": "Recent",
+      "misc": "Misc"
     }
   },
   "mail": {
@@ -938,7 +943,6 @@ export const ro: TranslationDict = {
       "title": "Debugger Sistem Fișiere"
     },
     "performance": {
-
       "title": "Monitor Performanță"
     },
     "menu": {
@@ -1019,9 +1023,6 @@ export const ro: TranslationDict = {
       "wallpaperUse": "Folosește"
     },
     "performance": {
-      "gpuTitle": "Utilizează accelerarea grafică",
-      "gpuDescription": "Utilizează accelerarea hardware dacă este disponibilă (necesită restart)",
-
       "blurTitle": "Blur & Transparență",
       "blurDescription": "Activează efectul de blur sticlă și transparența ferestrelor",
       "reduceMotionTitle": "Redu Mișcarea",
@@ -1029,7 +1030,9 @@ export const ro: TranslationDict = {
       "disableShadowsTitle": "Dezactivează Umbre",
       "disableShadowsDescription": "Elimină umbrele ferestrelor pentru a îmbunătăți randarea",
       "disableGradientsTitle": "Dezactivează Gradienți",
-      "disableGradientsDescription": "Folosește culori solide în loc de gradienți pentru pictograme"
+      "disableGradientsDescription": "Folosește culori solide în loc de gradienți pentru pictograme",
+      "gpuTitle": "Utilizează accelerarea grafică",
+      "gpuDescription": "Utilizează accelerarea hardware dacă este disponibilă (necesită restart)"
     },
     "placeholders": {
       "displaysTitle": "Setări Ecran",

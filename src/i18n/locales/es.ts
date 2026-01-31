@@ -45,9 +45,8 @@ export const es: TranslationDict = {
       "credits": {}
     },
     "bios": {
-      "hardwareAcceleration": "Aceleración de hardware",
-
       "title": "Ajustes de BIOS",
+      "hardwareAcceleration": "Aceleración de hardware",
       "fullScreen": "Pantalla completa",
       "immersiveMode": "Modo inmersivo",
       "fullScreenEnter": "Entrar",
@@ -234,7 +233,8 @@ export const es: TranslationDict = {
       "fileError": "Error de archivo"
     },
     "empty": "No hay notificaciones",
-    "clearApp": "Borrar todo de esta app"
+    "clearApp": "Borrar todo de esta app",
+    "messageFrom": "Mensaje de {{sender}}"
   },
   "memory": {
     "title": "Memoria",
@@ -300,6 +300,8 @@ export const es: TranslationDict = {
       "closeTab": "Cerrar pestaña"
     },
     "welcome": {
+      "title": "Navegador",
+      "description": "Busca información o introduce una URL para empezar a navegar.",
       "searchPlaceholder": "Busca sitios web o introduce una dirección...",
       "favorites": "Favoritos",
       "recentActivity": "Actividad reciente"
@@ -621,7 +623,8 @@ export const es: TranslationDict = {
     "library": {
       "allPhotos": "Todas las fotos",
       "favorites": "Favoritos",
-      "recent": "Recientes"
+      "recent": "Recientes",
+      "userLibrary": "Biblioteca de {{user}}"
     },
     "menu": {
       "slideshow": "Presentación",
@@ -649,7 +652,9 @@ export const es: TranslationDict = {
       "openHome": "Abrir directorio de inicio"
     },
     "folders": {
-      "pictures": "Imágenes"
+      "pictures": "Imágenes",
+      "recent": "Recientes",
+      "misc": "Misc"
     }
   },
   "mail": {
@@ -938,7 +943,6 @@ export const es: TranslationDict = {
       "title": "Depurador del sistema de archivos"
     },
     "performance": {
-
       "title": "Monitor de rendimiento"
     },
     "menu": {
@@ -1019,9 +1023,6 @@ export const es: TranslationDict = {
       "wallpaperUse": "Usar"
     },
     "performance": {
-      "gpuTitle": "Usar aceleración gráfica",
-      "gpuDescription": "Usar aceleración por hardware si está disponible (requiere reinicio)",
-
       "blurTitle": "Desenfoque y transparencia",
       "blurDescription": "Activa el efecto de vidrio y la transparencia de las ventanas",
       "reduceMotionTitle": "Reducir movimiento",
@@ -1029,7 +1030,9 @@ export const es: TranslationDict = {
       "disableShadowsTitle": "Desactivar sombras",
       "disableShadowsDescription": "Elimina sombras de las ventanas para mejorar el rendimiento",
       "disableGradientsTitle": "Desactivar degradados",
-      "disableGradientsDescription": "Usa colores sólidos en lugar de degradados para los iconos"
+      "disableGradientsDescription": "Usa colores sólidos en lugar de degradados para los iconos",
+      "gpuTitle": "Usar aceleración gráfica",
+      "gpuDescription": "Usar aceleración por hardware si está disponible (requiere reinicio)"
     },
     "placeholders": {
       "displaysTitle": "Configuración de pantalla",

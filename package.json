@@ -3,7 +3,7 @@
       "version": "0.8.5",
       "private": true,
       "type": "module",
-      "author": "Cătălin-Robert Drăgoiu",
+      "author": "Cătălin-Robert Drăgoiu aka. mental.os() // Dope Pixels",
       "nickname": "mental.os()",
       "license": "AGPL-3.0",
       "description": "A browser-based OS hacking simulator powered by web technology.",
@@ -35,7 +35,7 @@
       "contributors": [
             {
                   "name": "Cătălin-Robert Drăgoiu aka. mental.os()",
-                  "email": "mental.os@proton.me",
+                  "email": "mentalos@proton.me",
                   "url": "https://github.com/mental-os"
             }
       ],
@@ -146,6 +146,20 @@
             "asar": true,
             "compression": "maximum",
             "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+            "copyright": "Copyright ©2026 Drăgoiu Cătălin-Robert aka. mental.os() // Dope Pixels",
+            "electronFuses": {
+                  "runAsNode": false,
+                  "enableCookieEncryption": true,
+                  "enableNodeOptionsEnvironmentVariable": false,
+                  "enableNodeCliInspectArguments": false,
+                  "enableEmbeddedAsarIntegrityValidation": true,
+                  "onlyLoadAppFromAsar": true
+            },
+            "publish": {
+                  "provider": "github",
+                  "owner": "mental-os",
+                  "repo": "Aurora-OS.js"
+            },
             "directories": {
                   "output": "release"
             },
@@ -159,6 +173,7 @@
                   "verifyUpdateCodeSignature": false
             },
             "nsis": {
+                  "menuCategory": "Dope Pixels",
                   "oneClick": false,
                   "allowToChangeInstallationDirectory": true,
                   "perMachine": false,

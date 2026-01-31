@@ -45,9 +45,8 @@ export const ja: TranslationDict = {
       "credits": {}
     },
     "bios": {
-      "hardwareAcceleration": "ハードウェアアクセラレーション",
-
       "title": "BIOS設定",
+      "hardwareAcceleration": "ハードウェアアクセラレーション",
       "fullScreen": "フルスクリーン",
       "immersiveMode": "没入モード",
       "fullScreenEnter": "入る",
@@ -234,7 +233,8 @@ export const ja: TranslationDict = {
       "fileError": "ファイルエラー"
     },
     "empty": "通知はありません",
-    "clearApp": "このアプリからの通知をすべて消去"
+    "clearApp": "このアプリからの通知をすべて消去",
+    "messageFrom": "Message from {{sender}}"
   },
   "memory": {
     "title": "メモリ",
@@ -300,6 +300,8 @@ export const ja: TranslationDict = {
       "closeTab": "タブを閉じる"
     },
     "welcome": {
+      "title": "Browser",
+      "description": "Search for information or enter a URL to start browsing.",
       "searchPlaceholder": "ウェブサイトを検索またはアドレスを入力...",
       "favorites": "お気に入り",
       "recentActivity": "最近のアクティビティ"
@@ -621,7 +623,8 @@ export const ja: TranslationDict = {
     "library": {
       "allPhotos": "すべての写真",
       "favorites": "お気に入り",
-      "recent": "最近の項目"
+      "recent": "最近の項目",
+      "userLibrary": "{{user}}'s Library"
     },
     "menu": {
       "slideshow": "スライドショー",
@@ -649,7 +652,9 @@ export const ja: TranslationDict = {
       "openHome": "ホームディレクトリを開く"
     },
     "folders": {
-      "pictures": "ピクチャ"
+      "pictures": "ピクチャ",
+      "recent": "Recent",
+      "misc": "Misc"
     }
   },
   "mail": {
@@ -938,7 +943,6 @@ export const ja: TranslationDict = {
       "title": "ファイルシステムデバッガ"
     },
     "performance": {
-
       "title": "パフォーマンスモニター"
     },
     "menu": {
@@ -1019,9 +1023,6 @@ export const ja: TranslationDict = {
       "wallpaperUse": "使用"
     },
     "performance": {
-      "gpuTitle": "グラフィックスアクセラレーションを使用",
-      "gpuDescription": "利用可能な場合はハードウェアアクセラレーションを使用（再起動が必要）",
-
       "blurTitle": "ぼかしと透明度",
       "blurDescription": "すりガラス効果とウィンドウの透明化を有効にする",
       "reduceMotionTitle": "視差効果を減らす",
@@ -1029,7 +1030,9 @@ export const ja: TranslationDict = {
       "disableShadowsTitle": "影を無効化",
       "disableShadowsDescription": "ウィンドウの影を削除して描画パフォーマンスを向上",
       "disableGradientsTitle": "グラデーションを無効化",
-      "disableGradientsDescription": "アイコンにグラデーションの代わりに単色を使用"
+      "disableGradientsDescription": "アイコンにグラデーションの代わりに単色を使用",
+      "gpuTitle": "グラフィックスアクセラレーションを使用",
+      "gpuDescription": "利用可能な場合はハードウェアアクセラレーションを使用（再起動が必要）"
     },
     "placeholders": {
       "displaysTitle": "ディスプレイ設定",
