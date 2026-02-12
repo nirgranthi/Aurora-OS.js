@@ -192,7 +192,7 @@
                   "icon": "public/icon.icns",
                   "hardenedRuntime": true,
                   "gatekeeperAssess": false,
-                  "identity": null,
+                  "identity": "-",
                   "darkModeSupport": true,
                   "category": "public.app-category.simulation-games"
             },
