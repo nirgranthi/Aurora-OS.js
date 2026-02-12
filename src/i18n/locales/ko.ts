@@ -176,9 +176,6 @@ export const ko: TranslationDict = {
       "bookmarks": "북마크",
       "mailbox": "메일함",
       "message": "메시지",
-      "devCenter": "DEV 센터",
-      "tools": "도구",
-      "image": "이미지",
       "conversations": "대화"
     },
     "items": {
@@ -337,7 +334,9 @@ export const ko: TranslationDict = {
     "error": {
       "pageNotFound": "페이지를 찾을 수 없음",
       "pageNotFoundDesc": "웹사이트 {{url}}을(를) 찾을 수 없습니다.",
-      "goHome": "홈으로"
+      "goHome": "홈으로",
+      "offlineTitle": "No Internet Connection",
+      "offlineDesc": "You are not connected to the internet. Please connect to a network to browse the web."
     }
   },
   "music": {
@@ -1063,16 +1062,11 @@ export const ko: TranslationDict = {
     },
     "network": {
       "wifiTitle": "Wi-Fi",
-      "wifiConnected": "{{network}}에 연결됨",
+      "wifinotConnected": "Not Connected",
       "wifiDisabled": "Wi-Fi 꺼짐",
-      "bluetoothTitle": "Bluetooth",
-      "bluetoothConnected": "{{device}}에 연결됨",
-      "bluetoothDisabled": "Bluetooth 꺼짐",
       "wifiNetworks": "사용 가능한 네트워크",
       "scanning": "검색 중...",
-      "enterPassword": "비밀번호 입력",
       "passwordPlaceholder": "비밀번호",
-      "connect": "연결",
       "disconnect": "연결 해제",
       "configurationMode": "구성 모드",
       "automatic": "자동 (DHCP)",
@@ -1084,21 +1078,12 @@ export const ko: TranslationDict = {
       "gateway": "게이트웨이",
       "dns": "DNS 서버",
       "validateConfig": "구성 검증",
-      "invalidIP": "유효하지 않은 IP 주소",
-      "invalidGateway": "유효하지 않은 게이트웨이",
-      "invalidSubnetMask": "유효하지 않은 서브넷 마스크",
-      "invalidDNS": "유효하지 않은 DNS 서버",
-      "gatewayNotInSubnet": "게이트웨이가 IP 주소와 동일한 서브넷에 있지 않습니다",
       "configSaved": "네트워크 구성이 성공적으로 저장되었습니다",
       "dhcpAttributionProgress": "DHCP를 통해 IP 주소 검색 중"
     },
     "placeholders": {
-      "displaysTitle": "디스플레이 설정",
-      "displaysDescription": "해상도, 배율 및 밝기 제어 곧 출시 예정.",
       "notificationsTitle": "알림",
       "notificationsDescription": "알림 센터 환경 설정 곧 출시 예정.",
-      "networkTitle": "네트워크",
-      "networkDescription": "Wi‑Fi 및 Bluetooth 구성 곧 출시 예정.",
       "securityTitle": "보안 및 개인 정보 보호",
       "securityDescription": "방화벽, 권한 및 개인 정보 설정 곧 출시 예정.",
       "storageTitle": "스토리지",

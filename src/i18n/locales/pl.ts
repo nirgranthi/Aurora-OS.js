@@ -176,9 +176,6 @@ export const pl: TranslationDict = {
       "bookmarks": "Zakładki",
       "mailbox": "Skrzynka",
       "message": "Wiadomość",
-      "devCenter": "Centrum DEV",
-      "tools": "Narzędzia",
-      "image": "Obraz",
       "conversations": "Rozmowy"
     },
     "items": {
@@ -337,7 +334,9 @@ export const pl: TranslationDict = {
     "error": {
       "pageNotFound": "Strona nie znaleziona",
       "pageNotFoundDesc": "Strona internetowa {{url}} nie została znaleziona.",
-      "goHome": "Wróć do strony głównej"
+      "goHome": "Wróć do strony głównej",
+      "offlineTitle": "No Internet Connection",
+      "offlineDesc": "You are not connected to the internet. Please connect to a network to browse the web."
     }
   },
   "music": {
@@ -1063,16 +1062,11 @@ export const pl: TranslationDict = {
     },
     "network": {
       "wifiTitle": "Wi-Fi",
-      "wifiConnected": "Połączono z {{network}}",
+      "wifinotConnected": "Not Connected",
       "wifiDisabled": "Wi-Fi jest wyłączone",
-      "bluetoothTitle": "Bluetooth",
-      "bluetoothConnected": "Połączono z {{device}}",
-      "bluetoothDisabled": "Bluetooth jest wyłączony",
       "wifiNetworks": "Dostępne sieci",
       "scanning": "Skanowanie...",
-      "enterPassword": "Wpisz hasło",
       "passwordPlaceholder": "Hasło",
-      "connect": "Połącz",
       "disconnect": "Rozłącz",
       "configurationMode": "Tryb konfiguracji",
       "automatic": "Automatyczny (DHCP)",
@@ -1084,21 +1078,12 @@ export const pl: TranslationDict = {
       "gateway": "Brama",
       "dns": "Serwer DNS",
       "validateConfig": "Sprawdź konfigurację",
-      "invalidIP": "Nieprawidłowy adres IP",
-      "invalidGateway": "Nieprawidłowa brama",
-      "invalidSubnetMask": "Nieprawidłowa maska podsieci",
-      "invalidDNS": "Nieprawidłowy serwer DNS",
-      "gatewayNotInSubnet": "Brama nie znajduje się w tej samej podsieci co adres IP",
       "configSaved": "Konfiguracja sieci została pomyślnie zapisana",
       "dhcpAttributionProgress": "Pobieranie adresu IP przez DHCP"
     },
     "placeholders": {
-      "displaysTitle": "Ustawienia Ekranu",
-      "displaysDescription": "Kontrola rozdzielczości, skalowania i jasności wkrótce.",
       "notificationsTitle": "Powiadomienia",
       "notificationsDescription": "Preferencje centrum powiadomień wkrótce.",
-      "networkTitle": "Sieć",
-      "networkDescription": "Konfiguracja Wi‑Fi i Bluetooth wkrótce.",
       "securityTitle": "Bezpieczeństwo i Prywatność",
       "securityDescription": "Zapora, uprawnienia i ustawienia prywatności wkrótce.",
       "storageTitle": "Pamięć",

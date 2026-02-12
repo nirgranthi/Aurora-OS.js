@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from 'react';
-import { Wifi, ChevronRight, RefreshCw, Lock } from 'lucide-react';
+import { Wifi, ChevronRight, RefreshCw, Lock, Activity, Globe, HardDrive } from 'lucide-react';
 import { CustomSwitch } from '@/components/ui/custom-switch';
 import { GlassButton } from '@/components/ui/GlassButton';
 import { GlassInput } from '@/components/ui/GlassInput';
@@ -16,6 +17,7 @@ import {
 import { useI18n } from '@/i18n';
 import { validateNetworkConfig } from '@/utils/networkValidation';
 import { useNetworkSimulation, Network } from '@/hooks/useNetworkSimulation';
+import { getSessionDataUsage, STORAGE_EVENT, StorageOperation } from '@/utils/memory';
 
 interface NetworkSettingsProps {
   accentColor: string;
@@ -35,6 +37,39 @@ interface NetworkSettingsProps {
   setNetworkDNS: (dns: string) => void;
 }
 
+function useDataUsage(wifiEnabled: boolean, wifiNetwork: string) {
+  const [usageMB, setUsageMB] = useState(0);
+
+  useEffect(() => {
+    // Initial load
+    setUsageMB(getSessionDataUsage());
+
+    const handleStorage = (e: Event) => {
+      const detail = (e as CustomEvent<{ op: StorageOperation }>).detail;
+      if (detail.op === 'write') {
+        setUsageMB(getSessionDataUsage());
+      }
+    };
+
+    window.addEventListener(STORAGE_EVENT, handleStorage);
+    return () => window.removeEventListener(STORAGE_EVENT, handleStorage);
+  }, []);
+
+  // Also poll occasionally for smoother updates during heavy downloads if storage events are debounced/batched
+  useEffect(() => {
+    if (!wifiEnabled || !wifiNetwork) {
+      setUsageMB(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      setUsageMB(getSessionDataUsage());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [wifiEnabled, wifiNetwork]);
+
+  return usageMB;
+}
+
 export function NetworkSettings({
   accentColor,
   wifiEnabled,
@@ -52,7 +87,7 @@ export function NetworkSettings({
   setNetworkDNS,
 }: NetworkSettingsProps) {
   const { t } = useI18n();
-  
+
   // Local UI state
   const [showNetworkDetails, setShowNetworkDetails] = useState(false);
   const [showWifiList, setShowWifiList] = useState(false);
@@ -67,12 +102,17 @@ export function NetworkSettings({
   const [networkConfigurationLoading, setNetworkConfigurationLoading] = useState(false);
 
   const {
-      availableNetworks,
-      isScanning,
-      scanNetworks,
-      connectToNetwork,
-      disconnect
+    availableNetworks,
+    isScanning,
+    scanNetworks,
+    connectToNetwork,
+    disconnect
   } = useNetworkSimulation();
+
+  const dataUsageMB = useDataUsage(wifiEnabled, wifiNetwork);
+
+  // Get current network details
+  const currentNetDetails = availableNetworks.find(n => n.ssid === wifiNetwork);
 
   // Sync temp state when props change
   useEffect(() => {
@@ -113,7 +153,7 @@ export function NetworkSettings({
     });
 
     if (!validation.valid) {
-      toast.error(t('settings.notifications.subtitles.validation')); 
+      toast.error(t('notifications.subtitles.validation'));
       return;
     }
 
@@ -122,18 +162,6 @@ export function NetworkSettings({
     setNetworkSubnetMask(tempSubnetMask);
     setNetworkDNS(tempDNS);
     toast.success(t('settings.network.configSaved'));
-  };
-
-  const handleWifiBlockClick = () => {
-    if (wifiEnabled && wifiNetwork) {
-      setShowNetworkDetails(true);
-      if (networkConfigMode === 'auto') {
-        generateAutoIP();
-      }
-    } else {
-      setShowWifiList(true);
-      if (wifiEnabled) scanNetworks();
-    }
   };
 
   const handleBackToMain = () => {
@@ -152,12 +180,12 @@ export function NetworkSettings({
       connectToNetwork(network.ssid);
       handleBackToMain();
     } else {
-       if (expandedNetworkId === network.id) {
-         setExpandedNetworkId(null);
-         setPasswordInput('');
+      if (expandedNetworkId === network.id) {
+        setExpandedNetworkId(null);
+        setPasswordInput('');
       } else {
-         setExpandedNetworkId(network.id);
-         setPasswordInput('');
+        setExpandedNetworkId(network.id);
+        setPasswordInput('');
       }
     }
   };
@@ -189,250 +217,344 @@ export function NetworkSettings({
     }
   };
 
+  const formatDataUsage = (mb: number) => {
+    if (mb < 1024) return `${mb.toFixed(1)} MB`;
+    return `${(mb / 1024).toFixed(2)} GB`;
+  };
+
   return (
     <div>
       <h2 className="text-2xl text-white mb-6">{t('settings.sections.network')}</h2>
 
       {!showWifiList && !showNetworkDetails ? (
-        <>
-          <button
-            onClick={handleWifiBlockClick}
-            className="w-full bg-black/20 rounded-xl p-4 mb-1 border border-white/5 hover:bg-white/5 transition-colors cursor-pointer"
-          >
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${accentColor}20` }}>
-                  <Wifi className="w-5 h-5" style={{ color: accentColor }} />
+        <div className="space-y-4">
+          {/* 1. Main Toggle / Status Card */}
+          {!wifiEnabled || !wifiNetwork ? (
+            // Disconnected State: Simple Card
+            <button
+              onClick={() => {
+                if (!wifiEnabled) setWifiEnabled(true);
+                else {
+                  setShowWifiList(true);
+                  scanNetworks();
+                }
+              }}
+              className="w-full bg-black/20 rounded-xl p-4 border border-white/5 hover:bg-white/5 transition-colors cursor-pointer text-left"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5">
+                    <Wifi className="w-5 h-5 text-white/50" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-white">{t('settings.network.wifiTitle')}</h3>
+                    <p className="text-xs text-white/50">{wifiEnabled ? t('settings.network.wifinotConnected') : t('settings.network.wifiDisabled')}</p>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <h3 className="text-sm font-medium text-white">{t('settings.network.wifiTitle')}</h3>
-                  <p className="text-xs text-white/50">
-                    {wifiEnabled
-                      ? t('settings.network.wifiConnected', { network: wifiNetwork })
-                      : t('settings.network.wifiDisabled')
-                    }
-                  </p>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <CustomSwitch
+                    checked={wifiEnabled}
+                    onCheckedChange={(checked) => {
+                      setWifiEnabled(checked);
+                      if (checked) scanNetworks();
+                    }}
+                    accentColor={accentColor}
+                  />
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                 <div
-                    onClick={(e) => {
-                        e.stopPropagation(); // Prevent opening block
+            </button>
+          ) : (
+            // Connected State: Detailed Overview (Windows 11 style)
+            <div className="bg-black/20 rounded-xl border border-white/5 overflow-hidden">
+              {/* Header: SSID & Toggle */}
+              <div className="p-6 pb-4 flex items-start justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: `${accentColor}20` }}>
+                    <Wifi className="w-6 h-6" style={{ color: accentColor }} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-white tracking-tight">{wifiNetwork}</h3>
+                    <p className="text-sm text-white/60 font-medium">Connected • Private network</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <CustomSwitch
+                    checked={wifiEnabled}
+                    onCheckedChange={(checked) => {
+                      setWifiEnabled(checked);
                     }}
-                 >
-                    <CustomSwitch 
-                        checked={wifiEnabled}
-                        onCheckedChange={(checked) => {
-                            setWifiEnabled(checked);
-                            if (checked) scanNetworks();
-                        }}
-                        accentColor={accentColor}
-                    />
-                 </div>
-                 <ChevronRight className="w-5 h-5 text-white/40" />
+                    accentColor={accentColor}
+                  />
+                </div>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 gap-px bg-white/5 border-t border-white/5">
+                <div className="p-4 bg-black/20 hover:bg-white/5 transition-colors">
+                  <div className="flex items-center gap-2 mb-1 text-white/60 text-xs uppercase tracking-wider font-semibold">
+                    <Activity className="w-3 h-3" /> Signal
+                  </div>
+                  <div className="text-lg font-medium text-white">
+                    {currentNetDetails ? `${Math.round(currentNetDetails.strength)}%` : '--'}
+                  </div>
+                </div>
+                <div className="p-4 bg-black/20 hover:bg-white/5 transition-colors">
+                  <div className="flex items-center gap-2 mb-1 text-white/60 text-xs uppercase tracking-wider font-semibold">
+                    <Lock className="w-3 h-3" /> Security
+                  </div>
+                  <div className="text-lg font-medium text-white">
+                    {currentNetDetails?.security || 'WPA2'}
+                  </div>
+                </div>
+                <div className="p-4 bg-black/20 hover:bg-white/5 transition-colors">
+                  <div className="flex items-center gap-2 mb-1 text-white/60 text-xs uppercase tracking-wider font-semibold">
+                    <Globe className="w-3 h-3" /> Speed (Link)
+                  </div>
+                  <div className="text-lg font-medium text-white">
+                    {currentNetDetails ? `${currentNetDetails.speed} / ${currentNetDetails.maxSpeed} Mbps` : '--'}
+                  </div>
+                </div>
+                <div className="p-4 bg-black/20 hover:bg-white/5 transition-colors">
+                  <div className="flex items-center gap-2 mb-1 text-white/60 text-xs uppercase tracking-wider font-semibold">
+                    <HardDrive className="w-3 h-3" /> Data Usage
+                  </div>
+                  <div className="text-lg font-medium text-white">
+                    {formatDataUsage(dataUsageMB)} <span className="text-xs text-white/40 font-normal ml-1">(Session)</span>
+                  </div>
+                </div>
+                <div className="p-4 bg-black/20 hover:bg-white/5 transition-colors col-span-2">
+                  <div className="flex items-center gap-2 mb-1 text-white/60 text-xs uppercase tracking-wider font-semibold">
+                    IPv4 Address
+                  </div>
+                  <div className="text-lg font-medium text-white font-mono">
+                    {networkIP}
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions Footer */}
+              <div className="p-2 bg-white/5 flex gap-2">
+                <button
+                  onClick={() => {
+                    setShowNetworkDetails(true);
+                    if (networkConfigMode === 'auto') generateAutoIP();
+                  }}
+                  className="flex-1 py-2 text-xs font-medium text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  Properties
+                </button>
+                <button
+                  onClick={() => {
+                    setShowWifiList(true);
+                    scanNetworks();
+                  }}
+                  className="flex-1 py-2 text-xs font-medium text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  Manage Known Networks
+                </button>
               </div>
             </div>
-          </button>
-        </>
+          )}
+        </div>
       ) : showNetworkDetails ? (
         <div className="bg-black/20 rounded-xl border border-white/5 overflow-hidden">
           <div className="flex items-center justify-between p-4 border-b border-white/5">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handleBackToMain}
-                  className="p-1 hover:bg-white/10 rounded transition-colors"
-                >
-                  <ChevronRight className="w-5 h-5 text-white rotate-180" />
-                </button>
-                <h3 className="text-sm font-medium text-white">{wifiNetwork}</h3>
-              </div>
-              <GlassButton
-                onClick={handleDisconnectWifi}
-                variant="danger"
-                className="text-xs px-3 py-1.5 h-auto"
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleBackToMain}
+                className="p-1 hover:bg-white/10 rounded transition-colors"
               >
-                {t('settings.network.disconnect')}
-              </GlassButton>
+                <ChevronRight className="w-5 h-5 text-white rotate-180" />
+              </button>
+              <h3 className="text-sm font-medium text-white">{wifiNetwork} Properties</h3>
+            </div>
+            <GlassButton
+              onClick={handleDisconnectWifi}
+              variant="danger"
+              className="text-xs px-3 py-1.5 h-auto"
+            >
+              {t('settings.network.disconnect')}
+            </GlassButton>
           </div>
 
           <div className="p-4 space-y-4">
-             {/* Configuration Mode */}
-              <div className="bg-white/5 rounded-lg p-4">
-                <h4 className="text-white font-medium mb-3">{t('settings.network.configurationMode')}</h4>
-                <Select
-                  value={networkConfigMode}
-                  onValueChange={(value: 'auto' | 'manual') => {
-                    setNetworkConfigMode(value);
-                    if (value === 'auto') handleDHCPAttribution();
-                  }}
-                >
-                   <SelectTrigger className="bg-black/20 border-white/10 text-white">
-                      <SelectValue />
-                   </SelectTrigger>
-                   <SelectContent className="bg-gray-900 border-white/10 text-white">
-                      <SelectItem value="auto">{t('settings.network.automatic')}</SelectItem>
-                      <SelectItem value="manual">{t('settings.network.manual')}</SelectItem>
-                   </SelectContent>
-                </Select>
-              </div>
+            {/* Configuration Mode */}
+            <div className="bg-white/5 rounded-lg p-4">
+              <h4 className="text-white font-medium mb-3">{t('settings.network.configurationMode')}</h4>
+              <Select
+                value={networkConfigMode}
+                onValueChange={(value: 'auto' | 'manual') => {
+                  setNetworkConfigMode(value);
+                  if (value === 'auto') handleDHCPAttribution();
+                }}
+              >
+                <SelectTrigger className="bg-black/20 border-white/10 text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-900 border-white/10 text-white">
+                  <SelectItem value="auto">{t('settings.network.automatic')}</SelectItem>
+                  <SelectItem value="manual">{t('settings.network.manual')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-              {networkConfigurationLoading ? (
-                 <div className="bg-white/5 rounded-lg p-4 flex items-center gap-3">
-                    <RefreshCw className="w-5 h-5 text-white/40 animate-spin" />
-                    <p className="text-sm text-white/60">{t('settings.network.dhcpAttributionProgress')}</p>
-                 </div>
-              ) : (
-                <div className="bg-white/5 rounded-lg p-4 space-y-3">
-                    <h4 className="text-white font-medium mb-2">
-                         {networkConfigMode === 'auto' ? t('settings.network.autoConfigTitle') : t('settings.network.manualConfigTitle')}
-                    </h4>
-                    <div>
-                        <Label className="text-xs text-white/60 block mb-1">{t('settings.network.ipAddress')}</Label>
-                        {networkConfigMode === 'auto' ? <div className="text-white text-sm">{networkIP}</div> : 
-                           <GlassInput value={tempIP} onChange={(e) => setTempIP(e.target.value)} />
-                        }
-                    </div>
-                     <div>
-                        <Label className="text-xs text-white/60 block mb-1">{t('settings.network.subnetMask')}</Label>
-                        {networkConfigMode === 'auto' ? <div className="text-white text-sm">{networkSubnetMask}</div> : 
-                           <GlassInput value={tempSubnetMask} onChange={(e) => setTempSubnetMask(e.target.value)} />
-                        }
-                    </div>
-                     <div>
-                        <Label className="text-xs text-white/60 block mb-1">{t('settings.network.gateway')}</Label>
-                        {networkConfigMode === 'auto' ? <div className="text-white text-sm">{networkGateway}</div> : 
-                           <GlassInput value={tempGateway} onChange={(e) => setTempGateway(e.target.value)} />
-                        }
-                    </div>
-                     <div>
-                        <Label className="text-xs text-white/60 block mb-1">{t('settings.network.dns')}</Label>
-                        {networkConfigMode === 'auto' ? <div className="text-white text-sm">{networkDNS}</div> : 
-                           <GlassInput value={tempDNS} onChange={(e) => setTempDNS(e.target.value)} />
-                        }
-                    </div>
-                    {networkConfigMode === 'manual' && (
-                        <GlassButton onClick={handleSaveManualConfig} style={{ backgroundColor: accentColor }} className="w-full mt-2">
-                             {t('settings.network.validateConfig')}
-                        </GlassButton>
-                    )}
+            {networkConfigurationLoading ? (
+              <div className="bg-white/5 rounded-lg p-4 flex items-center gap-3">
+                <RefreshCw className="w-5 h-5 text-white/40 animate-spin" />
+                <p className="text-sm text-white/60">{t('settings.network.dhcpAttributionProgress')}</p>
+              </div>
+            ) : (
+              <div className="bg-white/5 rounded-lg p-4 space-y-3">
+                <h4 className="text-white font-medium mb-2">
+                  {networkConfigMode === 'auto' ? t('settings.network.autoConfigTitle') : t('settings.network.manualConfigTitle')}
+                </h4>
+                <div>
+                  <Label className="text-xs text-white/60 block mb-1">{t('settings.network.ipAddress')}</Label>
+                  {networkConfigMode === 'auto' ? <div className="text-white text-sm">{networkIP}</div> :
+                    <GlassInput value={tempIP} onChange={(e) => setTempIP(e.target.value)} />
+                  }
                 </div>
-              )}
+                <div>
+                  <Label className="text-xs text-white/60 block mb-1">{t('settings.network.subnetMask')}</Label>
+                  {networkConfigMode === 'auto' ? <div className="text-white text-sm">{networkSubnetMask}</div> :
+                    <GlassInput value={tempSubnetMask} onChange={(e) => setTempSubnetMask(e.target.value)} />
+                  }
+                </div>
+                <div>
+                  <Label className="text-xs text-white/60 block mb-1">{t('settings.network.gateway')}</Label>
+                  {networkConfigMode === 'auto' ? <div className="text-white text-sm">{networkGateway}</div> :
+                    <GlassInput value={tempGateway} onChange={(e) => setTempGateway(e.target.value)} />
+                  }
+                </div>
+                <div>
+                  <Label className="text-xs text-white/60 block mb-1">{t('settings.network.dns')}</Label>
+                  {networkConfigMode === 'auto' ? <div className="text-white text-sm">{networkDNS}</div> :
+                    <GlassInput value={tempDNS} onChange={(e) => setTempDNS(e.target.value)} />
+                  }
+                </div>
+                {networkConfigMode === 'manual' && (
+                  <GlassButton onClick={handleSaveManualConfig} style={{ backgroundColor: accentColor }} className="w-full mt-2">
+                    {t('settings.network.validateConfig')}
+                  </GlassButton>
+                )}
+              </div>
+            )}
           </div>
         </div>
       ) : (
         <div className="bg-black/20 rounded-xl border border-white/5 overflow-hidden">
-             {/* List Header */}
-            <div className="flex items-center justify-between p-4 border-b border-white/5">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handleBackToMain}
-                  className="p-1 hover:bg-white/10 rounded transition-colors"
-                >
-                  <ChevronRight className="w-5 h-5 text-white rotate-180" />
-                </button>
-                <h3 className="text-sm font-medium text-white">{t('settings.network.wifiNetworks')}</h3>
-              </div>
+          {/* List Header */}
+          <div className="flex items-center justify-between p-4 border-b border-white/5">
+            <div className="flex items-center gap-3">
               <button
-                onClick={scanNetworks}
-                disabled={isScanning}
-                className="p-1.5 hover:bg-white/10 rounded transition-colors disabled:opacity-50"
-                style={{ color: accentColor }}
+                onClick={handleBackToMain}
+                className="p-1 hover:bg-white/10 rounded transition-colors"
               >
-                <RefreshCw className={cn("w-4 h-4", isScanning && "animate-spin")} />
+                <ChevronRight className="w-5 h-5 text-white rotate-180" />
               </button>
+              <h3 className="text-sm font-medium text-white">{t('settings.network.wifiNetworks')}</h3>
             </div>
-            
-             {/* List Content */}
-            <div className="p-2 space-y-1">
-                 {isScanning && availableNetworks.length === 0 && (
-                     <div className="flex items-center gap-3 py-4 px-3">
-                        <RefreshCw className="w-5 h-5 text-white/40 animate-spin" />
-                        <p className="text-sm text-white/60">{t('settings.network.scanning')}</p>
-                     </div>
-                 )}
-                 
-                 {availableNetworks.map((network) => (
-                    <div key={network.id} className="transition-all">
-                        <button
-                            onClick={() => handleNetworkClick(network)}
-                            className={cn(
-                                "w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group text-left",
-                                expandedNetworkId === network.id ? "bg-white/5" : ""
-                            )}
-                        >
-                             <div className="flex items-center gap-3 min-w-0">
-                                 <div className={cn("transition-colors", network.connected ? "text-white" : "text-white/50 group-hover:text-white/70")}>
-                                   {getSignalIcon(network.strength)}
-                                 </div>
-                                 <div className="flex flex-col min-w-0 flex-1">
-                                     <span className={cn(
-                                        "text-sm font-medium leading-none mb-1.5 truncate",
-                                        network.connected ? "text-white" : "text-white/90"
-                                     )}>
-                                        {network.ssid}
-                                     </span>
-                                     <div className="flex items-center gap-2 text-[10px] text-white/40 font-mono transition-all">
-                                        <span>{Math.round(network.strength)}%</span>
-                                        <span className="w-px h-2 bg-white/20" />
-                                        <span>CH {network.channel}</span>
-                                        <span className="w-px h-2 bg-white/20" />
-                                        <span className="truncate">{network.bssid.split(':').map((part, i) => i > 2 ? part : part).join(':')}</span>
-                                     </div>
-                                 </div>
-                             </div>
+            <button
+              onClick={scanNetworks}
+              disabled={isScanning}
+              className="p-1.5 hover:bg-white/10 rounded transition-colors disabled:opacity-50"
+              style={{ color: accentColor }}
+            >
+              <RefreshCw className={cn("w-4 h-4", isScanning && "animate-spin")} />
+            </button>
+          </div>
 
-                             <div className="flex items-center gap-3">
-                                {wifiNetwork === network.ssid && wifiEnabled && (
-                                    <div className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: accentColor }} />
-                                )}
-                                
-                                <div className="flex items-center gap-2">
-                                    <div className={cn(
-                                      "text-[9px] font-bold font-mono px-1.5 py-0.5 rounded border opacity-70",
-                                      getSecurityBadgeColor(network.security)
-                                    )}>
-                                      {network.security}
-                                    </div>
-                                    {network.security !== 'OPEN' && (
-                                       <Lock className="w-3 h-3 text-white/20 ml-0.5" />
-                                    )}
-                                </div>
-                             </div>
-                        </button>
+          {/* List Content */}
+          <div className="p-2 space-y-1">
+            {isScanning && availableNetworks.length === 0 && (
+              <div className="flex items-center gap-3 py-4 px-3">
+                <RefreshCw className="w-5 h-5 text-white/40 animate-spin" />
+                <p className="text-sm text-white/60">{t('settings.network.scanning')}</p>
+              </div>
+            )}
 
-                        {expandedNetworkId === network.id && (
-                           <div className="mx-2 mb-2 p-3 bg-white/5 rounded-lg border-t border-white/5 animate-in slide-in-from-top-2 duration-200" onClick={(e) => e.stopPropagation()}>
-                              <div className="flex gap-2">
-                                <GlassInput
-                                  type="password"
-                                  value={passwordInput}
-                                  onChange={(e) => setPasswordInput(e.target.value)}
-                                  placeholder={t('settings.network.passwordPlaceholder')}
-                                  className="h-8 text-xs bg-black/20"
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter') handlePasswordSubmit(network.ssid);
-                                    if (e.key === 'Escape') setExpandedNetworkId(null);
-                                  }}
-                                  autoFocus
-                                />
-                                <GlassButton
-                                  onClick={() => handlePasswordSubmit(network.ssid)}
-                                  disabled={!passwordInput}
-                                  style={{ backgroundColor: accentColor }}
-                                  className="h-8 px-3"
-                                >
-                                  <ChevronRight className="w-4 h-4" />
-                                </GlassButton>
-                              </div>
-                            </div>
-                        )}
+            {availableNetworks.map((network) => (
+              <div key={network.id} className="transition-all">
+                <button
+                  onClick={() => handleNetworkClick(network)}
+                  className={cn(
+                    "w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group text-left",
+                    expandedNetworkId === network.id ? "bg-white/5" : ""
+                  )}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={cn("transition-colors", network.connected ? "text-white" : "text-white/50 group-hover:text-white/70")}>
+                      {getSignalIcon(network.strength)}
                     </div>
-                 ))}
-                 
-                 {!isScanning && availableNetworks.length === 0 && (
-                     <div className="p-4 text-center text-white/40 text-sm">No networks found</div>
-                 )}
-            </div>
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <span className={cn(
+                        "text-sm font-medium leading-none mb-1.5 truncate",
+                        network.connected ? "text-white" : "text-white/90"
+                      )}>
+                        {network.ssid}
+                      </span>
+                      <div className="flex items-center gap-2 text-[10px] text-white/40 font-mono transition-all">
+                        <span>{Math.round(network.strength)}%</span>
+                        <span className="w-px h-2 bg-white/20" />
+                        <span>CH {network.channel}</span>
+                        <span className="w-px h-2 bg-white/20" />
+                        <span className="truncate">{network.bssid.split(':').map((part, i) => i > 2 ? part : part).join(':')}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    {wifiNetwork === network.ssid && wifiEnabled && (
+                      <div className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: accentColor }} />
+                    )}
+
+                    <div className="flex items-center gap-2">
+                      <div className={cn(
+                        "text-[9px] font-bold font-mono px-1.5 py-0.5 rounded border opacity-70",
+                        getSecurityBadgeColor(network.security)
+                      )}>
+                        {network.security}
+                      </div>
+                      {network.security !== 'OPEN' && (
+                        <Lock className="w-3 h-3 text-white/20 ml-0.5" />
+                      )}
+                    </div>
+                  </div>
+                </button>
+
+                {expandedNetworkId === network.id && (
+                  <div className="mx-2 mb-2 p-3 bg-white/5 rounded-lg border-t border-white/5 animate-in slide-in-from-top-2 duration-200" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex gap-2">
+                      <GlassInput
+                        type="password"
+                        value={passwordInput}
+                        onChange={(e) => setPasswordInput(e.target.value)}
+                        placeholder={t('settings.network.passwordPlaceholder')}
+                        className="h-8 text-xs bg-black/20"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handlePasswordSubmit(network.ssid);
+                          if (e.key === 'Escape') setExpandedNetworkId(null);
+                        }}
+                        autoFocus
+                      />
+                      <GlassButton
+                        onClick={() => handlePasswordSubmit(network.ssid)}
+                        disabled={!passwordInput}
+                        style={{ backgroundColor: accentColor }}
+                        className="h-8 px-3"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </GlassButton>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {!isScanning && availableNetworks.length === 0 && (
+              <div className="p-4 text-center text-white/40 text-sm">No networks found</div>
+            )}
+          </div>
         </div>
       )}
     </div>

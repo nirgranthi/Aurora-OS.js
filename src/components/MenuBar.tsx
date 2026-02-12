@@ -35,7 +35,7 @@ interface MenuBarProps {
 
 function MenuBarComponent({ focusedApp, onOpenApp }: MenuBarProps) {
   const { menuBarBackground, blurStyle, getBackgroundColor } = useThemeColors();
-  const { devMode, disableShadows, setIsLocked, locale, timeMode, setTimeMode } = useAppContext();
+  const { disableShadows, setIsLocked, locale, timeMode, setTimeMode } = useAppContext();
   const { logout, suspendSession, currentUser } = useFileSystem();
   const { t } = useI18n();
 
@@ -121,8 +121,7 @@ function MenuBarComponent({ focusedApp, onOpenApp }: MenuBarProps) {
     'History': 'menubar.menus.history',
     'Bookmarks': 'menubar.menus.bookmarks',
     'Mailbox': 'menubar.menus.mailbox',
-    'Message': 'menubar.menus.message',
-    'DEV Center': 'menubar.menus.devCenter'
+    'Message': 'menubar.menus.message'
   };
 
   const getMenuDisplayName = (menuName: string) => {
@@ -131,9 +130,7 @@ function MenuBarComponent({ focusedApp, onOpenApp }: MenuBarProps) {
   };
 
   // Add "DEV Center" to Finder menus if devMode is enabled
-  const menuLabels = (appConfig.name === 'Finder' && devMode)
-    ? [...appConfig.menus, 'DEV Center']
-    : appConfig.menus;
+  const menuLabels = appConfig.menus;
 
   // Render dummy menu content for now, can be expanded to be real later
   const renderMenuContent = (menuName: string) => {
@@ -381,21 +378,17 @@ function MenuBarComponent({ focusedApp, onOpenApp }: MenuBarProps) {
                   "text-white/70 hover:text-white data-[state=open]:text-white focus:text-white"
                 )}
                 onClick={() => {
-                  if (menu === 'DEV Center') {
-                    onOpenApp?.('dev-center');
-                  }
+                  // Standard menu click handling if needed
                 }}
               >
                 {getMenuDisplayName(menu)}
               </MenubarTrigger>
-              {menu !== 'DEV Center' && (
-                <MenubarContent
-                  className={cn("border-white/10 text-white min-w-48 p-1 z-10000", !disableShadows ? "shadow-xl" : "shadow-none")}
-                  style={{ background: getBackgroundColor(0.8), ...blurStyle }}
-                >
-                  {renderMenuContent(menu)}
-                </MenubarContent>
-              )}
+              <MenubarContent
+                className={cn("border-white/10 text-white min-w-48 p-1 z-10000", !disableShadows ? "shadow-xl" : "shadow-none")}
+                style={{ background: getBackgroundColor(0.8), ...blurStyle }}
+              >
+                {renderMenuContent(menu)}
+              </MenubarContent>
             </MenubarMenu>
           ))}
         </Menubar>

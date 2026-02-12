@@ -176,9 +176,6 @@ export const tr: TranslationDict = {
       "bookmarks": "Yer İmleri",
       "mailbox": "Posta Kutusu",
       "message": "Mesaj",
-      "devCenter": "GELİŞTİRİCİ Merkezi",
-      "tools": "Araçlar",
-      "image": "Görüntü",
       "conversations": "Konuşmalar"
     },
     "items": {
@@ -337,7 +334,9 @@ export const tr: TranslationDict = {
     "error": {
       "pageNotFound": "Sayfa Bulunamadı",
       "pageNotFoundDesc": "{{url}} web sitesi bulunamadı.",
-      "goHome": "Eve Dön"
+      "goHome": "Eve Dön",
+      "offlineTitle": "No Internet Connection",
+      "offlineDesc": "You are not connected to the internet. Please connect to a network to browse the web."
     }
   },
   "music": {
@@ -1063,16 +1062,11 @@ export const tr: TranslationDict = {
     },
     "network": {
       "wifiTitle": "Wi-Fi",
-      "wifiConnected": "{{network}} ağına bağlı",
+      "wifinotConnected": "Not Connected",
       "wifiDisabled": "Wi-Fi kapalı",
-      "bluetoothTitle": "Bluetooth",
-      "bluetoothConnected": "{{device}} cihazına bağlı",
-      "bluetoothDisabled": "Bluetooth kapalı",
       "wifiNetworks": "Kullanılabilir Ağlar",
       "scanning": "Taranıyor...",
-      "enterPassword": "Şifreyi girin",
       "passwordPlaceholder": "Şifre",
-      "connect": "Bağlan",
       "disconnect": "Bağlantıyı Kes",
       "configurationMode": "Yapılandırma modu",
       "automatic": "Otomatik (DHCP)",
@@ -1084,21 +1078,12 @@ export const tr: TranslationDict = {
       "gateway": "Ağ Geçidi",
       "dns": "DNS Sunucusu",
       "validateConfig": "Yapılandırmayı Doğrula",
-      "invalidIP": "Geçersiz IP adresi",
-      "invalidGateway": "Geçersiz ağ geçidi",
-      "invalidSubnetMask": "Geçersiz alt ağ maskesi",
-      "invalidDNS": "Geçersiz DNS sunucusu",
-      "gatewayNotInSubnet": "Ağ geçidi IP adresiyle aynı alt ağda değil",
       "configSaved": "Ağ yapılandırması başarıyla kaydedildi",
       "dhcpAttributionProgress": "DHCP üzerinden IP adresi alınıyor"
     },
     "placeholders": {
-      "displaysTitle": "Ekran Ayarları",
-      "displaysDescription": "Çözünürlük, ölçeklendirme ve parlaklık kontrolü çok yakında.",
       "notificationsTitle": "Bildirimler",
       "notificationsDescription": "Bildirim merkezi tercihleri çok yakında.",
-      "networkTitle": "Ağ",
-      "networkDescription": "Wi‑Fi ve Bluetooth yapılandırması çok yakında.",
       "securityTitle": "Güvenlik ve Gizlilik",
       "securityDescription": "Güvenlik duvarı, izinler ve gizlilik ayarları çok yakında.",
       "storageTitle": "Depolama",

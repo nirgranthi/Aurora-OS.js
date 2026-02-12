@@ -176,9 +176,6 @@ export const hi: TranslationDict = {
       "bookmarks": "बुकमार्क",
       "mailbox": "मेलबॉक्स",
       "message": "संदेश",
-      "devCenter": "देव केंद्र",
-      "tools": "औजार",
-      "image": "छवि",
       "conversations": "बात चिट"
     },
     "items": {
@@ -337,7 +334,9 @@ export const hi: TranslationDict = {
     "error": {
       "pageNotFound": "पृष्ठ नहीं मिला",
       "pageNotFoundDesc": "वेबसाइट {{url}} नहीं मिली।",
-      "goHome": "होम पर जाएं"
+      "goHome": "होम पर जाएं",
+      "offlineTitle": "No Internet Connection",
+      "offlineDesc": "You are not connected to the internet. Please connect to a network to browse the web."
     }
   },
   "music": {
@@ -1063,16 +1062,11 @@ export const hi: TranslationDict = {
     },
     "network": {
       "wifiTitle": "Wi-Fi",
-      "wifiConnected": "Connected to {{network}}",
+      "wifinotConnected": "Not Connected",
       "wifiDisabled": "Wi-Fi is off",
-      "bluetoothTitle": "Bluetooth",
-      "bluetoothConnected": "Connected to {{device}}",
-      "bluetoothDisabled": "Bluetooth is off",
       "wifiNetworks": "Available Networks",
       "scanning": "Scanning...",
-      "enterPassword": "Enter password",
       "passwordPlaceholder": "Password",
-      "connect": "Connect",
       "disconnect": "Disconnect",
       "configurationMode": "Configuration mode",
       "automatic": "Automatic (DHCP)",
@@ -1084,21 +1078,12 @@ export const hi: TranslationDict = {
       "gateway": "Gateway",
       "dns": "DNS Server",
       "validateConfig": "Validate configuration",
-      "invalidIP": "Invalid IP address",
-      "invalidGateway": "Invalid gateway",
-      "invalidSubnetMask": "Invalid subnet mask",
-      "invalidDNS": "Invalid DNS server",
-      "gatewayNotInSubnet": "Gateway is not in the same subnet as the IP address",
       "configSaved": "Network configuration saved successfully",
       "dhcpAttributionProgress": "Retrieving an IP address via DHCP"
     },
     "placeholders": {
-      "displaysTitle": "प्रदर्शन सेटिंग्स",
-      "displaysDescription": "रिज़ॉल्यूशन, स्केलिंग और ब्राइटनेस कंट्रोल जल्द ही आएंगे।",
       "notificationsTitle": "सूचनाएं",
       "notificationsDescription": "नोटिफिकेशन सेंटर प्रेफरेंस जल्द ही आ रहे हैं।",
-      "networkTitle": "नेटवर्क",
-      "networkDescription": "वाई-फ़ाई और ब्लूटूथ कॉन्फ़िगरेशन जल्द ही आएंगे।",
       "securityTitle": "सुरक्षा और गोपनीयता",
       "securityDescription": "फ़ायरवॉल, परमिशन और प्राइवेसी सेटिंग्स जल्द ही आ रही हैं।",
       "storageTitle": "भंडारण",

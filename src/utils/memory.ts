@@ -39,6 +39,7 @@ export const STORAGE_KEYS = {
     TERM_INPUT_PREFIX: 'session_term_input_', // Terminal input history
     SESSION_META: 'session_meta_',          // Ephemeral session flags
     CURRENT_USER: 'session_current_user',   // Currently logged in user
+    NETWORK_USAGE: 'session_net_usage',     // Data usage for current session
 } as const;
 
 /**
@@ -247,3 +248,28 @@ export function initStorageObserver() {
     console.log('Storage Observer initialized');
 }
 
+
+/**
+ * Get current session data usage in MB
+ */
+export function getSessionDataUsage(): number {
+    const val = localStorage.getItem(STORAGE_KEYS.NETWORK_USAGE);
+    return val ? parseFloat(val) : 0;
+}
+
+/**
+ * Increment session data usage
+ * @param mb Megabytes to add
+ */
+export function incrementSessionDataUsage(mb: number): void {
+    const current = getSessionDataUsage();
+    const newVal = current + mb;
+    localStorage.setItem(STORAGE_KEYS.NETWORK_USAGE, newVal.toString());
+}
+
+/**
+ * Reset session data usage (on disconnect/new session)
+ */
+export function resetSessionDataUsage(): void {
+    localStorage.removeItem(STORAGE_KEYS.NETWORK_USAGE);
+}

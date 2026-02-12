@@ -176,9 +176,6 @@ export const pt: TranslationDict = {
       "bookmarks": "Favoritos",
       "mailbox": "Caixa de Correio",
       "message": "Mensagem",
-      "devCenter": "Centro DEV",
-      "tools": "Ferramentas",
-      "image": "Imagem",
       "conversations": "Conversas"
     },
     "items": {
@@ -337,7 +334,9 @@ export const pt: TranslationDict = {
     "error": {
       "pageNotFound": "Página Não Encontrada",
       "pageNotFoundDesc": "O site {{url}} não pôde ser encontrado.",
-      "goHome": "Ir para o Início"
+      "goHome": "Ir para o Início",
+      "offlineTitle": "No Internet Connection",
+      "offlineDesc": "You are not connected to the internet. Please connect to a network to browse the web."
     }
   },
   "music": {
@@ -1063,16 +1062,11 @@ export const pt: TranslationDict = {
     },
     "network": {
       "wifiTitle": "Wi-Fi",
-      "wifiConnected": "Conectado a {{network}}",
+      "wifinotConnected": "Not Connected",
       "wifiDisabled": "Wi-Fi desligado",
-      "bluetoothTitle": "Bluetooth",
-      "bluetoothConnected": "Conectado a {{device}}",
-      "bluetoothDisabled": "Bluetooth desligado",
       "wifiNetworks": "Redes disponíveis",
       "scanning": "Procurando...",
-      "enterPassword": "Introduzir senha",
       "passwordPlaceholder": "Senha",
-      "connect": "Conectar",
       "disconnect": "Desconectar",
       "configurationMode": "Modo de configuração",
       "automatic": "Automático (DHCP)",
@@ -1084,21 +1078,12 @@ export const pt: TranslationDict = {
       "gateway": "Gateway",
       "dns": "Servidor DNS",
       "validateConfig": "Validar configuração",
-      "invalidIP": "Endereço IP inválido",
-      "invalidGateway": "Gateway inválido",
-      "invalidSubnetMask": "Máscara de sub-rede inválida",
-      "invalidDNS": "Servidor DNS inválido",
-      "gatewayNotInSubnet": "O gateway não está na mesma sub-rede que o endereço IP",
       "configSaved": "Configuração de rede salva com sucesso",
       "dhcpAttributionProgress": "Recuperando um endereço IP via DHCP"
     },
     "placeholders": {
-      "displaysTitle": "Configurações de exibição",
-      "displaysDescription": "Resolução, escala e brilho em breve.",
       "notificationsTitle": "Notificações",
       "notificationsDescription": "Configurações da central de notificações em breve.",
-      "networkTitle": "Rede",
-      "networkDescription": "Configuração de Wi‑Fi e Bluetooth em breve.",
       "securityTitle": "Segurança e privacidade",
       "securityDescription": "Firewall, permissões e privacidade em breve.",
       "storageTitle": "Armazenamento",

@@ -176,9 +176,6 @@ export const zh: TranslationDict = {
       "bookmarks": "书签",
       "mailbox": "邮箱",
       "message": "消息",
-      "devCenter": "开发者中心",
-      "tools": "工具",
-      "image": "图片",
       "conversations": "对话"
     },
     "items": {
@@ -337,7 +334,9 @@ export const zh: TranslationDict = {
     "error": {
       "pageNotFound": "页面未找到",
       "pageNotFoundDesc": "无法找到网站 {{url}}。",
-      "goHome": "前往首页"
+      "goHome": "前往首页",
+      "offlineTitle": "No Internet Connection",
+      "offlineDesc": "You are not connected to the internet. Please connect to a network to browse the web."
     }
   },
   "music": {
@@ -1063,16 +1062,11 @@ export const zh: TranslationDict = {
     },
     "network": {
       "wifiTitle": "Wi-Fi",
-      "wifiConnected": "已连接到 {{network}}",
+      "wifinotConnected": "Not Connected",
       "wifiDisabled": "Wi-Fi 已关闭",
-      "bluetoothTitle": "蓝牙",
-      "bluetoothConnected": "已连接到 {{device}}",
-      "bluetoothDisabled": "蓝牙已关闭",
       "wifiNetworks": "可用网络",
       "scanning": "正在扫描...",
-      "enterPassword": "输入密码",
       "passwordPlaceholder": "密码",
-      "connect": "连接",
       "disconnect": "断开连接",
       "configurationMode": "配置模式",
       "automatic": "自动 (DHCP)",
@@ -1084,21 +1078,12 @@ export const zh: TranslationDict = {
       "gateway": "网关",
       "dns": "DNS 服务器",
       "validateConfig": "验证配置",
-      "invalidIP": "无效的 IP 地址",
-      "invalidGateway": "无效的网关",
-      "invalidSubnetMask": "无效的子网掩码",
-      "invalidDNS": "无效的 DNS 服务器",
-      "gatewayNotInSubnet": "网关与 IP 地址不在同一子网",
       "configSaved": "网络配置已成功保存",
       "dhcpAttributionProgress": "正在通过 DHCP 获取 IP 地址"
     },
     "placeholders": {
-      "displaysTitle": "显示器设置",
-      "displaysDescription": "分辨率、缩放和亮度控制即将推出。",
       "notificationsTitle": "通知",
       "notificationsDescription": "通知中心首选项即将推出。",
-      "networkTitle": "网络",
-      "networkDescription": "Wi‑Fi 和蓝牙配置即将推出。",
       "securityTitle": "安全与隐私",
       "securityDescription": "防火墙、权限和隐私设置即将推出。",
       "storageTitle": "存储",

@@ -1,5 +1,5 @@
 import pkg from '../../package.json';
-import { getCoreApps } from '../config/appRegistry';
+import { getCoreApps } from '@/config/appRegistry';
 
 /**
 import startupSound2 from '../assets/sounds/Lo-Fi Girl.mp3';
@@ -10,8 +10,8 @@ import photo4 from '../assets/images/wallpaper-orbit.png';
 import photo5 from '../assets/images/wallpaper-dunes.png';
 import photo6 from '../assets/images/wallpaper-mesh.png';
 */
-import startupSound from '../assets/sounds/Runway Electric.mp3';
-import photo7 from '../assets/images/background.png';
+import startupSound from '@/assets/sounds/Runway Electric.mp3';
+import photo7 from '@/assets/images/background.png';
 
 
 export interface FileNode {
@@ -184,7 +184,7 @@ export function createUserHome(username: string, permissions: string = 'drwxr-x-
                 name: 'Pictures',
                 type: 'directory',
                 children: [
-                     { name: 'Screenshots', type: 'directory', children: [], owner: username, permissions: 'drwxr-xr-x' }
+                    { name: 'Screenshots', type: 'directory', children: [], owner: username, permissions: 'drwxr-xr-x' }
                 ],
                 owner: username,
                 permissions: 'drwxr-xr-x'
@@ -468,7 +468,7 @@ export const initialFileSystem: any = {
                 { name: 'passwd', type: 'file', permissions: '-rw-r--r--', owner: 'root', content: 'root:admin:0:0:System Administrator:/root:/bin/bash\nuser:1234:1000:1000:User:/home/user:/bin/bash\nguest:guest:1001:1001:Guest:/home/guest:/bin/bash' },
                 { name: 'group', type: 'file', permissions: '-rw-r--r--', owner: 'root', content: 'root:x:0:root\nusers:x:100:user,guest\nadmin:x:10:user' },
                 { name: 'hostname', type: 'file', permissions: '-rw-r--r--', owner: 'root', content: 'aurora' },
-                { name: 'hosts', type: 'file', permissions: '-rw-r--r--', owner: 'root', content: '127.0.0.1\tlocalhost\n::1\t\tlocalhost' },
+                { name: 'hosts', type: 'file', permissions: '-rw-r--r--', owner: 'root', content: '127.0.0.1\tlocalhost' },
                 { name: 'os-release', type: 'file', permissions: '-rw-r--', owner: 'root', content: `NAME="${pkg.build.productName}"\nVERSION="${pkg.version}"\nID=${pkg.name}\nPRETTY_NAME="${pkg.build.productName}"` },
                 {
                     name: 'apt',

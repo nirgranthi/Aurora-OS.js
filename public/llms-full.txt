@@ -1,3 +1,6 @@
+---
+trigger: always_on
+---
 
 # AURORA OS.JS SYSTEM CONTEXT
 
@@ -32,8 +35,9 @@
     - **Ids**: `root` (0), `guest` (1001), `activeUser` (physical), `currentUser` (logical).
     - **Auth**: `useAuth()` hook. Logic synced to `/etc/passwd` & `/etc/group`.
     - **Persistent**: `useAppStorage` uses `activeUser` to scope keys (e.g., `os_app_data_<app>-<user>`).
-    - **Home**: `/home/<user>` created via `createUserHome()`.
+    - **Home**: `/home/<user>` created via `createUserHome()`. Includes `~/.Config` (700 permissions) for sensitive app data.
     - **Fast User Switching**: `suspendSession()` preserves RAM (open windows, terminal history) while switching users. Exposed via `FileSystemContext` and used by `MenuBar.tsx` "Switch User" action.
+    - **Developer Mode**: Toggled via Settings > About. Controls visibility of "Dev Center" app in App Store and other debug features.
 
 3.  **App Engine**:
     - **Registry**: `src/config/appRegistry.ts` (Definition source of truth).
@@ -50,11 +54,11 @@
 4.  **Terminal Architecture**:
     - **PATH**: `["/bin", "/usr/bin"]`.
     - **`/bin`**: Contains **system commands** (e.g., `ls`, `cat`).
-      - Implemented as **Internal Commands** in `src/utils/terminal/registry`.
-      - Represented in VFS as files containing `#command <name>`.
+      - **Implementation**: Text files containing `#command <name>` (e.g., `ls` -> `#command ls`).
+      - **Execution**: `useTerminalLogic` parses this directive and maps it to `src/utils/terminal/registry.ts`.
     - **`/usr/bin`**: Contains **App Launchers** (e.g., `chrome`, `code`).
-      - Implemented as **App IDs** in `src/config/appRegistry.ts`.
-      - Represented in VFS as files containing `#!app <appId>`.
+      - **Implementation**: Text files containing `#!app <appId>` (e.g., `#!app terminal`).
+      - **Execution**: `useTerminalLogic` parses this directive and launches the corresponding AppID from `src/config/appRegistry.ts`.
     - **Execution**:
       - `useTerminalLogic` resolves input -> checks built-ins -> checks PATH.
       - If `#!app ...` -> Launches Window.
@@ -131,20 +135,19 @@
     - **Simulation**:
       - **Historical Speeds**: Speed tiers based on 802.11 eras: `OPEN` (<1Mbps) < `WEP` (1-5Mbps) < `WPA` (5-15Mbps) < `WPA2` (20-150Mbps) < `WPA3` (150-600+Mbps).
       - **Signal Strength**: Realized speed = `MaxSpeed * (SignalStrength / 100)`. Strength fluctuates dynamically.
-    - **Persistence**: Managed via simulated Scan/Connect logic, but network list regenerates on reload (stateless simulation).
-    - **UI**: `InternetApplet` (Tray), `NetworkSettings` (App), and `AppStore` (Download Speed) all consume this context.
+    - **Persistence**: Managed via simulated Scan/Connect logic, but network list regenerates on reload (stateless simulation). **Session Data Usage**: Stored in `STORAGE_KEYS.NETWORK_USAGE`.
+    - **UI**: 
+      - `InternetApplet` (Tray): Quick actions, visually consistent with system theme.
+      - `NetworkSettings` (App): Detailed connection stats (Signal, Security, Speed), Manual IP config, Data Usage tracking.
+      - `AppStore`: Download speed simulation.
 
-12. **Display & Window Management (Electron)**:
+12. **Display & Window Management**:
     - **Modes**:
-      - **Fullscreen**: Native OS fullscreen (Default).
-      - **Borderless**: Maximized window without chrome/borders.
-      - **Windowed**: Standard window with optional `frame` (title bar) and custom resolution.
-    - **Backend**: `electron/main.ts` manages state via `display-settings.json`.
-      - **Optimization**: Window Recreation logic only triggers when `frame` property changes. Resolution/Mode switches are instant.
-      - **Frameless Resize**: Uses `setBounds` for robust resizing of borderless windows.
-    - **Resolution**:
-      - **Filtering**: `SettingsModal` filters options based on current `window.screen` dimensions.
-      - **Persistence**: Remembers last used settings per mode.
+      - **Electron**: Fullscreen, Borderless, Windowed (with custom resolution/frame).
+      - **Browser**: Fullscreen toggle via `useFullscreen` hook.
+    - **Backend (Electron)**: `electron/main.ts` manages state via `display-settings.json`.
+    - **Frontend**: `DisplaySettings.tsx` provides unified UI for Resolution, Scaling, and Modes.
+      - **Resolution**: Filters options based on screen dimensions.
     - **Bridge**: `useFullscreen` hook unifies Browser (DOM API) and Electron (IPC) logic.
       - **Detection**: "Bulletproof" multi-check (`window.electron` + UA + process) prevents race conditions.
 
@@ -186,6 +189,7 @@
 | `src/components/FileSystemContext.tsx` | **VFS Core**       | Context for all FS operations.                           |
 | `src/utils/fileSystemUtils.ts`         | **VFS Utils**      | `FileNode` types, `initialFileSystem`, permission logic. |
 | `src/components/AppContext.tsx`        | **Session**        | Theme, Wallpapers, Physical User session.                |
+| `src/components/DisplaySettings.tsx`   | **Display**        | Cross-platform display management UI.                    |
 | `src/config/appRegistry.ts`            | **Registry**       | Installed Apps configuration.                            |
 | `src/services/notifications.tsx`       | **Notifications**  | Central service for rich system toasts.                  |
 | `src/services/sound.ts`                | **Sound Manager**  | Global audio state and Howler integration.               |

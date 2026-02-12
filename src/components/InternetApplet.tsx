@@ -22,6 +22,7 @@ export function InternetApplet({ onOpenApp }: InternetAppletProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [expandedNetworkId, setExpandedNetworkId] = useState<string | null>(null);
   const [passwordInput, setPasswordInput] = useState('');
+  const [hoveredButton, setHoveredButton] = useState<string | null>(null);
 
   const {
     wifiEnabled,
@@ -59,11 +60,11 @@ export function InternetApplet({ onOpenApp }: InternetAppletProps) {
       setExpandedNetworkId(null);
     } else {
       if (expandedNetworkId === network.id) {
-         setExpandedNetworkId(null);
-         setPasswordInput('');
+        setExpandedNetworkId(null);
+        setPasswordInput('');
       } else {
-         setExpandedNetworkId(network.id);
-         setPasswordInput('');
+        setExpandedNetworkId(network.id);
+        setPasswordInput('');
       }
     }
   };
@@ -89,7 +90,7 @@ export function InternetApplet({ onOpenApp }: InternetAppletProps) {
             {wifiEnabled ? <Wifi className="w-4 h-4" /> : <WifiOff className="w-4 h-4" />}
           </button>
         </PopoverTrigger>
-        
+
         <PopoverContent
           className={cn(
             "w-80 p-0 overflow-hidden border-white/10 rounded-xl text-white",
@@ -108,18 +109,18 @@ export function InternetApplet({ onOpenApp }: InternetAppletProps) {
             <div className="flex items-center gap-3">
               <div className={cn(
                 "p-2 rounded-full",
-                wifiEnabled ? "bg-blue-500/20" : "bg-white/5"
+                wifiEnabled ? "bg-white/10" : "bg-white/5"
               )}>
-                {wifiEnabled 
-                  ? <Wifi className="w-5 h-5 text-blue-400" style={{ color: accentColor }} /> 
+                {wifiEnabled
+                  ? <Wifi className="w-5 h-5 text-blue-400" style={{ color: accentColor }} />
                   : <WifiOff className="w-5 h-5 text-white/50" />
                 }
               </div>
               <div className="flex flex-col">
                 <span className="font-medium text-sm">{t('settings.network.wifiTitle')}</span>
                 <span className="text-xs text-white/50">
-                  {wifiEnabled 
-                    ? (isScanning ? t('settings.network.scanning') : "On") 
+                  {wifiEnabled
+                    ? (isScanning ? t('settings.network.scanning') : "On")
                     : t('settings.network.wifiDisabled')
                   }
                 </span>
@@ -155,7 +156,7 @@ export function InternetApplet({ onOpenApp }: InternetAppletProps) {
                         <div className={cn("transition-colors", network.connected ? "text-white" : "text-white/50 group-hover:text-white/70")}>
                           {getSignalIcon(network.strength)}
                         </div>
-                        
+
                         <div className="flex flex-col min-w-0 flex-1">
                           <span className={cn(
                             "text-sm font-medium leading-none mb-1.5 truncate",
@@ -182,36 +183,36 @@ export function InternetApplet({ onOpenApp }: InternetAppletProps) {
                           {network.security}
                         </div>
                         {network.security !== 'OPEN' && (
-                           <Lock className="w-3 h-3 text-white/20 ml-0.5" />
+                          <Lock className="w-3 h-3 text-white/20 ml-0.5" />
                         )}
                       </div>
                     </button>
-                    
+
                     {expandedNetworkId === network.id && (
-                       <div className="p-3 bg-white/5 border-t border-white/5 animate-in slide-in-from-top-2 duration-200" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex gap-2">
-                            <GlassInput
-                              type="password"
-                              value={passwordInput}
-                              onChange={(e) => setPasswordInput(e.target.value)}
-                              placeholder={t('settings.network.passwordPlaceholder')}
-                              className="h-8 text-xs bg-black/20"
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') handlePasswordSubmit(network.ssid);
-                                if (e.key === 'Escape') setExpandedNetworkId(null);
-                              }}
-                              autoFocus
-                            />
-                            <GlassButton
-                              onClick={() => handlePasswordSubmit(network.ssid)}
-                              disabled={!passwordInput}
-                              style={{ backgroundColor: accentColor }}
-                              className="h-8 px-3"
-                            >
-                              <ChevronRight className="w-4 h-4" />
-                            </GlassButton>
-                          </div>
+                      <div className="p-3 bg-white/5 border-t border-white/5 animate-in slide-in-from-top-2 duration-200" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex gap-2">
+                          <GlassInput
+                            type="password"
+                            value={passwordInput}
+                            onChange={(e) => setPasswordInput(e.target.value)}
+                            placeholder={t('settings.network.passwordPlaceholder')}
+                            className="h-8 text-xs bg-black/20"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handlePasswordSubmit(network.ssid);
+                              if (e.key === 'Escape') setExpandedNetworkId(null);
+                            }}
+                            autoFocus
+                          />
+                          <GlassButton
+                            onClick={() => handlePasswordSubmit(network.ssid)}
+                            disabled={!passwordInput}
+                            style={{ backgroundColor: accentColor }}
+                            className="h-8 px-3"
+                          >
+                            <ChevronRight className="w-4 h-4" />
+                          </GlassButton>
                         </div>
+                      </div>
                     )}
                   </div>
                 ))}
@@ -221,12 +222,12 @@ export function InternetApplet({ onOpenApp }: InternetAppletProps) {
                     {t('settings.network.wifiNetworks')}
                   </div>
                 )}
-                
+
                 {isScanning && availableNetworks.length === 0 && (
-                   <div className="py-8 flex items-center justify-center gap-2 text-white/40 text-xs">
-                      <RefreshCw className="w-3 h-3 animate-spin" />
-                      {t('settings.network.scanning')}
-                   </div>
+                  <div className="py-8 flex items-center justify-center gap-2 text-white/40 text-xs">
+                    <RefreshCw className="w-3 h-3 animate-spin" />
+                    {t('settings.network.scanning')}
+                  </div>
                 )}
               </>
             ) : (
@@ -242,25 +243,37 @@ export function InternetApplet({ onOpenApp }: InternetAppletProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 text-xs text-white/50 hover:text-white gap-2"
+                className="h-8 text-xs text-white/50 transition-colors gap-2"
                 onClick={scanNetworks}
                 disabled={isScanning}
+                style={{
+                  backgroundColor: hoveredButton === 'scan' ? accentColor : undefined,
+                  color: hoveredButton === 'scan' ? '#fff' : undefined
+                }}
+                onMouseEnter={() => setHoveredButton('scan')}
+                onMouseLeave={() => setHoveredButton(null)}
               >
                 <RefreshCw className={cn("w-3 h-3", isScanning && "animate-spin")} />
                 Scan
               </Button>
 
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 text-xs text-white/50 hover:text-white gap-1"
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 text-xs text-white/50 transition-colors gap-1"
                 onClick={() => {
-                    setIsOpen(false);
-                    onOpenApp?.('settings');
-                     // Navigate specifically to network section if possible (Settings needs to handle this)
-                     // We'll rely on the user navigating or adding a dispatch event
-                     window.dispatchEvent(new CustomEvent('aurora-open-settings-section', { detail: 'network' }));
+                  setIsOpen(false);
+                  onOpenApp?.('settings');
+                  // Navigate specifically to network section if possible (Settings needs to handle this)
+                  // We'll rely on the user navigating or adding a dispatch event
+                  window.dispatchEvent(new CustomEvent('aurora-open-settings-section', { detail: 'network' }));
                 }}
+                style={{
+                  backgroundColor: hoveredButton === 'settings' ? accentColor : undefined,
+                  color: hoveredButton === 'settings' ? '#fff' : undefined
+                }}
+                onMouseEnter={() => setHoveredButton('settings')}
+                onMouseLeave={() => setHoveredButton(null)}
               >
                 <span>{t('settings.sections.network')}</span>
                 <ChevronRight className="w-3 h-3 opacity-50" />

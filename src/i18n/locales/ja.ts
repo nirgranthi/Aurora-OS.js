@@ -176,9 +176,6 @@ export const ja: TranslationDict = {
       "bookmarks": "ブックマーク",
       "mailbox": "メールボックス",
       "message": "メッセージ",
-      "devCenter": "DEVセンター",
-      "tools": "ツール",
-      "image": "画像",
       "conversations": "会話"
     },
     "items": {
@@ -337,7 +334,9 @@ export const ja: TranslationDict = {
     "error": {
       "pageNotFound": "ページが見つかりません",
       "pageNotFoundDesc": "ウェブサイト {{url}} は見つかりませんでした。",
-      "goHome": "ホームへ"
+      "goHome": "ホームへ",
+      "offlineTitle": "No Internet Connection",
+      "offlineDesc": "You are not connected to the internet. Please connect to a network to browse the web."
     }
   },
   "music": {
@@ -1063,16 +1062,11 @@ export const ja: TranslationDict = {
     },
     "network": {
       "wifiTitle": "Wi-Fi",
-      "wifiConnected": "{{network}} に接続済み",
+      "wifinotConnected": "Not Connected",
       "wifiDisabled": "Wi-Fi はオフです",
-      "bluetoothTitle": "Bluetooth",
-      "bluetoothConnected": "{{device}} に接続済み",
-      "bluetoothDisabled": "Bluetooth はオフです",
       "wifiNetworks": "利用可能なネットワーク",
       "scanning": "スキャン中...",
-      "enterPassword": "パスワードを入力",
       "passwordPlaceholder": "パスワード",
-      "connect": "接続",
       "disconnect": "切断",
       "configurationMode": "構成モード",
       "automatic": "自動 (DHCP)",
@@ -1084,21 +1078,12 @@ export const ja: TranslationDict = {
       "gateway": "ゲートウェイ",
       "dns": "DNSサーバー",
       "validateConfig": "構成を検証",
-      "invalidIP": "無効なIPアドレス",
-      "invalidGateway": "無効なゲートウェイ",
-      "invalidSubnetMask": "無効なサブネットマスク",
-      "invalidDNS": "無効なDNSサーバー",
-      "gatewayNotInSubnet": "ゲートウェイがIPアドレスと同じサブネットにありません",
       "configSaved": "ネットワーク構成が正常に保存されました",
       "dhcpAttributionProgress": "DHCP経由でIPアドレスを取得中"
     },
     "placeholders": {
-      "displaysTitle": "ディスプレイ設定",
-      "displaysDescription": "解像度、スケーリング、明るさの制御は近日公開予定。",
       "notificationsTitle": "通知",
       "notificationsDescription": "通知センターの設定は近日公開予定。",
-      "networkTitle": "ネットワーク",
-      "networkDescription": "Wi‑Fi と Bluetooth の設定は近日公開予定。",
       "securityTitle": "セキュリティとプライバシー",
       "securityDescription": "ファイアウォール、権限、プライバシー設定は近日公開予定。",
       "storageTitle": "ストレージ",

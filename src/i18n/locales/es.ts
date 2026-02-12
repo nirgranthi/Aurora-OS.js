@@ -176,9 +176,6 @@ export const es: TranslationDict = {
       "bookmarks": "Marcadores",
       "mailbox": "Buzón",
       "message": "Mensaje",
-      "devCenter": "Centro DEV",
-      "tools": "Herramientas",
-      "image": "Imagen",
       "conversations": "Conversaciones"
     },
     "items": {
@@ -337,7 +334,9 @@ export const es: TranslationDict = {
     "error": {
       "pageNotFound": "Página no encontrada",
       "pageNotFoundDesc": "No se ha podido encontrar el sitio web {{url}}.",
-      "goHome": "Ir al inicio"
+      "goHome": "Ir al inicio",
+      "offlineTitle": "No Internet Connection",
+      "offlineDesc": "You are not connected to the internet. Please connect to a network to browse the web."
     }
   },
   "music": {
@@ -1063,16 +1062,11 @@ export const es: TranslationDict = {
     },
     "network": {
       "wifiTitle": "Wi-Fi",
-      "wifiConnected": "Conectado a {{network}}",
+      "wifinotConnected": "Not Connected",
       "wifiDisabled": "Wi-Fi desactivado",
-      "bluetoothTitle": "Bluetooth",
-      "bluetoothConnected": "Conectado a {{device}}",
-      "bluetoothDisabled": "Bluetooth desactivado",
       "wifiNetworks": "Redes disponibles",
       "scanning": "Buscando...",
-      "enterPassword": "Introducir contraseña",
       "passwordPlaceholder": "Contraseña",
-      "connect": "Conectar",
       "disconnect": "Desconectar",
       "configurationMode": "Modo de configuración",
       "automatic": "Automático (DHCP)",
@@ -1084,21 +1078,12 @@ export const es: TranslationDict = {
       "gateway": "Puerta de enlace",
       "dns": "Servidor DNS",
       "validateConfig": "Validar configuración",
-      "invalidIP": "Dirección IP inválida",
-      "invalidGateway": "Puerta de enlace inválida",
-      "invalidSubnetMask": "Máscara de subred inválida",
-      "invalidDNS": "Servidor DNS inválido",
-      "gatewayNotInSubnet": "La puerta de enlace no está en la misma subred que la dirección IP",
       "configSaved": "Configuración de red guardada con éxito",
       "dhcpAttributionProgress": "Recuperando una dirección IP vía DHCP"
     },
     "placeholders": {
-      "displaysTitle": "Configuración de pantalla",
-      "displaysDescription": "Resolución, escala y brillo próximamente.",
       "notificationsTitle": "Notificaciones",
       "notificationsDescription": "Preferencias del centro de notificaciones próximamente.",
-      "networkTitle": "Red",
-      "networkDescription": "Configuración de Wi‑Fi y Bluetooth próximamente.",
       "securityTitle": "Seguridad y privacidad",
       "securityDescription": "Cortafuegos, permisos y privacidad próximamente.",
       "storageTitle": "Almacenamiento",

@@ -176,9 +176,6 @@ export const de: TranslationDict = {
       "bookmarks": "Lesezeichen",
       "mailbox": "Postfach",
       "message": "Nachricht",
-      "devCenter": "DEV Center",
-      "tools": "Werkzeuge",
-      "image": "Bild",
       "conversations": "Unterhaltungen"
     },
     "items": {
@@ -337,7 +334,9 @@ export const de: TranslationDict = {
     "error": {
       "pageNotFound": "Seite nicht gefunden",
       "pageNotFoundDesc": "Die Webseite {{url}} konnte nicht gefunden werden.",
-      "goHome": "Zur Startseite"
+      "goHome": "Zur Startseite",
+      "offlineTitle": "No Internet Connection",
+      "offlineDesc": "You are not connected to the internet. Please connect to a network to browse the web."
     }
   },
   "music": {
@@ -1063,16 +1062,11 @@ export const de: TranslationDict = {
     },
     "network": {
       "wifiTitle": "WLAN",
-      "wifiConnected": "Verbunden mit {{network}}",
+      "wifinotConnected": "Not Connected",
       "wifiDisabled": "WLAN ist ausgeschaltet",
-      "bluetoothTitle": "Bluetooth",
-      "bluetoothConnected": "Verbunden mit {{device}}",
-      "bluetoothDisabled": "Bluetooth ist ausgeschaltet",
       "wifiNetworks": "Verfügbare Netzwerke",
       "scanning": "Suche läuft...",
-      "enterPassword": "Passwort eingeben",
       "passwordPlaceholder": "Passwort",
-      "connect": "Verbinden",
       "disconnect": "Trennen",
       "configurationMode": "Konfigurationsmodus",
       "automatic": "Automatisch (DHCP)",
@@ -1084,21 +1078,12 @@ export const de: TranslationDict = {
       "gateway": "Gateway",
       "dns": "DNS-Server",
       "validateConfig": "Konfiguration validieren",
-      "invalidIP": "Ungültige IP-Adresse",
-      "invalidGateway": "Ungültiges Gateway",
-      "invalidSubnetMask": "Ungültige Subnetzmaske",
-      "invalidDNS": "Ungültiger DNS-Server",
-      "gatewayNotInSubnet": "Das Gateway befindet sich nicht im selben Subnetz wie die IP-Adresse",
       "configSaved": "Netzwerkkonfiguration erfolgreich gespeichert",
       "dhcpAttributionProgress": "IP-Adresse wird über DHCP abgerufen"
     },
     "placeholders": {
-      "displaysTitle": "Anzeigeeinstellungen",
-      "displaysDescription": "Auflösung, Skalierung und Helligkeitsregler kommen bald.",
       "notificationsTitle": "Benachrichtigungen",
       "notificationsDescription": "Einstellungen für die Mitteilungszentrale kommen bald.",
-      "networkTitle": "Netzwerk",
-      "networkDescription": "WLAN- und Bluetooth-Konfigurationen kommen bald.",
       "securityTitle": "Sicherheit & Datenschutz",
       "securityDescription": "Firewall-, Berechtigungs- und Datenschutzeinstellungen kommen bald.",
       "storageTitle": "Speicher",

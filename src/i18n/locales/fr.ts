@@ -176,9 +176,6 @@ export const fr: TranslationDict = {
       "bookmarks": "Favoris",
       "mailbox": "Boîte aux lettres",
       "message": "Message",
-      "devCenter": "Centre DEV",
-      "tools": "Outils",
-      "image": "Image",
       "conversations": "Conversations"
     },
     "items": {
@@ -337,7 +334,9 @@ export const fr: TranslationDict = {
     "error": {
       "pageNotFound": "Page non trouvée",
       "pageNotFoundDesc": "Le site web {{url}} n'a pas pu être trouvé.",
-      "goHome": "Aller à l'accueil"
+      "goHome": "Aller à l'accueil",
+      "offlineTitle": "No Internet Connection",
+      "offlineDesc": "You are not connected to the internet. Please connect to a network to browse the web."
     }
   },
   "music": {
@@ -1063,16 +1062,11 @@ export const fr: TranslationDict = {
     },
     "network": {
       "wifiTitle": "Wi-Fi",
-      "wifiConnected": "Connecté à {{network}}",
+      "wifinotConnected": "Not Connected",
       "wifiDisabled": "Wi-Fi désactivé",
-      "bluetoothTitle": "Bluetooth",
-      "bluetoothConnected": "Connecté à {{device}}",
-      "bluetoothDisabled": "Bluetooth désactivé",
       "wifiNetworks": "Réseaux disponibles",
       "scanning": "Recherche en cours...",
-      "enterPassword": "Entrer le mot de passe",
       "passwordPlaceholder": "Mot de passe",
-      "connect": "Connecter",
       "disconnect": "Se déconnecter",
       "configurationMode": "Mode de configuration",
       "automatic": "Automatique (DHCP)",
@@ -1084,21 +1078,12 @@ export const fr: TranslationDict = {
       "gateway": "Passerelle",
       "dns": "Serveur DNS",
       "validateConfig": "Valider la configuration",
-      "invalidIP": "Adresse IP invalide",
-      "invalidGateway": "Passerelle invalide",
-      "invalidSubnetMask": "Masque de sous-réseau invalide",
-      "invalidDNS": "Serveur DNS invalide",
-      "gatewayNotInSubnet": "La passerelle n'est pas dans le même sous-réseau que l'adresse IP",
       "configSaved": "Configuration réseau enregistrée avec succès",
       "dhcpAttributionProgress": "Récupération d'une adresse IP via DHCP"
     },
     "placeholders": {
-      "displaysTitle": "Paramètres d’affichage",
-      "displaysDescription": "Résolution, mise à l’échelle et luminosité bientôt disponibles.",
       "notificationsTitle": "Notifications",
       "notificationsDescription": "Préférences du centre de notifications bientôt disponibles.",
-      "networkTitle": "Réseau",
-      "networkDescription": "Configuration Wi‑Fi et Bluetooth bientôt disponible.",
       "securityTitle": "Sécurité et confidentialité",
       "securityDescription": "Pare-feu, permissions et confidentialité bientôt disponibles.",
       "storageTitle": "Stockage",

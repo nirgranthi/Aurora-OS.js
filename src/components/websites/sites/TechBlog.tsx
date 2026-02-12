@@ -38,8 +38,8 @@ const articles: Article[] = [
     bg: 'bg-indigo-50',
     readTime: '1 min read',
     links: [
-        { label: 'Download v0.8.5', url: 'https://github.com/mental-os/Aurora-OS.js/releases', variant: 'primary', icon: Download },
-        { label: 'Star on GitHub', url: 'https://github.com/mental-os/Aurora-OS.js', variant: 'default', icon: Star },
+      { label: 'Download v0.8.5', url: 'https://github.com/mental-os/Aurora-OS.js/releases', variant: 'primary', icon: Download },
+      { label: 'Star on GitHub', url: 'https://github.com/mental-os/Aurora-OS.js', variant: 'default', icon: Star },
     ],
     content: `
       <div class="space-y-6">
@@ -92,8 +92,8 @@ const articles: Article[] = [
     bg: 'bg-amber-50',
     readTime: '2 min read',
     links: [
-        { label: 'Star on GitHub', url: 'https://github.com/mental-os/Aurora-OS.js', variant: 'primary', icon: Star },
-        { label: 'Join Discord', url: 'https://discord.gg/AtAVfRDYhG', variant: 'default', icon: MessageCircle }
+      { label: 'Star on GitHub', url: 'https://github.com/mental-os/Aurora-OS.js', variant: 'primary', icon: Star },
+      { label: 'Join Discord', url: 'https://discord.gg/AtAVfRDYhG', variant: 'default', icon: MessageCircle }
     ],
     content: `
       <div class="space-y-6">
@@ -125,7 +125,7 @@ export function TechBlog(_props: WebsiteProps) {
   const [selectedArticle, setSelectedArticle] = useState<typeof articles[0] | null>(null);
 
   // Prevent scroll propagation when modal is open
-    // Ideally we'd lock body scroll but inside the browser app we just let the overlay cover it
+  // Ideally we'd lock body scroll but inside the browser app we just let the overlay cover it
 
   return (
     <WebsiteLayout bg="bg-gray-50">
@@ -213,7 +213,7 @@ export function TechBlog(_props: WebsiteProps) {
                   <div className="flex items-center gap-3 mt-auto pt-4 border-t border-gray-100">
                     <div className="flex items-center gap-2 text-sm text-gray-600 font-medium">
                       <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center flex-none">
-                         <User className="w-3 h-3 text-gray-500" />
+                        <User className="w-3 h-3 text-gray-500" />
                       </div>
                       <span>{article.author}</span>
                     </div>
@@ -228,28 +228,28 @@ export function TechBlog(_props: WebsiteProps) {
 
         {/* Community / Discord Section */}
         <div className="bg-linear-to-r from-indigo-600 to-purple-600 rounded-2xl p-12 text-center text-white relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-full bg-white/5 backdrop-blur-[1px]" />
-            <div className="relative z-10">
-                <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6 backdrop-blur-md">
-                    <MessageCircle className="w-8 h-8 text-white" />
-                </div>
-                <h2 className="text-3xl font-bold mb-4">Join our Community</h2>
-                <p className="text-indigo-100 mb-8 max-w-md mx-auto text-lg">
-                    Connect with other developers, share your rices, and get direct support from the Aurora OS team.
-                </p>
-                <a 
-                    href="https://discord.gg/AtAVfRDYhG" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-8 py-4 bg-white text-indigo-600 rounded-xl font-bold hover:bg-indigo-50 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
-                >
-                    <MessageCircle className="w-5 h-5" />
-                    Join Discord Server
-                </a>
-                <p className="text-xs text-indigo-200 mt-6">
-                    50+ members • Active daily • Developer support
-                </p>
+          <div className="absolute top-0 left-0 w-full h-full bg-white/5 backdrop-blur-[1px]" />
+          <div className="relative z-10">
+            <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6 backdrop-blur-md">
+              <MessageCircle className="w-8 h-8 text-white" />
             </div>
+            <h2 className="text-3xl font-bold mb-4">Join our Community</h2>
+            <p className="text-indigo-100 mb-8 max-w-md mx-auto text-lg">
+              Connect with other developers, share your rices, and get direct support from the Aurora OS team.
+            </p>
+            <a
+              href="https://discord.gg/AtAVfRDYhG"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-white text-indigo-600 rounded-xl font-bold hover:bg-indigo-50 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+            >
+              <MessageCircle className="w-5 h-5" />
+              Join Discord Server
+            </a>
+            <p className="text-xs text-indigo-200 mt-6">
+              100+ members • Active daily • Developer support
+            </p>
+          </div>
         </div>
       </WebsiteContainer>
 
@@ -257,7 +257,7 @@ export function TechBlog(_props: WebsiteProps) {
         <div className="grid grid-cols-4 gap-8 mb-8">
           <div>
             <h4 className="font-semibold text-gray-900 mb-4">Categories</h4>
-             {/* ... footer content same ... */}
+            {/* ... footer content same ... */}
             <div className="space-y-2 text-sm text-gray-600">
               <div>Web Development</div>
               <div>Mobile Apps</div>
@@ -306,97 +306,97 @@ export function TechBlog(_props: WebsiteProps) {
       <AnimatePresence>
         {selectedArticle && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 @md:p-8">
-            <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setSelectedArticle(null)}
-                className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedArticle(null)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
             />
             <motion.div
-                initial={{ opacity: 0, y: 50, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 50, scale: 0.95 }}
-                onClick={(e: any) => e.stopPropagation()}
-                onMouseDown={(e: any) => e.stopPropagation()}
-                className="bg-white w-full max-w-4xl max-h-[90%] rounded-2xl shadow-2xl relative z-10 flex flex-col overflow-hidden"
+              initial={{ opacity: 0, y: 50, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 50, scale: 0.95 }}
+              onClick={(e: any) => e.stopPropagation()}
+              onMouseDown={(e: any) => e.stopPropagation()}
+              className="bg-white w-full max-w-4xl max-h-[90%] rounded-2xl shadow-2xl relative z-10 flex flex-col overflow-hidden"
             >
-                {/* Modal Header */}
-                <div className="p-6 border-b border-gray-100 flex-none bg-white flex items-start justify-between">
-                     <div className="pr-8">
-                        <div className="flex items-center gap-2 mb-3">
-                            <span className={`text-xs font-bold ${selectedArticle.color} px-2 py-1 bg-gray-100 rounded-md uppercase tracking-wide`}>
-                                {selectedArticle.category}
-                            </span>
-                             <span className="text-gray-300">•</span>
-                            <span className="text-xs text-gray-500 flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                {selectedArticle.readTime}
-                            </span>
-                        </div>
-                        <h2 className="text-2xl @md:text-3xl font-bold text-gray-900 leading-tight">
-                            {selectedArticle.title}
-                        </h2>
-                     </div>
-                     <button 
-                        onClick={() => setSelectedArticle(null)}
-                        className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500"
-                    >
-                        <X className="w-6 h-6" />
-                     </button>
+              {/* Modal Header */}
+              <div className="p-6 border-b border-gray-100 flex-none bg-white flex items-start justify-between">
+                <div className="pr-8">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className={`text-xs font-bold ${selectedArticle.color} px-2 py-1 bg-gray-100 rounded-md uppercase tracking-wide`}>
+                      {selectedArticle.category}
+                    </span>
+                    <span className="text-gray-300">•</span>
+                    <span className="text-xs text-gray-500 flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {selectedArticle.readTime}
+                    </span>
+                  </div>
+                  <h2 className="text-2xl @md:text-3xl font-bold text-gray-900 leading-tight">
+                    {selectedArticle.title}
+                  </h2>
                 </div>
+                <button
+                  onClick={() => setSelectedArticle(null)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
 
-                {/* Modal Content */}
-                <div className="flex-1 overflow-y-auto p-6 @md:p-10">
-                    <div className="flex items-center justify-between mb-8 pb-8 border-b border-gray-100">
-                        <div className="flex items-center gap-3">
-                             <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                                <User className="w-5 h-5 text-gray-500" />
-                            </div>
-                            <div>
-                                <div className="font-semibold text-gray-900">{selectedArticle.author}</div>
-                                <div className="text-xs text-gray-500">{selectedArticle.date}</div>
-                            </div>
-                        </div>
-                        <div className="flex gap-2">
-                             <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                                <Share2 className="w-5 h-5" />
-                             </button>
-                             <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                                <Bookmark className="w-5 h-5" />
-                             </button>
-                        </div>
+              {/* Modal Content */}
+              <div className="flex-1 overflow-y-auto p-6 @md:p-10">
+                <div className="flex items-center justify-between mb-8 pb-8 border-b border-gray-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                      <User className="w-5 h-5 text-gray-500" />
                     </div>
-
-                    <div 
-                        className="prose prose-blue max-w-none text-gray-600 prose-headings:font-bold prose-headings:text-gray-900 select-text cursor-text"
-                        dangerouslySetInnerHTML={{ __html: selectedArticle.content! }}
-                    />
-
-                    {/* Action Links */}
-                    {(selectedArticle as any).links && (
-                        <div className="flex flex-wrap gap-3 mt-10 pt-8 border-t border-gray-100">
-                            {(selectedArticle as any).links.map((link: any, i: number) => (
-                                <a 
-                                    key={i}
-                                    href={link.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className={cn(
-                                        "px-5 py-2.5 font-medium rounded-xl text-sm inline-flex items-center gap-2 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5",
-                                        link.variant === 'primary' 
-                                            ? "bg-gray-900 text-white hover:bg-gray-800 shadow-gray-900/20" 
-                                            : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
-                                    )}
-                                >
-                                    {link.icon && <link.icon className="w-4 h-4" />}
-                                    <span>{link.label}</span>
-                                    {link.variant === 'primary' && <ArrowRight className="w-4 h-4 opacity-50" />}
-                                </a>
-                            ))}
-                        </div>
-                    )}
+                    <div>
+                      <div className="font-semibold text-gray-900">{selectedArticle.author}</div>
+                      <div className="text-xs text-gray-500">{selectedArticle.date}</div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                      <Share2 className="w-5 h-5" />
+                    </button>
+                    <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                      <Bookmark className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
+
+                <div
+                  className="prose prose-blue max-w-none text-gray-600 prose-headings:font-bold prose-headings:text-gray-900 select-text cursor-text"
+                  dangerouslySetInnerHTML={{ __html: selectedArticle.content! }}
+                />
+
+                {/* Action Links */}
+                {(selectedArticle as any).links && (
+                  <div className="flex flex-wrap gap-3 mt-10 pt-8 border-t border-gray-100">
+                    {(selectedArticle as any).links.map((link: any, i: number) => (
+                      <a
+                        key={i}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={cn(
+                          "px-5 py-2.5 font-medium rounded-xl text-sm inline-flex items-center gap-2 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5",
+                          link.variant === 'primary'
+                            ? "bg-gray-900 text-white hover:bg-gray-800 shadow-gray-900/20"
+                            : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+                        )}
+                      >
+                        {link.icon && <link.icon className="w-4 h-4" />}
+                        <span>{link.label}</span>
+                        {link.variant === 'primary' && <ArrowRight className="w-4 h-4 opacity-50" />}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
             </motion.div>
           </div>
         )}

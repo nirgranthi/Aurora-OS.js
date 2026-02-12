@@ -20,7 +20,7 @@ interface AppStoreProps {
 }
 
 export function AppStore({ owner, onOpenApp }: AppStoreProps) {
-    const { accentColor } = useAppContext();
+    const { accentColor, devMode } = useAppContext();
     const { t } = useI18n();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<'all' | AppMetadata['category']>('all');
@@ -32,17 +32,17 @@ export function AppStore({ owner, onOpenApp }: AppStoreProps) {
     // Prevent window close if installing
     const installingAppsCount = Object.keys(installingApps).length;
     const installingAppsRef = useRef(installingAppsCount);
-    
+
     useEffect(() => {
         installingAppsRef.current = installingAppsCount;
     }, [installingAppsCount]);
 
     useEffect(() => {
         if (!windowContext) return;
-        
+
         windowContext.setBeforeClose(() => async () => {
             if (installingAppsRef.current > 0) {
-                 notify.system(
+                notify.system(
                     'warning',
                     'App Store',
                     t('appStore.installingWarning'),
@@ -79,8 +79,12 @@ export function AppStore({ owner, onOpenApp }: AppStoreProps) {
             );
         }
 
+        if (!devMode) {
+            apps = apps.filter(app => app.id !== 'dev-center');
+        }
+
         return apps;
-    }, [searchQuery, selectedCategory, t]);
+    }, [searchQuery, selectedCategory, t, devMode]);
 
     return (
         <AppTemplate

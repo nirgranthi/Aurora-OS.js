@@ -176,9 +176,6 @@ export const ru: TranslationDict = {
       "bookmarks": "Закладки",
       "mailbox": "Почтовый ящик",
       "message": "Сообщение",
-      "devCenter": "DEV Центр",
-      "tools": "Инструменты",
-      "image": "Изображение",
       "conversations": "Разговоры"
     },
     "items": {
@@ -337,7 +334,9 @@ export const ru: TranslationDict = {
     "error": {
       "pageNotFound": "Страница не найдена",
       "pageNotFoundDesc": "Веб-сайт {{url}} не найден.",
-      "goHome": "На главную"
+      "goHome": "На главную",
+      "offlineTitle": "No Internet Connection",
+      "offlineDesc": "You are not connected to the internet. Please connect to a network to browse the web."
     }
   },
   "music": {
@@ -1063,16 +1062,11 @@ export const ru: TranslationDict = {
     },
     "network": {
       "wifiTitle": "Wi-Fi",
-      "wifiConnected": "Подключено к {{network}}",
+      "wifinotConnected": "Not Connected",
       "wifiDisabled": "Wi-Fi выключен",
-      "bluetoothTitle": "Bluetooth",
-      "bluetoothConnected": "Подключено к {{device}}",
-      "bluetoothDisabled": "Bluetooth выключен",
       "wifiNetworks": "Доступные сети",
       "scanning": "Сканирование...",
-      "enterPassword": "Введите пароль",
       "passwordPlaceholder": "Пароль",
-      "connect": "Подключить",
       "disconnect": "Отключить",
       "configurationMode": "Режим настройки",
       "automatic": "Автоматически (DHCP)",
@@ -1084,21 +1078,12 @@ export const ru: TranslationDict = {
       "gateway": "Шлюз",
       "dns": "DNS-сервер",
       "validateConfig": "Проверить настройки",
-      "invalidIP": "Неверный IP-адрес",
-      "invalidGateway": "Неверный шлюз",
-      "invalidSubnetMask": "Неверная маска подсети",
-      "invalidDNS": "Неверный DNS-сервер",
-      "gatewayNotInSubnet": "Шлюз находится не в той же подсети, что и IP-адрес",
       "configSaved": "Настройки сети успешно сохранены",
       "dhcpAttributionProgress": "Получение IP-адреса через DHCP"
     },
     "placeholders": {
-      "displaysTitle": "Настройки дисплея",
-      "displaysDescription": "Разрешение, масштабирование и яркость скоро появятся.",
       "notificationsTitle": "Уведомления",
       "notificationsDescription": "Настройки центра уведомлений скоро появятся.",
-      "networkTitle": "Сеть",
-      "networkDescription": "Настройки Wi‑Fi и Bluetooth скоро появятся.",
       "securityTitle": "Безопасность и Приватность",
       "securityDescription": "Брандмауэр, права доступа и настройки приватности скоро появятся.",
       "storageTitle": "Хранилище",

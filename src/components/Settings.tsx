@@ -13,6 +13,7 @@ import { GlassInput } from '@/components/ui/GlassInput';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useSessionStorage } from '@/hooks/useSessionStorage';
 import { NetworkSettings } from '@/components/NetworkSettings';
+import { DisplaySettings } from '@/components/DisplaySettings';
 import {
   Select,
   SelectContent,
@@ -538,16 +539,7 @@ export function Settings({ owner }: { owner?: string }) {
         )}
 
         {activeSection === 'displays' && (
-          <div>
-            <h2 className="text-2xl text-white mb-6">{t('settings.sections.displays')}</h2>
-            <div className="bg-black/20 rounded-xl border border-white/5">
-              <EmptyState
-                icon={Monitor}
-                title={t('settings.placeholders.displaysTitle')}
-                description={t('settings.placeholders.displaysDescription')}
-              />
-            </div>
-          </div>
+          <DisplaySettings />
         )}
 
         {activeSection === 'notifications' && (

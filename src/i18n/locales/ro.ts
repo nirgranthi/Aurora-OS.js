@@ -176,9 +176,6 @@ export const ro: TranslationDict = {
       "bookmarks": "Marcaje",
       "mailbox": "Cutie poștală",
       "message": "Mesaje",
-      "devCenter": "Centru DEV",
-      "tools": "Unelte",
-      "image": "Imagine",
       "conversations": "Conversații"
     },
     "items": {
@@ -337,7 +334,9 @@ export const ro: TranslationDict = {
     "error": {
       "pageNotFound": "Pagina nu a fost găsită",
       "pageNotFoundDesc": "Site-ul web {{url}} nu a putut fi găsit.",
-      "goHome": "Mergi la pagina principală"
+      "goHome": "Mergi la pagina principală",
+      "offlineTitle": "No Internet Connection",
+      "offlineDesc": "You are not connected to the internet. Please connect to a network to browse the web."
     }
   },
   "music": {
@@ -1063,16 +1062,11 @@ export const ro: TranslationDict = {
     },
     "network": {
       "wifiTitle": "Wi-Fi",
-      "wifiConnected": "Conectat la {{network}}",
+      "wifinotConnected": "Not Connected",
       "wifiDisabled": "Wi-Fi dezactivat",
-      "bluetoothTitle": "Bluetooth",
-      "bluetoothConnected": "Conectat la {{device}}",
-      "bluetoothDisabled": "Bluetooth dezactivat",
       "wifiNetworks": "Rețele disponibile",
       "scanning": "Căutare în curs...",
-      "enterPassword": "Introduceți parola",
       "passwordPlaceholder": "Parolă",
-      "connect": "Conectare",
       "disconnect": "Deconectare",
       "configurationMode": "Mod de configurare",
       "automatic": "Automat (DHCP)",
@@ -1084,21 +1078,12 @@ export const ro: TranslationDict = {
       "gateway": "Gateway",
       "dns": "Server DNS",
       "validateConfig": "Validare configurație",
-      "invalidIP": "Adresă IP invalidă",
-      "invalidGateway": "Gateway invalid",
-      "invalidSubnetMask": "Mască de subrețea invalidă",
-      "invalidDNS": "Server DNS invalid",
-      "gatewayNotInSubnet": "Gateway-ul nu este în aceeași subrețea cu adresa IP",
       "configSaved": "Configurație de rețea salvată cu succes",
       "dhcpAttributionProgress": "Se recuperează o adresă IP prin DHCP"
     },
     "placeholders": {
-      "displaysTitle": "Setări Ecran",
-      "displaysDescription": "Rezoluție, scalare și luminozitate în curând.",
       "notificationsTitle": "Notificări",
       "notificationsDescription": "Preferințe centru de notificări în curând.",
-      "networkTitle": "Rețea",
-      "networkDescription": "Configurări Wi‑Fi și Bluetooth în curând.",
       "securityTitle": "Securitate & Confidențialitate",
       "securityDescription": "Firewall, permisiuni și setări de confidențialitate în curând.",
       "storageTitle": "Stocare",
