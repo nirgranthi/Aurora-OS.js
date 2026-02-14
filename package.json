@@ -3,7 +3,10 @@
       "version": "0.8.5",
       "private": true,
       "type": "module",
-      "author": "Dope Pixels",
+      "author": {
+            "name": "Cătălin-Robert Drăgoiu",
+            "email": "mentalos@proton.me"
+      },
       "nickname": "mental.os()",
       "license": "AGPL-3.0",
       "description": "A high-fidelity OS hacking simulator set in the mental.os() universe.",
@@ -34,7 +37,7 @@
       },
       "contributors": [
             {
-                  "name": "Cătălin-Robert Drăgoiu aka. mental.os()",
+                  "name": "Cătălin-Robert Drăgoiu",
                   "email": "mentalos@proton.me",
                   "url": "https://github.com/mental-os"
             }
@@ -149,7 +152,7 @@
             "asar": true,
             "compression": "maximum",
             "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
-            "copyright": "Copyright ©2026 Drăgoiu Cătălin-Robert aka. mental.os() // Dope Pixels",
+            "copyright": "Copyright ©2026 Dope Pixels & MOONHOUND Studio",
             "electronFuses": {
                   "runAsNode": false,
                   "enableCookieEncryption": true,
@@ -171,11 +174,13 @@
                   "dist-electron/**/*"
             ],
             "win": {
+                  "publisherName": "MOONHOUND Studio",
                   "target": "nsis",
                   "icon": "public/icon.ico",
                   "verifyUpdateCodeSignature": false
             },
             "nsis": {
+                  "publisherName": "MOONHOUND Studio",
                   "menuCategory": "Dope Pixels",
                   "oneClick": false,
                   "allowToChangeInstallationDirectory": true,
@@ -225,6 +230,7 @@
                         "AppImage",
                         "deb"
                   ],
+                  "maintainer": "Cătălin-Robert Drăgoiu <mentalos@proton.me>",
                   "icon": "public/icon.png",
                   "category": "Game",
                   "synopsis": "Hacking simulator game",
