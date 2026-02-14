@@ -57,11 +57,11 @@ Deliver a **functional desktop OS** with real applications and natural usability
 
 ### Milestones
 
-- `0.1.0` — Early functional desktop
-- `0.3.0` — Core UX stabilized
-- `0.5.0` — Desktop usable, core apps functional
-- `0.6.0` — OS usable end-to-end
-- `0.8.5` — Pre-alpha release with fluid experience
+- **`0.1.0` — Early functional desktop**
+- **`0.3.0` — Core UX stabilized**
+- **`0.5.0` — Desktop usable, core apps functional**
+- **`0.6.0` — OS usable end-to-end**
+- **`0.8.5` — Pre-alpha release with fluid experience**
 - `0.9.x` — Game systems begin to integrate
 
 ---
