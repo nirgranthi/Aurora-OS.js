@@ -76,7 +76,16 @@ jobs:
 
       - name: Sync version
         run: |
-          npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+          TARGET_VERSION=${{ steps.version.outputs.version }}
+          STRIPPED_VERSION=${TARGET_VERSION#v}
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          
+          if [ "$CURRENT_VERSION" != "$STRIPPED_VERSION" ]; then
+            npm version $TARGET_VERSION --no-git-tag-version
+          else
+            echo "Version already matches $CURRENT_VERSION"
+          fi
+        shell: bash
 
       - name: Create Release Draft
         # Creating a draft release explicitly ensures we have a target for all runners.
