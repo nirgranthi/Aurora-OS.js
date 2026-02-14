@@ -151,7 +151,7 @@
             "productName": "Aurora OS.js",
             "asar": true,
             "compression": "maximum",
-            "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+            "artifactName": "${productName}-${version}-${os}-${arch}-${target}.${ext}",
             "copyright": "Copyright ©2026 Dope Pixels & MOONHOUND Studio",
             "electronFuses": {
                   "runAsNode": false,
@@ -164,7 +164,8 @@
             "publish": {
                   "provider": "github",
                   "owner": "mental-os",
-                  "repo": "Aurora-OS.js"
+                  "repo": "Aurora-OS.js",
+                  "timeout": 300000
             },
             "directories": {
                   "output": "release"

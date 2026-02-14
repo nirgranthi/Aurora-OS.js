@@ -115,3 +115,4 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Increase stability for uploads
           NODE_OPTIONS: --max-old-space-size=4096
+          ELECTRON_BUILDER_UPLOAD_RETRY_COUNT: 5
