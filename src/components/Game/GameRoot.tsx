@@ -3,10 +3,10 @@ import { IntroSequence } from '@/components/Game/IntroSequence';
 import { MainMenu } from '@/components/Game/MainMenu';
 import { BootSequence } from '@/components/Game/BootSequence';
 import { useFileSystem } from '@/components/FileSystemContext';
-import { useAppContext, SystemConfig } from '@/components/AppContext';
-import { PERSISTENT_CONFIG_KEYS } from '@/config/systemConfig';
+import { useAppContext } from '@/components/AppContext';
 
-import { STORAGE_KEYS } from '@/utils/memory';
+
+import { STORAGE_KEYS, memory, hardReset, saveGame } from '@/utils/memory';
 import { Onboarding } from "@/components/Game/Onboarding.tsx";
 
 import { StorageIndicator } from '@/components/ui/StorageIndicator';
@@ -20,12 +20,17 @@ interface GameRootProps {
 type GameState = 'INTRO' | 'MENU' | 'FIRST_BOOT' | 'BOOT' | 'ONBOARDING' | 'GAMEPLAY';
 
 export function GameRoot({ children }: GameRootProps) {
-    const [gameState, setGameState] = useState<GameState>('INTRO'); // Default to INTRO
+    const [gameState, setGameState] = useState<GameState>('INTRO');
+    // Memory is now initialized in main.tsx before render
+    const [isMemoryReady] = useState(true);
+    
     const { resetFileSystem } = useFileSystem();
     const appContext = useAppContext();
-    const { setIsLocked, resetSystemConfig } = appContext;
+    const { setIsLocked } = appContext;
 
-    // Global click sound (Persistent across all game states: Menu, Intro, Desktop, etc.)
+    // Memory initialization moved to main.tsx for synchronous hydration
+
+    // Global click sound
     useEffect(() => {
         const handleGlobalClick = () => {
             feedback.click();
@@ -34,44 +39,35 @@ export function GameRoot({ children }: GameRootProps) {
         return () => window.removeEventListener('click', handleGlobalClick);
     }, []);
 
-    // Signal Electron that the React app is ready (closes splash screen)
+    // Signal Electron
     useEffect(() => {
-        // @ts-expect-error - window.electron is only available in Electron runtime
         window.electron?.signalReady?.();
     }, []);
 
     // Check for save data
     const { onboardingComplete } = appContext;
     const hasSave = useMemo(() => {
+        if (!isMemoryReady) return false;
         // Check for FILESYSTEM AND Onboarding Status
-        // A valid game requires both the FS to exist and the user to have finished setup.
-        // This prevents "Continue" from being active on a fresh (wiped) FS.
-        const fsExists = !!localStorage.getItem(STORAGE_KEYS.FILESYSTEM);
+        const fsExists = !!memory.getItem(STORAGE_KEYS.FILESYSTEM);
         return fsExists && onboardingComplete;
-    }, [onboardingComplete]);
+    }, [onboardingComplete, isMemoryReady]);
 
-    const handleNewGame = () => {
-        // hardReset() is now handled internally by resetFileSystem()
-        // which resets both localStorage and in-memory React state
+    const handleNewGame = async () => {
+        // Hard Reset: Wipe OS/HDD + Session (Keep BIOS)
+        await hardReset(); 
+        
+        // Re-init FileSystem Context to defaults (since keys are gone)
         resetFileSystem(true);
-
-        // Preserve "BIOS" settings (Graphics/Hardware/Language) dynamically
-        const biosSettings: Partial<SystemConfig> = {};
-        PERSISTENT_CONFIG_KEYS.forEach((key) => {
-            if (appContext[key] !== undefined) {
-                // @ts-expect-error - Dynamic key assignment to Partial<SystemConfig>
-                biosSettings[key] = appContext[key];
-            }
-        });
-
-        resetSystemConfig(biosSettings);
 
         setIsLocked(false);
         setGameState('FIRST_BOOT');
+        
+        // Force save empty state (Optional but good for immediate persistence)
+        await saveGame();
     };
 
     const handleContinue = () => {
-        // Force lock so that even if a user is remembered, we show the Login Screen
         setIsLocked(true);
         setGameState('BOOT');
     };
@@ -85,9 +81,9 @@ export function GameRoot({ children }: GameRootProps) {
         setGameState('GAMEPLAY');
     };
 
-    // Override: If user refreshes page during gameplay, should we go back to menu?
-    // User requested "Video Game Flow". Usually games go to intro/menu on refresh.
-    // So default behavior is correct.
+    if (!isMemoryReady) {
+        return <div className="fixed inset-0 bg-black" />; // Loading state
+    }
 
     return (
         <div className="fixed inset-0 w-full h-full bg-black text-white overflow-hidden">
@@ -132,3 +128,5 @@ export function GameRoot({ children }: GameRootProps) {
         </div>
     );
 }
+
+

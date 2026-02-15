@@ -214,6 +214,8 @@ export const fr: TranslationDict = {
       "switchUser": "Changer d’utilisateur",
       "user": "Utilisateur",
       "logOutAs": "Déconnexion : {{username}}",
+      "restart": "Redémarrer...",
+      "restartDescription": "Redémarrer le système (Effacer la session)",
       "viewSystemInfo": "Voir les informations système",
       "viewSystemSettings": "Voir les réglages système",
       "returnToLoginWhile": "Retourner à l’écran de connexion en",

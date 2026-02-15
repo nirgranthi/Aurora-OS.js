@@ -214,6 +214,8 @@ export const zh: TranslationDict = {
       "switchUser": "切换用户",
       "user": "用户",
       "logOutAs": "登出：{{username}}",
+      "restart": "重启...",
+      "restartDescription": "重启系统 (清除会话)",
       "viewSystemInfo": "查看系统信息",
       "viewSystemSettings": "查看系统设置",
       "returnToLoginWhile": "返回登录界面时",

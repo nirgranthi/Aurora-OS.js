@@ -214,6 +214,8 @@ export const pl: TranslationDict = {
       "switchUser": "Przełącz użytkownika",
       "user": "Użytkownik",
       "logOutAs": "Wyloguj: {{username}}",
+      "restart": "Uruchom ponownie...",
+      "restartDescription": "Uruchom ponownie system (Wyczyść sesję)",
       "viewSystemInfo": "Wyświetl informacje o systemie",
       "viewSystemSettings": "Wyświetl ustawienia systemowe",
       "returnToLoginWhile": "Wróć do ekranu logowania,",

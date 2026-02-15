@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useTerminalLogic } from '../hooks/useTerminalLogic';
 import { FileSystemProvider, useFileSystem } from '../components/FileSystemContext';
 import { AppProvider } from '../components/AppContext';
-import { STORAGE_KEYS } from '../utils/memory';
+import { STORAGE_KEYS, memory } from '../utils/memory';
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -155,7 +155,7 @@ describe('useTerminalLogic', () => {
             expect(last?.output.join(' ')).toContain('a+b.txt');
         });
     });
-    it('persists history to localStorage', async () => {
+    it('persists history to memory', async () => {
         const { result } = renderHook(() => {
             const fs = useFileSystem();
             const terminal = useTerminalLogic(undefined, 'user');
@@ -168,8 +168,7 @@ describe('useTerminalLogic', () => {
         await act(async () => { result.current.fs.addUser('user', 'User', '1234'); });
         await act(async () => { result.current.fs.login('user', '1234'); });
 
-        // Calculate initial call count to account for internal state updates
-        // const initialSetItemCalls = vi.mocked(localStorage.setItem).mock.calls.length;
+        const setItemSpy = vi.spyOn(memory, 'setItem');
 
         // Execute command
         await act(async () => {
@@ -179,9 +178,9 @@ describe('useTerminalLogic', () => {
             result.current.terminal.handleKeyDown({ key: 'Enter', preventDefault: () => { } } as any);
         });
 
-        // Verify localStorage was updated with the new key format
+        // Verify memory was updated with the new key format
         await waitFor(() => {
-            expect(localStorage.setItem).toHaveBeenCalledWith(
+            expect(setItemSpy).toHaveBeenCalledWith(
                 `${STORAGE_KEYS.TERM_HISTORY_PREFIX}user`,
                 expect.stringContaining('persistence_test')
             );

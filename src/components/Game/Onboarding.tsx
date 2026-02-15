@@ -10,10 +10,11 @@ import { GlassButton } from "@/components/ui/GlassButton";
 import { cn } from "@/components/ui/utils";
 import { SUPPORTED_LOCALES } from "@/i18n/translations";
 import { useI18n } from "@/i18n/index";
-import { STORAGE_KEYS } from "@/utils/memory";
+import { memory, STORAGE_KEYS, forceSaveGame, updateStoredVersion } from "@/utils/memory";
+import { safeParseLocal } from "@/utils/safeStorage";
 
-import { updateStoredVersion } from "@/utils/migrations";
 import { BRAND } from "@/config/systemConfig";
+import { DEFAULT_SYSTEM_CONFIG } from "@/components/AppContext";
 
 interface OnboardingProps {
     onContinue: () => void;
@@ -147,14 +148,27 @@ export function Onboarding({ onContinue, onBack }: OnboardingProps) {
                 setAccentColor(previewAccent);
 
                 // 5. Mark Complete & Save
+                // CRITICAL: We explicitly set items in memoryCache BEFORE forceSaveGame
+                // to ensure the snapshot captures the final state immediately.
+                // The AppContext effects will eventually sync these back to React state.
                 try {
-                    localStorage.setItem(STORAGE_KEYS.LANGUAGE, locale);
-                    localStorage.setItem(STORAGE_KEYS.INSTALL_DATE, new Date().toISOString());
-                } catch (e) { console.warn(e) }
+                    memory.setItem(STORAGE_KEYS.LANGUAGE, locale);
+                    memory.setItem(STORAGE_KEYS.INSTALL_DATE, new Date().toISOString());
+                    
+                    // Force-sync System Config with the new onboarding status
+                    const currentConfig = safeParseLocal<any>(STORAGE_KEYS.SYSTEM_CONFIG) || DEFAULT_SYSTEM_CONFIG;
+                    memory.setItem(STORAGE_KEYS.SYSTEM_CONFIG, JSON.stringify({
+                        ...currentConfig,
+                        onboardingComplete: true
+                    }));
+                } catch (e) { console.warn('Failed to pre-sync memory during onboarding:', e) }
 
                 setOnboardingComplete(true);
                 updateStoredVersion(); // Commit session
-                saveFileSystem(); // Force write to disk
+                saveFileSystem(); // Force write to cache
+                
+                // Now force save the physical game data
+                forceSaveGame(); 
 
                 // 6. Continue to Game
                 setTimeout(() => {

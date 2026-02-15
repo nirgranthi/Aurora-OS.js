@@ -214,6 +214,8 @@ export const pt: TranslationDict = {
       "switchUser": "Trocar Usuário",
       "user": "Usuário",
       "logOutAs": "Sair como: {{username}}",
+      "restart": "Reiniciar...",
+      "restartDescription": "Reiniciar o sistema (Limpar sessão)",
       "viewSystemInfo": "Ver informações do sistema",
       "viewSystemSettings": "Ver ajustes do sistema",
       "returnToLoginWhile": "Retornar à tela de login enquanto",

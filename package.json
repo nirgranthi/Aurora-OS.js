@@ -1,6 +1,6 @@
 {
       "name": "aurora-os-js",
-      "version": "0.8.5",
+      "version": "0.8.6",
       "private": true,
       "type": "module",
       "author": {
@@ -141,10 +141,10 @@
             "electron:build": "npm run build && npm run ts:electron && electron-builder",
             "electron:build:all": "npm run build && npm run ts:electron && electron-builder -mwl",
             "test": "vitest",
-            "translations:generate": "tsx scripts/ts-to-json.ts",
-            "translations:validate": "tsx scripts/validate-translations.ts",
-            "translations:build": "npm run translations:validate && tsx scripts/json-to-ts.ts",
-            "translations:build:changed": "npm run translations:validate && tsx scripts/json-to-ts.ts --changed"
+            "translations:generate": "tsx .scripts/ts-to-json.ts",
+            "translations:validate": "tsx .scripts/validate-translations.ts",
+            "translations:build": "npm run translations:validate && tsx .scripts/json-to-ts.ts",
+            "translations:build:changed": "npm run translations:validate && tsx .scripts/json-to-ts.ts --changed"
       },
       "build": {
             "appId": "com.auroraos.app",

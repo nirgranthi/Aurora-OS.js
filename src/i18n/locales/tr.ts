@@ -214,6 +214,8 @@ export const tr: TranslationDict = {
       "switchUser": "Kullanıcı Değiştir",
       "user": "Kullanıcı",
       "logOutAs": "Oturumu Kapat: {{username}}",
+      "restart": "Yeniden Başlat...",
+      "restartDescription": "Sistemi yeniden başlat (Oturumu Temizle)",
       "viewSystemInfo": "Sistem Bilgilerini Görüntüle",
       "viewSystemSettings": "Sistem Ayarlarını Görüntüle",
       "returnToLoginWhile": "Oturum açma ekranına dön,",

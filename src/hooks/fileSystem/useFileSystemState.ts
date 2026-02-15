@@ -3,14 +3,11 @@ import {
     FileNode,
     deepCloneFileSystem,
     ensureIds,
-    initialFileSystem
-} from '../../utils/fileSystemUtils';
-import {
-    checkMigrationNeeded,
+    initialFileSystem,
     migrateFileSystem
-} from '../../utils/migrations';
+} from '../../utils/fileSystemUtils';
 import { validateIntegrity } from '../../utils/integrity';
-import { hardReset, STORAGE_KEYS } from '../../utils/memory';
+import { hardReset, memory, STORAGE_KEYS, checkMigrationNeeded } from '../../utils/memory';
 import { safeParseLocal } from '../../utils/safeStorage';
 import { useDebounce } from '../useDebounce';
 
@@ -34,7 +31,7 @@ function loadFileSystem(): FileNode {
 
 function saveFileSystemToStorage(fs: FileNode): void {
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(fs));
+        memory.setItem(STORAGE_KEY, JSON.stringify(fs));
     } catch (e) {
         console.warn('Failed to save filesystem to storage:', e);
     }

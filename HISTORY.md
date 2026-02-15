@@ -1,3 +1,35 @@
+## 0.8.6
+
+### Added
+
+- **Tiered Storage Architecture:** Implemented a new 3-tier storage model (`memory.ts`) separating **BIOS** (System Config), **HDD** (Files/Users), and **RAM** (Session State).
+- **Universal Snapshotting**: Refactored `SnapshotEngine` to dynamically capture all application state (Notepad tabs, Finder navigation) without hardcoded key lists.
+- **Emergency Protection**: Added a synchronous `emergencySave` buffer (localStorage) triggered on `beforeunload` to prevent data loss during refreshes and crashes.
+- **Physical I/O Indicators**: Redesigned the "Hard Drive" indicator to reflect actual disk/IndexedDB activity instead of in-memory access.
+- **Session Persistence:** Added "Crash Proof" session handling. Windows and Terminal history now survive reloads via auto-save.
+- **Compression:** Added GZIP compression for Electron save files to reduce disk usage and obfuscate data.
+- **Restart Action:** Added "Restart" option to System Menu (performs a Soft Reset).
+- **Translations:** Added missing `restart` and `restartDescription` keys for all 12 supported locales.
+
+### Improved
+
+- **Refactor:** Replaced all direct `localStorage` usage with the new `memory` API for better state management and testing.
+- **Locked-Pair Pattern**: Implemented atomic state-key management in `useAppStorage` and `useSessionStorage` to eliminate race conditions during rapid user switching.
+- **I/O Efficiency**: Added "Dirty Checking" to `memory.setItem` to bypass redundant disk writes if data hasn't changed.
+- **Save Latency**: Reduced global auto-save debounce to 100ms for near-instant persistence.
+- **Session Continuity**: Improved `GameRoot.tsx` to restore active sessions after refreshes, bypassing the full intro sequence.
+- **Project Structure:** Moved build scripts to `.scripts/` and consolidated types into `src/types/index.ts`.
+- **Resource Monitor:** Moved `resourceMonitor.ts` to `src/services/` for better architectural alignment.
+- **User Switching:** improved "Switch User" flow to correctly preserve the previous user's session state in background memory.
+
+### Fixed
+
+- **App Store:** Fixed a bug where app installation checks were failing due to incorrect permissions logic.
+- **Stale Data Overwrites**: Resolved a critical bug where slow debounced saves could overwrite valid user data with stale state from a previous session.
+- **Dynamic State Leak**: Fixed a gap where non-system storage keys (dynamic app data) were being ignored during the serialization process.
+- **Tests:** Resolved regressions in `App.test.tsx` and `FileSystemContext.test.tsx` caused by the storage refactor.
+- **Locale Sync:** Fixed missing translation keys in non-English locales (`de`, `es`, `fr`, `pt`, `ro`, `zh`, `ru`, `ja`, `pl`, `ko`, `tr`, `hi`).
+
 ## 0.8.5
 
 ### Added

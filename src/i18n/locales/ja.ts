@@ -214,6 +214,8 @@ export const ja: TranslationDict = {
       "switchUser": "ユーザーを切り替え",
       "user": "ユーザー",
       "logOutAs": "ログアウト: {{username}}",
+      "restart": "再起動...",
+      "restartDescription": "システムを再起動 (セッションを消去)",
       "viewSystemInfo": "システム情報を表示",
       "viewSystemSettings": "システム設定を表示",
       "returnToLoginWhile": "ログイン画面に戻ります（",

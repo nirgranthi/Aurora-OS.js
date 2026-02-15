@@ -4,10 +4,11 @@ import {
   FileSystemProvider,
   useFileSystem,
 } from "../components/FileSystemContext";
+import { memory } from "../utils/memory";
 
 describe("FileSystemContext", () => {
   beforeEach(() => {
-    localStorage.clear();
+    memory.clear();
     vi.clearAllMocks();
   });
 

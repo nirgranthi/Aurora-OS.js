@@ -1,9 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { safeParseLocal } from '../utils/safeStorage';
+import { memory } from '../utils/memory';
 
 describe('safeParseLocal', () => {
     beforeEach(() => {
-        localStorage.clear();
+        memory.clear();
     });
 
     it('returns null for missing key', () => {
@@ -12,7 +13,7 @@ describe('safeParseLocal', () => {
     });
 
     it('parses simple JSON value', () => {
-        localStorage.setItem('simple', JSON.stringify({ a: 1, b: 'x' }));
+        memory.setItem('simple', JSON.stringify({ a: 1, b: 'x' }));
         const res = safeParseLocal<{ a: number; b: string }>('simple');
         expect(res).toEqual({ a: 1, b: 'x' });
     });
@@ -21,7 +22,7 @@ describe('safeParseLocal', () => {
         // We manually construct the JSON to ensure __proto__ is treated as a key in the input
         const maliciousJson = '{"good":1, "__proto__":{"injected":true}, "constructor":{"evil":true}, "prototype":{"nope":true}}';
 
-        localStorage.setItem('mal', maliciousJson);
+        memory.setItem('mal', maliciousJson);
         const res: any = safeParseLocal('mal');
         expect(res).toBeTruthy();
         expect(res.good).toBe(1);
@@ -39,7 +40,7 @@ describe('safeParseLocal', () => {
     it('handles nested malicious keys deeply', () => {
         // Manually construct JSON to ensure __proto__ is a key
         const nestedJson = '{"a": {"b": {"c": 2, "__proto__": {"pwnd": true}}}}';
-        localStorage.setItem('deep', nestedJson);
+        memory.setItem('deep', nestedJson);
         const res: any = safeParseLocal('deep');
         expect(res.a.b.c).toBe(2);
         expect(Object.prototype.hasOwnProperty.call(res.a.b, '__proto__')).toBe(false);
@@ -47,7 +48,7 @@ describe('safeParseLocal', () => {
 
     it('returns null on malformed JSON', () => {
         // invalid JSON
-        localStorage.setItem('bad', '{ invalid: , }');
+        memory.setItem('bad', '{ invalid: , }');
         const res = safeParseLocal('bad');
         expect(res).toBeNull();
     });
@@ -55,7 +56,7 @@ describe('safeParseLocal', () => {
     it('sanitizes arrays and nested objects', () => {
         // Inject __proto__ into array element via string
         const json = '{"arr": [1, {"x": 2, "__proto__": {"a": 1}}], "s": "ok"}';
-        localStorage.setItem('arr', json);
+        memory.setItem('arr', json);
         const res: any = safeParseLocal('arr');
         expect(Array.isArray(res.arr)).toBe(true);
         expect(res.arr[1].x).toBe(2);

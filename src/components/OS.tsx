@@ -10,7 +10,7 @@ import { useFileSystem, type FileSystemContextType } from '@/components/FileSyst
 import { Toaster } from '@/components/ui/sonner';
 import { notify } from '@/services/notifications';
 import { getGridConfig, gridToPixel, pixelToGrid, findNextFreeCell, gridPosToKey, rearrangeGrid, type GridPosition } from '@/utils/gridSystem';
-import { STORAGE_KEYS } from '@/utils/memory';
+import { memory, STORAGE_KEYS } from '@/utils/memory';
 import { safeParseLocal } from '@/utils/safeStorage';
 import { useWindowManager } from '@/hooks/useWindowManager';
 import { useI18n } from '@/i18n/index';
@@ -69,7 +69,7 @@ export default function OS() {
 
     // Save grid positions when they change
     useEffect(() => {
-        localStorage.setItem(STORAGE_KEYS.DESKTOP_ICONS, JSON.stringify(iconGridPositions));
+        memory.setItem(STORAGE_KEYS.DESKTOP_ICONS, JSON.stringify(iconGridPositions));
     }, [iconGridPositions]);
 
     // Derive desktop icons from filesystem + grid positions

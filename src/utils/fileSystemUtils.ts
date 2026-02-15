@@ -127,6 +127,51 @@ export function deepCloneFileSystem(root: FileNode): FileNode {
     return ensureIds(cloned);
 }
 
+/**
+ * Merges a fresh system state into a stored user state.
+ * Strategy: "Smart Merge"
+ * - New Files/Dirs in fresh FS -> Added to stored FS (New Features).
+ * - Existing Files in stored FS -> Preserved (Respect User Modifications).
+ * - Critical Files -> Overwritten (Engine Compatibility).
+ */
+export function migrateFileSystem(storedFS: FileNode, initialFS: FileNode, criticalPaths: string[] = []): FileNode {
+    console.log(`Migrating Filesystem...`);
+
+    function mergeNodes(stored: FileNode, fresh: FileNode, currentPath: string) {
+        if (!fresh.children) return;
+        if (!stored.children) stored.children = [];
+
+        for (const freshChild of fresh.children) {
+            const childPath = `${currentPath === '/' ? '' : currentPath}/${freshChild.name}`;
+            const storedChildIndex = stored.children.findIndex(c => c.name === freshChild.name);
+
+            if (storedChildIndex === -1) {
+                // Case 1: New node found in fresh FS
+                stored.children.push(deepCloneFileNode(freshChild));
+            } else {
+                // Case 2: Node exists in user FS.
+                const storedChild = stored.children[storedChildIndex];
+
+                // If Critical Update strictly required
+                if (criticalPaths.includes(childPath)) {
+                    stored.children[storedChildIndex] = deepCloneFileNode(freshChild);
+                    continue;
+                }
+
+                // If it's a directory, we merge its contents
+                if (storedChild.type === 'directory' && freshChild.type === 'directory') {
+                    mergeNodes(storedChild, freshChild, childPath);
+                }
+
+                // If it's a file, we DO NOT touch it to respect user hacks
+            }
+        }
+    }
+
+    mergeNodes(storedFS, initialFS, '/');
+    return storedFS;
+}
+
 // Check if a node is a descendant of another (to prevent recursive moves)
 export function isDescendant(parent: FileNode, targetId: string): boolean {
     if (!parent.children) return false;

@@ -214,6 +214,8 @@ export const hi: TranslationDict = {
       "switchUser": "उपयोगकर्ता बदलें",
       "user": "उपयोगकर्ता",
       "logOutAs": "लॉग आउट: {{username}}",
+      "restart": "पुनः आरंभ करें...",
+      "restartDescription": "सिस्टम पुनः आरंभ करें (सत्र साफ़ करें)",
       "viewSystemInfo": "सिस्टम की जानकारी देखें",
       "viewSystemSettings": "सिस्टम सेटिंग्स देखें",
       "returnToLoginWhile": "लॉगिन स्क्रीन पर वापस जाएं जबकि",

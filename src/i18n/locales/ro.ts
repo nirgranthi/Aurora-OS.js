@@ -214,6 +214,8 @@ export const ro: TranslationDict = {
       "switchUser": "Schimbă Utilizator",
       "user": "Utilizator",
       "logOutAs": "Deconectare: {{username}}",
+      "restart": "Repornește...",
+      "restartDescription": "Repornește sistemul (Șterge sesiunea)",
       "viewSystemInfo": "Vezi informații sistem",
       "viewSystemSettings": "Vezi setări sistem",
       "returnToLoginWhile": "Înapoi la ecranul de autentificare păstrând",

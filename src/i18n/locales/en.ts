@@ -227,6 +227,8 @@ export const en: TranslationDict = {
       switchUser: 'Switch User',
       user: 'User',
       logOutAs: 'Log Out: {{username}}',
+      restart: 'Restart...',
+      restartDescription: 'Restart the system (Clear Session)',
       viewSystemInfo: 'View system information',
       viewSystemSettings: 'View system settings',
       returnToLoginWhile: 'Return to login screen while',

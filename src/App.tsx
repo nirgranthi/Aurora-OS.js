@@ -12,7 +12,8 @@ const OS = lazy(() => import('@/components/OS'));
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useI18n } from './i18n';
-import { calculateTotalRamUsage } from './utils/resourceMonitor';
+import { calculateTotalRamUsage } from '@/services/resourceMonitor';
+import { emergencySave } from '@/utils/memory';
 
 function KernelLoadingFallback() {
   const { t } = useI18n();
@@ -57,6 +58,7 @@ function AppContent() {
   // Track page refresh/unload state to distinguish from app window closing
   useEffect(() => {
       const handleUnload = () => {
+          emergencySave(); // Force synchronous dump to localStorage
           sessionStorage.setItem('is_refreshing', 'true');
       };
       

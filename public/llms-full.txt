@@ -22,14 +22,13 @@ trigger: always_on
 **Config**: `src/config/systemConfig.ts` defines core limits (e.g., Default RAM), **Graphics** (GPU, Blur, Shadows), and **Brand Identity** (Name, Colors, Standardized AVIF Wallpapers).
 **Networking**: Zero-dependency architecture (native `fetch` only). No `axios`.
 
-
 </tech_stack>
 
 <architecture_mechanics>
 
 1.  **Virtual File System (VFS)**:
     - **Structure**: In-memory recursive JSON tree (`FileNode`).
-    - **Storage**: Serialized to `localStorage` key `STORAGE_KEYS.FILESYSTEM` (`os_filesystem`).
+    - **Storage**: Serialized to `memory` (via `STORAGE_KEYS.FILESYSTEM`). Persisted to IndexedDB (Web) or JSON (Electron).
     - **Sync**: Unidirectional State -> File sync (e.g., `users` state updates `/etc/passwd`).
     - **Access**: MUST use `useFileSystem()` hook. NEVER mutate JSON directly.
 
@@ -164,16 +163,19 @@ trigger: always_on
       - **Detection**: "Bulletproof" multi-check (`window.electron` + UA + process) prevents race conditions.
 
 13. **Storage & Persistence**:
-    - **Core Utility**: `src/utils/safeStorage.ts` -> `safeParseLocal<T>(key)`.
-    - **Security**: **ALWAYS** use `safeParseLocal` instead of `JSON.parse` for reading `localStorage`. Automatically strips `__proto__`, `constructor`, and `prototype` to prevent prototype pollution.
+    - **Core Utility**: `src/utils/memory.ts` -> `memory` API (replaces direct `localStorage`).
+    - **Security**: **ALWAYS** use `safeParseLocal` from `src/utils/safeStorage.ts` for reading raw storage data.
     - **Performance**: Writes to `localStorage` (e.g., Window moves, Notepad typing) MUST be debounced via `useDebounce` hook (default 500ms) to prevent main-thread freezing and I/O thrashing.
     - **Keys**: Managed via `STORAGE_KEYS` in `src/utils/memory.ts`. 3-tier architecture:
       - **BIOS (`sys_` prefix)**: System hardware settings (language, display, sound). Survives ALL resets.
       - **HDD (`os_` prefix)**: OS data (filesystem, users, app data, mail). Wiped on Hard Reset (New Game).
-      - **RAM (`session_` prefix)**: Session state (windows, terminal history). Wiped on Soft Reset (Logout).
-    - **Reset Functions**: `softReset()` wipes RAM only. `hardReset()` wipes HDD + RAM, keeps BIOS. `factoryReset()` wipes everything.
-    - **Helper Functions**: `getAppStateKey(appId, user)` and `getWindowKey(user)` generate correctly-prefixed keys.
-    - **Tests**: Test assertions MUST use `STORAGE_KEYS.*` constants, never hardcoded key strings.
+      - **RAM (`session_` prefix)**: Session state (windows, terminal history). Wiped on Soft Reset (Logout/Restart).
+    - **Reset Functions**: 
+      - `softReset()`: Wipes Session (RAM).
+      - `hardReset()`: Wipes HDD + Session. Keeps BIOS.
+      - `factoryReset()`: Wipes Everything.
+    - **Helper Functions**: `getAppStateKey(appId, user)` and `getWindowKey(user)`.
+    - **Tests**: Test assertions MUST use `memory.getItem` or `STORAGE_KEYS` constants, never direct `localStorage`.
 
 </architecture_mechanics>
 
@@ -198,25 +200,28 @@ trigger: always_on
 
 <codebase_map>
 
-| Path                                   | Component          | Description                                                 |
-| :------------------------------------- | :----------------- | :---------------------------------------------------------- |
-| `src/components/FileSystemContext.tsx` | **VFS Core**       | Context for all FS operations.                              |
-| `src/utils/fileSystemUtils.ts`         | **VFS Utils**      | `FileNode` types, `initialFileSystem`, permission logic.    |
-| `src/components/AppContext.tsx`        | **Session**        | Theme, Wallpapers, Physical User session.                   |
-| `src/components/DisplaySettings.tsx`   | **Display**        | Cross-platform display management UI.                       |
-| `src/config/appRegistry.ts`            | **Registry**       | Installed Apps configuration.                               |
-| `src/services/notifications.tsx`       | **Notifications**  | Central service for rich system toasts.                     |
-| `src/services/sound.ts`                | **Sound Manager**  | Global audio state and Howler integration.                  |
-| `src/utils/id3Parser.ts`               | **ID3 Parser**     | Binary metadata extractor for MP3 files.                    |
-| `src/components/apps/*`                | **Apps**           | Individual App components (Notepad, Terminal, etc).         |
-| `src/hooks/useAppInstaller.ts`         | **Installer**      | Hook for app install/uninstall/restore logic.               |
-| `src/components/apps/AppStore/`        | **App Store**      | App Store components (AppCard, etc).                        |
-| `src/hooks/useWindowManager.ts`        | **Window Manager** | Handles window state and memory usage gates.                |
-| `src/components/NetworkContext.tsx`    | **Network**        | Global network state and simulation logic.                  |
-| `src/hooks/useFullscreen.ts`           | **Display Utils**  | Shared hook for Electron/Browser fullscreen logic.          |
-| `electron/main.ts`                     | **Electron Main**  | Native window management, splash screen, and backend logic. |
-| `electron/splash.html`                 | **Splash Screen**  | Electron-only splash with real progress milestones.         |
-| `src/test/`                            | **Tests**          | Unit tests for utilities and logic.                         |
+| Path                                   | Component         | Description                                              |
+| :------------------------------------- | :---------------- | :------------------------------------------------------- |
+| `src/components/FileSystemContext.tsx` | **VFS Core**      | Context for all FS operations.                           |
+| `src/utils/fileSystemUtils.ts`         | **VFS Utils**     | `FileNode` types, `initialFileSystem`, permission logic. |
+| `src/components/AppContext.tsx`        | **Session**       | Theme, Wallpapers, Physical User session.                |
+| `src/components/DisplaySettings.tsx`   | **Display**       | Cross-platform display management UI.                    |
+| `src/config/appRegistry.ts`            | **Registry**      | Installed Apps configuration.                            |
+| `src/services/notifications.tsx`       | **Notifications** | Central service for rich system toasts.                  |
+| `src/utils/memory.ts`                  | **Memory Core**   | Centralized in-memory cache and persistence logic.       |
+| `src/utils/save/*`                     | **Save System**   | `SaveManager`, `SnapshotEngine`, and Adapters.           |
+| `src/services/resourceMonitor.ts`      | **Resource Mon**  | logic for RAM calculation & Task Manager.                |
+| `src/services/sound.ts` | **Sound Manager** | Global audio state and Howler integration. |
+| `src/utils/id3Parser.ts` | **ID3 Parser** | Binary metadata extractor for MP3 files. |
+| `src/components/apps/*` | **Apps** | Individual App components (Notepad, Terminal, etc). |
+| `src/hooks/useAppInstaller.ts` | **Installer** | Hook for app install/uninstall/restore logic. |
+| `src/components/apps/AppStore/` | **App Store** | App Store components (AppCard, etc). |
+| `src/hooks/useWindowManager.ts` | **Window Manager** | Handles window state and memory usage gates. |
+| `src/components/NetworkContext.tsx` | **Network** | Global network state and simulation logic. |
+| `src/hooks/useFullscreen.ts` | **Display Utils** | Shared hook for Electron/Browser fullscreen logic. |
+| `electron/main.ts` | **Electron Main** | Native window management, splash screen, and backend logic. |
+| `electron/splash.html` | **Splash Screen** | Electron-only splash with real progress milestones. |
+| `src/test/` | **Tests** | Unit tests for utilities and logic. |
 
 </codebase_map>
 

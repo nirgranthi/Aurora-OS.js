@@ -15,7 +15,7 @@ import { cn } from '@/components/ui/utils';
 import { AppTemplate } from '@/components/apps/AppTemplate';
 import { useAppContext } from '@/components/AppContext';
 import { useFileSystem } from '@/components/FileSystemContext';
-import { STORAGE_KEYS } from '@/utils/memory';
+import { memory, STORAGE_KEYS } from '@/utils/memory';
 import { notify } from '@/services/notifications';
 import { useI18n } from '@/i18n/index';
 import { useThemeColors } from '@/hooks/useThemeColors';
@@ -127,7 +127,8 @@ const getMockEvents = (t: (key: string, vars?: Record<string, string | number>) 
     // Let's assume it's a raw string for date? 
     // Wait, STORAGE_KEYS.INSTALL_DATE is likely set via `new Date().toISOString()`.
     // Use raw localStorage for simple strings if determining they are safe (Dates are safe).
-    const installDateStr = localStorage.getItem(STORAGE_KEYS.INSTALL_DATE);
+    // UPDATE: Now using memory
+    const installDateStr = memory.getItem(STORAGE_KEYS.INSTALL_DATE);
     if (installDateStr) {
       startDate = new Date(installDateStr);
     } else {
@@ -403,7 +404,7 @@ export function Calendar({ owner }: CalendarProps) {
 
   // Save Soft State (UI Preferences)
   useEffect(() => {
-    localStorage.setItem(softStateKey, JSON.stringify({
+    memory.setItem(softStateKey, JSON.stringify({
       view,
       currentDate: currentDate.toISOString()
     }));

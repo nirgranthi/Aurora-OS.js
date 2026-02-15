@@ -10,7 +10,7 @@ import {
 import { TerminalCommand } from "@/utils/terminal/types";
 import { getColorShades } from "@/utils/colors";
 import { useI18n } from "@/i18n/index";
-import { STORAGE_KEYS } from "@/utils/memory";
+import { memory, STORAGE_KEYS } from "@/utils/memory";
 
 export interface CommandHistory {
   id: string;
@@ -209,7 +209,7 @@ export function useTerminalLogic(
   // Helper to load history
   const loadHistory = (key: string): CommandHistory[] => {
     try {
-      const saved = localStorage.getItem(key);
+      const saved = memory.getItem(key);
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -218,7 +218,7 @@ export function useTerminalLogic(
 
   const loadInputHistory = (key: string): string[] => {
     try {
-      const saved = localStorage.getItem(key);
+      const saved = memory.getItem(key);
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -274,14 +274,14 @@ export function useTerminalLogic(
         ...h,
         output: h.output.map(serializeOutput),
       }));
-      localStorage.setItem(historyKey, JSON.stringify(safeHistory));
+      memory.setItem(historyKey, JSON.stringify(safeHistory));
     } catch (e) {
       console.error("Failed to save terminal history", e);
     }
   }, [history, historyKey]);
 
   useEffect(() => {
-    localStorage.setItem(inputKey, JSON.stringify(commandHistory));
+    memory.setItem(inputKey, JSON.stringify(commandHistory));
   }, [commandHistory, inputKey]);
 
   // Each Terminal instance has its own working directory

@@ -214,6 +214,8 @@ export const ko: TranslationDict = {
       "switchUser": "사용자 전환",
       "user": "사용자",
       "logOutAs": "로그아웃: {{username}}",
+      "restart": "재시작...",
+      "restartDescription": "시스템 재시작 (세션 지우기)",
       "viewSystemInfo": "시스템 정보 보기",
       "viewSystemSettings": "시스템 설정 보기",
       "returnToLoginWhile": "로그인 화면으로 돌아갑니다 (",

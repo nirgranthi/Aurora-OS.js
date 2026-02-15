@@ -214,6 +214,8 @@ export const de: TranslationDict = {
       "switchUser": "Benutzer wechseln",
       "user": "Benutzer",
       "logOutAs": "Abmelden: {{username}}",
+      "restart": "Neustarten...",
+      "restartDescription": "System neustarten (Sitzung löschen)",
       "viewSystemInfo": "Systeminformationen anzeigen",
       "viewSystemSettings": "Systemeinstellungen anzeigen",
       "returnToLoginWhile": "Zum Anmeldebildschirm zurückkehren während",

@@ -214,6 +214,8 @@ export const ru: TranslationDict = {
       "switchUser": "Сменить пользователя",
       "user": "Пользователь",
       "logOutAs": "Выйти: {{username}}",
+      "restart": "Перезагрузка...",
+      "restartDescription": "Перезагрузить систему (Очистить сеанс)",
       "viewSystemInfo": "Просмотр информации о системе",
       "viewSystemSettings": "Просмотр настроек системы",
       "returnToLoginWhile": "Вернуться на экран входа,",

@@ -1,11 +1,10 @@
-import type React from 'react';
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { STORAGE_KEYS } from '../utils/memory';
+import { memory, STORAGE_KEYS } from '../utils/memory';
 import { safeParseLocal } from '../utils/safeStorage';
 import { feedback } from '../services/soundFeedback';
 import { notify } from '../services/notifications';
 import { getApp } from '../config/appRegistry';
-import { calculateTotalRamUsage } from '../utils/resourceMonitor';
+import { calculateTotalRamUsage } from '@/services/resourceMonitor';
 import { useI18n } from '@/i18n';
 
 export interface WindowState {
@@ -123,7 +122,7 @@ export function useWindowManager(
         }
         persistTimeoutRef.current = window.setTimeout(() => {
             try {
-                localStorage.setItem(key, JSON.stringify(sessions));
+                memory.setItem(key, JSON.stringify(sessions));
             } catch (e) {
                 console.warn('Failed to save windows:', e);
             }
@@ -136,11 +135,17 @@ export function useWindowManager(
                 clearTimeout(persistTimeoutRef.current as any);
                 persistTimeoutRef.current = null;
                 try {
-                    localStorage.setItem(key, JSON.stringify(sessions));
+                    memory.setItem(key, JSON.stringify(sessions));
                 } catch (e) {
                     console.warn('Failed to flush windows on unmount:', e);
                 }
             }
+            // CRITICAL: Even if no timeout pending, we MUST save on unmount if we have state
+            // But if we save on every change, the last change is already saved?
+            // Yes, unless the unmount happened < 300ms after change. 
+            // So checking persistTimeoutRef is correct for "pending changes".
+            // However, "Switch User" might not trigger a change event, just an unmount.
+            // But if no change happened, the previous save is valid.
         };
     }, [windows, activeUser, isRestoring]);
 
