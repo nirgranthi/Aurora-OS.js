@@ -93,8 +93,9 @@ trigger: always_on
 7.  **Game Flow & Pre-OS Experience**:
     - **State Machine**: 6-state flow handled by `GameRoot.tsx` (INTRO → MENU → FIRST_BOOT/BOOT → ONBOARDING → GAMEPLAY).
     - **Main Menu**: Video game-style interface with keyboard nav. Includes **Settings** (Tabbed: Display/Audio/System) and **Credits** modals.
+      - **Web-only extensions**: Collapsible "Community" menu and "Download" buttons are conditionally rendered in the footer when `!isElectron`.
       - **Exit Flow**: Retro terminal-style confirmation modal. Triggers immediate filesystem save (`saveFileSystem`) upon confirmation.
-      - **Floating Window**: `DevStatusWindow.tsx` provides persistent system status and contribution CTAs.
+      - **Floating Window**: `DevStatusWindow.tsx` provides persistent system status and contribution CTAs. Fully internationalized via `useI18n`.
     - **Save Detection**: Checks `localStorage.getItem(STORAGE_KEYS.VERSION)` to determine if save exists.
     - **New Game**: Calls `hardReset()` to wipe all `localStorage`, then `resetFileSystem()` for in-memory sync. **Preserves** BIOS settings (GPU/Blur/Motion) via `resetSystemConfig(overrides)`.
     - **Boot Sequence**: Realistic OS boot animation with dynamic log generation.
@@ -220,7 +221,7 @@ trigger: always_on
 | `src/services/resourceMonitor.ts`      | **Resource Mon**  | logic for RAM calculation & Task Manager.                |
 
 | `src/services/sound.ts` | **Sound Manager** | Global audio state and Howler integration. |
-| `src/utils/id3Parser.ts` | **ID3 Parser** | Binary metadata extractor for MP3 files. |
+| `src/utils/id3Parser.ts" | **ID3 Parser** | Binary metadata extractor for MP3 files. |
 | `src/components/apps/*` | **Apps** | Individual App components (Notepad, Terminal, etc). |
 | `src/hooks/useAppInstaller.ts` | **Installer** | Hook for app install/uninstall/restore logic. |
 | `src/components/apps/AppStore/` | **App Store** | App Store components (AppCard, etc). |

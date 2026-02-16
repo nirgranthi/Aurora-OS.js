@@ -42,7 +42,21 @@ export const ja: TranslationDict = {
           "confirm": "シャットダウン"
         }
       },
-      "credits": {}
+      "credits": {},
+      "external": {
+        "label": "コミュニティ",
+        "discord": "Discordサーバー",
+        "github": "GitHubリポジトリ",
+        "download": "ダウンロード"
+      },
+      "devStatus": {
+        "buildStatus": "ビルドステータス：試験的",
+        "title": "開発者用ビルド",
+        "description": "これは試験的なバージョンであり、現在開発中です。バグ、未完成のシステム、視覚的な不整合が予想されます。",
+        "joinDiscord": "Discordに参加",
+        "contribute": "貢献する",
+        "systemReady": "システム準備完了"
+      }
     },
     "bios": {
       "title": "BIOS設定",

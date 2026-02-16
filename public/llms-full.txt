@@ -77,7 +77,10 @@ trigger: always_on
     - **Display**: Stacking "Heads-Up" toasts (top-right, max 3) + Notification Center (sidebar).
     - **Performance**: High-traffic apps (like Notepad) MUST isolate re-renders by splitting the main editor/content logic into memoized sub-components.
     - **Provider**: Handled via `Sonner` (system) and `AppNotificationsContext` (app-level).
-    - **Global Indicators**: Retro "Hard Drive" LED (Green/Red) in bottom-left. **Green (Load)**: Triggered by ANY `localStorage.getItem`. **Red (Save)**: Triggered by `localStorage.setItem`. Drivers located in `src/utils/memory.ts`.
+    - **Global Indicators**: Retro "Hard Drive" LED (Green/Red) in bottom-left.
+      - **Green (Load)**: Triggered by PHYSICAL disk/IndexedDB read in `SaveManager.ts`.
+      - **Red (Save)**: Triggered by PHYSICAL disk/IndexedDB write in `SaveManager.ts`.
+      - **Optimization**: `memory.setItem` uses "Dirty Checking" to skip redundant saves if values are identical.
 
 6.  **Audio & Metadata System**:
     - **Howler Core**: All system audio (SFX, Music, Ambiance) is managed via `soundManager` (`src/services/sound.ts`).
@@ -90,8 +93,9 @@ trigger: always_on
 7.  **Game Flow & Pre-OS Experience**:
     - **State Machine**: 6-state flow handled by `GameRoot.tsx` (INTRO → MENU → FIRST_BOOT/BOOT → ONBOARDING → GAMEPLAY).
     - **Main Menu**: Video game-style interface with keyboard nav. Includes **Settings** (Tabbed: Display/Audio/System) and **Credits** modals.
+      - **Web-only extensions**: Collapsible "Community" menu and "Download" buttons are conditionally rendered in the footer when `!isElectron`.
       - **Exit Flow**: Retro terminal-style confirmation modal. Triggers immediate filesystem save (`saveFileSystem`) upon confirmation.
-      - **Floating Window**: `DevStatusWindow.tsx` provides persistent system status and contribution CTAs.
+      - **Floating Window**: `DevStatusWindow.tsx` provides persistent system status and contribution CTAs. Fully internationalized via `useI18n`.
     - **Save Detection**: Checks `localStorage.getItem(STORAGE_KEYS.VERSION)` to determine if save exists.
     - **New Game**: Calls `hardReset()` to wipe all `localStorage`, then `resetFileSystem()` for in-memory sync. **Preserves** BIOS settings (GPU/Blur/Motion) via `resetSystemConfig(overrides)`.
     - **Boot Sequence**: Realistic OS boot animation with dynamic log generation.
@@ -165,12 +169,16 @@ trigger: always_on
 13. **Storage & Persistence**:
     - **Core Utility**: `src/utils/memory.ts` -> `memory` API (replaces direct `localStorage`).
     - **Security**: **ALWAYS** use `safeParseLocal` from `src/utils/safeStorage.ts` for reading raw storage data.
-    - **Performance**: Writes to `localStorage` (e.g., Window moves, Notepad typing) MUST be debounced via `useDebounce` hook (default 500ms) to prevent main-thread freezing and I/O thrashing.
+    - **Performance**: Writes to `memory` (e.g., Window moves, Notepad typing) are debounced via `SaveManager` (100ms) to prevent I/O thrashing.
     - **Keys**: Managed via `STORAGE_KEYS` in `src/utils/memory.ts`. 3-tier architecture:
       - **BIOS (`sys_` prefix)**: System hardware settings (language, display, sound). Survives ALL resets.
       - **HDD (`os_` prefix)**: OS data (filesystem, users, app data, mail). Wiped on Hard Reset (New Game).
       - **RAM (`session_` prefix)**: Session state (windows, terminal history). Wiped on Soft Reset (Logout/Restart).
-    - **Reset Functions**: 
+    - **Absolute Persistence**:
+      - **Universal Snapshotting**: `SnapshotEngine.ts` captures ALL keys starting with `os_`, `sys_`, or `session_`, ensuring dynamic app data (Notepad tabs, Finder path) is never lost.
+      - **Emergency Buffer**: Synchronous `emergencySave()` dumps memory to `localStorage` during `beforeunload` to survive abrupt refreshes.
+      - **Safe Reload**: `useAppStorage` and `useSessionStorage` use a "Locked-Pair" pattern to prevent stale data overwrites during rapid context switches.
+    - **Reset Functions**:
       - `softReset()`: Wipes Session (RAM).
       - `hardReset()`: Wipes HDD + Session. Keeps BIOS.
       - `factoryReset()`: Wipes Everything.
@@ -204,21 +212,22 @@ trigger: always_on
 | :------------------------------------- | :---------------- | :------------------------------------------------------- |
 | `src/components/FileSystemContext.tsx` | **VFS Core**      | Context for all FS operations.                           |
 | `src/utils/fileSystemUtils.ts`         | **VFS Utils**     | `FileNode` types, `initialFileSystem`, permission logic. |
-| `src/components/AppContext.tsx`        | **Session**       | Theme, Wallpapers, Physical User session.                |
+| `src/components/AppContext.tsx"        | **Session**       | Theme, Wallpapers, Physical User session.                |
 | `src/components/DisplaySettings.tsx`   | **Display**       | Cross-platform display management UI.                    |
 | `src/config/appRegistry.ts`            | **Registry**      | Installed Apps configuration.                            |
 | `src/services/notifications.tsx`       | **Notifications** | Central service for rich system toasts.                  |
 | `src/utils/memory.ts`                  | **Memory Core**   | Centralized in-memory cache and persistence logic.       |
 | `src/utils/save/*`                     | **Save System**   | `SaveManager`, `SnapshotEngine`, and Adapters.           |
 | `src/services/resourceMonitor.ts`      | **Resource Mon**  | logic for RAM calculation & Task Manager.                |
+
 | `src/services/sound.ts` | **Sound Manager** | Global audio state and Howler integration. |
 | `src/utils/id3Parser.ts` | **ID3 Parser** | Binary metadata extractor for MP3 files. |
 | `src/components/apps/*` | **Apps** | Individual App components (Notepad, Terminal, etc). |
 | `src/hooks/useAppInstaller.ts` | **Installer** | Hook for app install/uninstall/restore logic. |
 | `src/components/apps/AppStore/` | **App Store** | App Store components (AppCard, etc). |
-| `src/hooks/useWindowManager.ts` | **Window Manager** | Handles window state and memory usage gates. |
+| `src/hooks/useWindowManager.ts" | **Window Manager** | Handles window state and memory usage gates. |
 | `src/components/NetworkContext.tsx` | **Network** | Global network state and simulation logic. |
-| `src/hooks/useFullscreen.ts` | **Display Utils** | Shared hook for Electron/Browser fullscreen logic. |
+| `src/hooks/useFullscreen.ts" | **Display Utils** | Shared hook for Electron/Browser fullscreen logic. |
 | `electron/main.ts` | **Electron Main** | Native window management, splash screen, and backend logic. |
 | `electron/splash.html` | **Splash Screen** | Electron-only splash with real progress milestones. |
 | `src/test/` | **Tests** | Unit tests for utilities and logic. |

@@ -42,7 +42,21 @@ export const de: TranslationDict = {
           "confirm": "Herunterfahren"
         }
       },
-      "credits": {}
+      "credits": {},
+      "external": {
+        "label": "Community",
+        "discord": "Discord Server",
+        "github": "GitHub Repo",
+        "download": "Download"
+      },
+      "devStatus": {
+        "buildStatus": "Build-Status: Experimentell",
+        "title": "Entwicklerversion",
+        "description": "Dies ist eine experimentelle Version, die noch in Arbeit ist. Fehler, unvollständige Systeme und visuelle Inkonsistenzen sind zu erwarten.",
+        "joinDiscord": "Discord beitreten",
+        "contribute": "Beitragen",
+        "systemReady": "System bereit"
+      }
     },
     "bios": {
       "title": "BIOS-Einstellungen",

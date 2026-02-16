@@ -42,7 +42,21 @@ export const ko: TranslationDict = {
           "confirm": "종료"
         }
       },
-      "credits": {}
+      "credits": {},
+      "external": {
+        "label": "커뮤니티",
+        "discord": "Discord 서버",
+        "github": "GitHub 저장소",
+        "download": "다운로드"
+      },
+      "devStatus": {
+        "buildStatus": "빌드 상태: 실험적",
+        "title": "개발자 빌드",
+        "description": "이것은 실험적인 버전이며, 아직 개발 중입니다. 버그, 불완전한 시스템 및 시각적 불일치가 예상됩니다.",
+        "joinDiscord": "Discord 참여",
+        "contribute": "기여하기",
+        "systemReady": "시스템 준비됨"
+      }
     },
     "bios": {
       "title": "BIOS 설정",

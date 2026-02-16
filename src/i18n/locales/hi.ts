@@ -42,7 +42,21 @@ export const hi: TranslationDict = {
           "confirm": "शट डाउन"
         }
       },
-      "credits": {}
+      "credits": {},
+      "external": {
+        "label": "समुदाय",
+        "discord": "डिस्कॉर्ड सर्वर",
+        "github": "गिटहब रेपो",
+        "download": "डाउनलोड"
+      },
+      "devStatus": {
+        "buildStatus": "बिल्ड की स्थिति: प्रयोगात्मक",
+        "title": "डेवलपर बिल्ड",
+        "description": "यह एक प्रयोगात्मक संस्करण है, अभी भी काम चल रहा है। बग, अधूरे सिस्टम और दृश्य विसंगतियों की उम्मीद है।",
+        "joinDiscord": "डिस्कॉर्ड में शामिल हों",
+        "contribute": "योगदान दें",
+        "systemReady": "सिस्टम तैयार है"
+      }
     },
     "bios": {
       "title": "BIOS सेटिंग्स",

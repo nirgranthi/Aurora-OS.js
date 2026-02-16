@@ -42,7 +42,21 @@ export const tr: TranslationDict = {
           "confirm": "Kapat"
         }
       },
-      "credits": {}
+      "credits": {},
+      "external": {
+        "label": "Topluluk",
+        "discord": "Discord Sunucusu",
+        "github": "GitHub Deposu",
+        "download": "İndir"
+      },
+      "devStatus": {
+        "buildStatus": "Yapı Durumu: Deneysel",
+        "title": "Geliştirici Sürümü",
+        "description": "Bu deneysel bir sürümdür, hala çalışma aşamasındadır. Hatalar, tamamlanmamış sistemler ve görsel tutarsızlıklar beklenmektedir.",
+        "joinDiscord": "Discord'a Katıl",
+        "contribute": "Katkıda Bulun",
+        "systemReady": "Sistem Hazır"
+      }
     },
     "bios": {
       "title": "BIOS Ayarları",

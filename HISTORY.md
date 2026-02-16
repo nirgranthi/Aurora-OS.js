@@ -9,7 +9,9 @@
 - **Session Persistence:** Added "Crash Proof" session handling. Windows and Terminal history now survive reloads via auto-save.
 - **Compression:** Added GZIP compression for Electron save files to reduce disk usage and obfuscate data.
 - **Restart Action:** Added "Restart" option to System Menu (performs a Soft Reset).
-- **Translations:** Added missing `restart` and `restartDescription` keys for all 12 supported locales.
+- **Web-only Main Menu Extensions**: Added a "Community" collapsible menu and a direct "Download" button to the Main Menu footer for web environments.
+- **Dev Status Window Localization**: Fully internationalized the floating developer information window (`DevStatusWindow.tsx`).
+- **Translations:** Added missing `restart`, `restartDescription`, `external`, and `devStatus` keys for all 13 supported locales.
 
 ### Improved
 
@@ -21,6 +23,8 @@
 - **Project Structure:** Moved build scripts to `.scripts/` and consolidated types into `src/types/index.ts`.
 - **Resource Monitor:** Moved `resourceMonitor.ts` to `src/services/` for better architectural alignment.
 - **User Switching:** improved "Switch User" flow to correctly preserve the previous user's session state in background memory.
+- **Main Menu Layout**: Synchronized footer button alignment and sizing for improved visual consistency across the "Community", "Download", and "Credits" sections.
+- **Localization Parity**: Replaced English placeholders with authentic translations across all 13 supported locales for new UI components.
 
 ### Fixed
 

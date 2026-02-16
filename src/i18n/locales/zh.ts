@@ -42,7 +42,21 @@ export const zh: TranslationDict = {
           "confirm": "关机"
         }
       },
-      "credits": {}
+      "credits": {},
+      "external": {
+        "label": "社区",
+        "discord": "Discord 服务器",
+        "github": "GitHub 仓库",
+        "download": "下载"
+      },
+      "devStatus": {
+        "buildStatus": "编译状态：实验性",
+        "title": "开发者版本",
+        "description": "这是一个实验性版本，仍在开发中。可能会出现错误、不完整的系统和视觉上的不一致。",
+        "joinDiscord": "加入 Discord",
+        "contribute": "贡献",
+        "systemReady": "系统就绪"
+      }
     },
     "bios": {
       "title": "BIOS 设置",

@@ -50,6 +50,20 @@ export const en: TranslationDict = {
         },
       },
       credits: {},
+      external: {
+        label: 'Community',
+        discord: 'Discord Server',
+        github: 'GitHub Repo',
+        download: 'Download',
+      },
+      "devStatus": {
+        "buildStatus": "Build Status: Experimental",
+        "title": "Developer Build",
+        "description": "This is an experimental version, still work in progress. Bugs, incomplete systems, and visual inconsistencies are expected.",
+        "joinDiscord": "Join Discord",
+        "contribute": "Contribute",
+        "systemReady": "System Ready"
+      }
     },
     bios: {
 

@@ -42,7 +42,21 @@ export const fr: TranslationDict = {
           "confirm": "Éteindre"
         }
       },
-      "credits": {}
+      "credits": {},
+      "external": {
+        "label": "Communauté",
+        "discord": "Serveur Discord",
+        "github": "Dépôt GitHub",
+        "download": "Télécharger"
+      },
+      "devStatus": {
+        "buildStatus": "Statut de construction : Expérimental",
+        "title": "Version développeur",
+        "description": "Il s'agit d'une version expérimentale, encore en cours de développement. Des bugs, des systèmes incomplets et des incohérences visuelles sont attendus.",
+        "joinDiscord": "Rejoindre Discord",
+        "contribute": "Contribuer",
+        "systemReady": "Système prêt"
+      }
     },
     "bios": {
       "title": "Réglages BIOS",
