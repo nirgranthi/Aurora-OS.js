@@ -65,6 +65,10 @@ trigger: always_on
       - If `#!app ...` -> Launches Window.
       - If `#command ...` -> Executes internal function.
       - If other text -> Parses as Shell Script (supports `$VAR`, `VAR=val`).
+    - **`exit` Command & `onClose` Wiring**:
+      - `exit` pops the session stack (e.g., `sudo -s` / `su` chains) until the base user, then calls `closeWindow(windowId)`.
+      - `onClose` is wired in `OS.tsx` via a **stable ref pattern**: `closeWindowRef` mirrors `closeWindow`, a `windowId` is **pre-computed** in `getAppContent` for the terminal type (`terminal-${Date.now()}`), and `onClose: () => closeWindowRef.current(preId)` is passed as a prop. `useWindowManager.openWindow` uses the returned `windowId` as the actual window ID to guarantee the IDs match.
+      - This avoids `React.cloneElement` in the render loop, preserving `React.memo(Window)` optimizations.
     - **Persistence**:
       - **Strategy**: "Crash Proof". History survives refresh (`is_refreshing` flag) but clears on explicit Window Close or Logout.
       - **Storage**: `localStorage` with custom serialization (preserving text content from React components to avoid `[Complex Output]`).
