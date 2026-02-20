@@ -36,7 +36,7 @@ export interface WindowSession {
 
 export function useWindowManager(
     activeUser: string | null,
-    getAppContent: (type: string, data?: any, owner?: string) => { content: React.ReactNode; title: string },
+    getAppContent: (type: string, data?: any, owner?: string) => { content: React.ReactNode; title: string; windowId?: string },
     totalMemoryGB: number
 ) {
     const [windows, setWindows] = useState<WindowState[]>([]);
@@ -150,10 +150,10 @@ export function useWindowManager(
     }, [windows, activeUser, isRestoring]);
 
     const openWindow = useCallback(
-        (type: string, data?: { path?: string; timestamp?: number; [key: string]: any }, owner?: string) => {
+        (type: string, data?: { path?: string; timestamp?: number; overrideId?: string;[key: string]: any }, owner?: string) => {
             const MULTI_INSTANCE_APPS = ['finder', 'terminal', 'browser'];
             const windowOwner = owner || activeUser || 'guest';
-            
+
             // --- Memory Check ---
             const app = getApp(type);
             if (app && app.ramUsage) {
@@ -164,21 +164,21 @@ export function useWindowManager(
                 // OR we can trust localStorage + simple heuristic.
                 // Let's rely on localStorage via calculateTotalRamUsage for the *Base* state, 
                 // but we also need to know if *this specific app* is already open for *this specific user* to determine strict cost.
-                
+
                 // We'll read the current usage
                 const currentReport = calculateTotalRamUsage(activeUser || 'guest'); // Using activeUser for context
                 const usedMB = currentReport.totalMB;
-                
+
                 // Determine cost: Check if this app type is already in the current *windows state* 
                 // We unfortunately don't have access to the *pending* state update here easily without 'windows' dependency.
                 // But we can check 'windows' from the outer scope if we add it to deps.
                 // Let's assume we use the state 'windows'.
                 const isAppAlreadyOpen = windows.some(w => w.type === type && w.owner === windowOwner);
                 const weight = windowOwner === activeUser ? 1.0 : 0.5;
-                const cost = isAppAlreadyOpen 
+                const cost = isAppAlreadyOpen
                     ? (app.ramUsage / 2) * weight // Extra Window
                     : app.ramUsage * weight;      // Main Window
-                
+
                 const totalMemoryMB = totalMemoryGB * 1024;
 
                 if (usedMB + cost > totalMemoryMB) {
@@ -211,7 +211,7 @@ export function useWindowManager(
                 }
 
                 feedback.windowOpen();
-                const { content, title } = getAppContent(type, data, windowOwner);
+                const { content, title, windowId } = getAppContent(type, data, windowOwner);
 
                 topZIndexRef.current += 1;
                 const newZIndex = topZIndexRef.current;
@@ -223,8 +223,8 @@ export function useWindowManager(
                 const defaultHeight = 600;
 
                 // Ensure window fits on screen with some padding
-                const width = Math.min(defaultWidth, screenW - 100); 
-                const height = Math.min(defaultHeight, screenH - 150); 
+                const width = Math.min(defaultWidth, screenW - 100);
+                const height = Math.min(defaultHeight, screenH - 150);
 
                 // Calculate diagonal cascade with dynamic wrapping
                 const stepSize = 30;
@@ -232,23 +232,23 @@ export function useWindowManager(
                 const startY = 80;
                 const rightPadding = 80;
                 const bottomPadding = 80;
-                
+
                 // Calculate how many steps fit before hitting screen boundaries
                 const maxStepsX = Math.floor((screenW - width - startX - rightPadding) / stepSize);
                 const maxStepsY = Math.floor((screenH - height - startY - bottomPadding) / stepSize);
                 const calculatedSteps = Math.min(maxStepsX, maxStepsY);
-                
+
                 // Use calculated steps but ensure at least 3 for variety
                 const maxSteps = Math.max(3, calculatedSteps);
-                
+
                 const windowIndex = prevWindows.length % maxSteps;
                 const cascadeOffset = windowIndex * stepSize;
-                
+
                 const x = startX + cascadeOffset;
                 const y = startY + cascadeOffset;
 
                 const newWindow: WindowState = {
-                    id: `${type}-${Date.now()}`,
+                    id: windowId ?? `${type}-${Date.now()}`,
                     type,
                     title,
                     content,

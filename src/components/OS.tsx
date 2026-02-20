@@ -147,9 +147,10 @@ export default function OS() {
     }, [desktopIcons, iconGridPositions]);
 
     const openWindowRef = useRef<(type: string, data?: { path?: string; timestamp?: number }, owner?: string) => void>(() => { });
+    const closeWindowRef = useRef<(id: string) => void>(() => { });
 
     // Helper to generate content
-    const getAppContent = useCallback((type: string, data?: any, owner?: string): { content: React.ReactNode, title: string } => {
+    const getAppContent = useCallback((type: string, data?: any, owner?: string): { content: React.ReactNode, title: string, windowId?: string } => {
         // Special Case: Trash (uses Finder)
         if (type === 'trash') {
             const Finder = APP_REGISTRY.finder.component;
@@ -176,7 +177,7 @@ export default function OS() {
         const props: any = { owner };
 
         // ID="template" for window-instantiated apps that need internal state isolation or unique IDs
-        if (['finder', 'music', 'notepad', 'terminal'].includes(type)) {
+        if (['finder', 'music', 'notepad'].includes(type)) {
             props.id = 'template';
         }
 
@@ -193,10 +194,23 @@ export default function OS() {
             props.onOpenApp = (type: string, data?: any, owner?: string) => openWindowRef.current(type, data, owner);
         }
 
-        // Terminal Special Handler
+        // Terminal Special Handler: pre-compute the window ID so we can wire onClose
+        // before the window exists. closeWindowRef stays stable via useEffect below.
         if (type === 'terminal') {
-            props.onLaunchApp = (id: string, args: any[], owner: string) => 
+            const preId = data?.overrideId ?? `terminal-${Date.now()}`;
+            props.id = 'template';
+            props.onLaunchApp = (id: string, args: any[], owner: string) =>
                 openWindowRef.current(id, { path: args?.[0], timestamp: Date.now() }, owner);
+            props.onClose = () => closeWindowRef.current(preId);
+            return {
+                title,
+                windowId: preId,
+                content: (
+                    <Suspense fallback={<WindowLoading />}>
+                        <Component {...props} />
+                    </Suspense>
+                )
+            };
         }
 
         return {
@@ -207,7 +221,7 @@ export default function OS() {
                 </Suspense>
             )
         };
-    }, []); // openWindowRef is stable
+    }, []); // openWindowRef and closeWindowRef are stable refs
 
     // Use Window Manager Hook
     const {
@@ -223,6 +237,10 @@ export default function OS() {
     useEffect(() => {
         openWindowRef.current = openWindow;
     }, [openWindow]);
+
+    useEffect(() => {
+        closeWindowRef.current = closeWindow;
+    }, [closeWindow]);
 
     /* 
      * Window interaction handlers are now managed by useWindowManager
@@ -365,61 +383,61 @@ export default function OS() {
 
     return (
         <AppNotificationsProvider onOpenApp={openWindow}>
-        <div className="dark h-screen w-screen overflow-hidden bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 relative">
-            <div className="window-drag-boundary absolute top-7 left-0 right-0 bottom-0 pointer-events-none z-0" />
-            <Desktop
-                onDoubleClick={() => { }}
-                icons={desktopIcons}
-                onUpdateIconsPositions={updateIconsPositions}
-                onIconDoubleClick={handleIconDoubleClick}
-                onOpenApp={openWindow}
-            />
+            <div className="dark h-screen w-screen overflow-hidden bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 relative">
+                <div className="window-drag-boundary absolute top-7 left-0 right-0 bottom-0 pointer-events-none z-0" />
+                <Desktop
+                    onDoubleClick={() => { }}
+                    icons={desktopIcons}
+                    onUpdateIconsPositions={updateIconsPositions}
+                    onIconDoubleClick={handleIconDoubleClick}
+                    onOpenApp={openWindow}
+                />
 
-            <MenuBar
-                focusedApp={focusedAppType}
-                onOpenApp={openWindow}
-            />
+                <MenuBar
+                    focusedApp={focusedAppType}
+                    onOpenApp={openWindow}
+                />
 
-            <Dock
-                onOpenApp={openWindow}
-                onRestoreWindow={focusWindow}
-                onFocusWindow={focusWindow}
-                windows={windows}
-            />
+                <Dock
+                    onOpenApp={openWindow}
+                    onRestoreWindow={focusWindow}
+                    onFocusWindow={focusWindow}
+                    windows={windows}
+                />
 
-            <AnimatePresence>
-                {windows.map(window => {
-                    // Memoization Fix: We pass the Window object directly.
-                    // The 'content' property inside 'window' is stable from useWindowManager.
-                    // We DO NOT cloneElement here anymore, avoiding new object creation on every render.
-                    // This allows React.memo(Window) to actually prevent re-renders of unfocused windows.
-                    return (
-                    <motion.div
-                        key={window.id}
-                        initial={reduceMotion ? undefined : { opacity: 0, scale: 0.95 }}
-                        animate={reduceMotion ? undefined : { opacity: 1, scale: 1 }}
-                        exit={reduceMotion ? undefined : { opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute inset-0 pointer-events-none"
-                        style={{ zIndex: window.zIndex }}
-                    >
-                        <Window
-                            window={window} // Pass the stable state object directly
-                            onClose={() => closeWindow(window.id)}
-                            onMinimize={() => minimizeWindow(window.id)}
-                            onMaximize={() => maximizeWindow(window.id)}
-                            onFocus={() => focusWindow(window.id)}
-                            onUpdateState={(updates: any) => updateWindowState(window.id, updates)}
-                            isFocused={window.id === focusedWindowId}
-                            bounds=".window-drag-boundary"
-                        />
-                    </motion.div>
-                );
-                })}
-            </AnimatePresence>
+                <AnimatePresence>
+                    {windows.map(window => {
+                        // Memoization Fix: We pass the Window object directly.
+                        // The 'content' property inside 'window' is stable from useWindowManager.
+                        // We DO NOT cloneElement here anymore, avoiding new object creation on every render.
+                        // This allows React.memo(Window) to actually prevent re-renders of unfocused windows.
+                        return (
+                            <motion.div
+                                key={window.id}
+                                initial={reduceMotion ? undefined : { opacity: 0, scale: 0.95 }}
+                                animate={reduceMotion ? undefined : { opacity: 1, scale: 1 }}
+                                exit={reduceMotion ? undefined : { opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+                                transition={{ duration: 0.2 }}
+                                className="absolute inset-0 pointer-events-none"
+                                style={{ zIndex: window.zIndex }}
+                            >
+                                <Window
+                                    window={window} // Pass the stable state object directly
+                                    onClose={() => closeWindow(window.id)}
+                                    onMinimize={() => minimizeWindow(window.id)}
+                                    onMaximize={() => maximizeWindow(window.id)}
+                                    onFocus={() => focusWindow(window.id)}
+                                    onUpdateState={(updates: any) => updateWindowState(window.id, updates)}
+                                    isFocused={window.id === focusedWindowId}
+                                    bounds=".window-drag-boundary"
+                                />
+                            </motion.div>
+                        );
+                    })}
+                </AnimatePresence>
 
-            <Toaster />
-        </div>
+                <Toaster />
+            </div>
         </AppNotificationsProvider>
     );
 }
