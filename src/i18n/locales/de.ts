@@ -515,6 +515,11 @@ export const de: TranslationDict = {
         "description": "Terminal-Befehlsverlauf anzeigen",
         "usage": "history [-c] [n]"
       }
+    },
+    "errors": {
+      "connect": {
+        "offline": "connect: network is unreachable"
+      }
     }
   },
   "placeholderApp": {

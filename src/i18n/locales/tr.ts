@@ -515,6 +515,11 @@ export const tr: TranslationDict = {
         "description": "Terminal komut geçmişini göster",
         "usage": "history [-c] [n]"
       }
+    },
+    "errors": {
+      "connect": {
+        "offline": "connect: network is unreachable"
+      }
     }
   },
   "placeholderApp": {

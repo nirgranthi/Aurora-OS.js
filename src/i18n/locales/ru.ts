@@ -515,6 +515,11 @@ export const ru: TranslationDict = {
         "description": "Показать историю команд терминала",
         "usage": "history [-c] [n]"
       }
+    },
+    "errors": {
+      "connect": {
+        "offline": "connect: network is unreachable"
+      }
     }
   },
   "placeholderApp": {

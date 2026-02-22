@@ -515,6 +515,11 @@ export const hi: TranslationDict = {
         "description": "टर्मिनल कमांड हिस्ट्री दिखाएँ",
         "usage": "history [-c] [n]"
       }
+    },
+    "errors": {
+      "connect": {
+        "offline": "connect: network is unreachable"
+      }
     }
   },
   "placeholderApp": {

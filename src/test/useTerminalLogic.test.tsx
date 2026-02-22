@@ -1,9 +1,9 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { useTerminalLogic } from '../hooks/useTerminalLogic';
-import { FileSystemProvider, useFileSystem } from '../components/FileSystemContext';
-import { AppProvider } from '../components/AppContext';
-import { STORAGE_KEYS, memory } from '../utils/memory';
+import { useTerminalLogic } from '@/hooks/useTerminalLogic';
+import { FileSystemProvider, useFileSystem } from '@/components/FileSystemContext';
+import { AppProvider } from '@/components/AppContext';
+import { STORAGE_KEYS, memory } from '@/utils/memory';
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -21,6 +21,22 @@ Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 // Mock colors
 vi.mock('../utils/colors', () => ({
     getColorShades: () => ({ bg: '', border: '', text: '' }),
+}));
+
+// Mock WorldContext
+vi.mock('../components/WorldContext', () => ({
+    useWorldContext: () => ({
+        resolveNpcTarget: vi.fn(),
+        getNpcApi: vi.fn(),
+    })
+}));
+
+// Mock NetworkContext
+vi.mock('../components/NetworkContext', () => ({
+    useNetworkContext: () => ({
+        wifiEnabled: true,
+        currentNetwork: 'Aurora_Net',
+    })
 }));
 
 describe('useTerminalLogic', () => {
@@ -64,9 +80,9 @@ describe('useTerminalLogic', () => {
         });
 
         await act(async () => {
-            // Explicitly pass 'user' to ensure proper ownership immediately
-            // Note: owner defaults to currentUser if not provided, but we are logged in as user now.
             result.current.fs.createFile('/home/user', 'note.txt', 'content');
+        });
+        await act(async () => {
             result.current.fs.createFile('/home/user', 'log.txt', 'log');
         });
 

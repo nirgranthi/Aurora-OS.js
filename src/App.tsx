@@ -5,6 +5,7 @@ import { FileSystemProvider, useFileSystem } from '@/components/FileSystemContex
 import { GameRoot } from '@/components/Game/GameRoot';
 import { MusicProvider } from '@/components/MusicContext';
 import { PhotosProvider } from '@/components/PhotosContext';
+import { WorldProvider } from '@/components/WorldContext';
 
 // Lazy load the Heavy OS component
 // This ensures we don't load Desktop/Apps/Assets until we actually start the game
@@ -109,9 +110,11 @@ export default function App() {
       <AppProvider>
         <NetworkProvider>
           <FileSystemProvider>
-            <GameRoot>
-              <AppContent />
-            </GameRoot>
+            <WorldProvider>
+              <GameRoot>
+                <AppContent />
+              </GameRoot>
+            </WorldProvider>
           </FileSystemProvider>
         </NetworkProvider>
       </AppProvider>

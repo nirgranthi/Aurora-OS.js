@@ -2,7 +2,7 @@
 description: Comprehensive preparation before pushing to GitHub
 ---
 
-Follow these steps to ensure the codebase is clean, synchronized, and ready for a remote push.
+Follow these steps to ensure the codebase is clean, synchronized, and ready for a remote push, as a senior software engineer.
 
 ### 1. Synchronization Check
 

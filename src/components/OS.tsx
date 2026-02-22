@@ -5,6 +5,7 @@ import { MenuBar } from '@/components/MenuBar';
 import { Dock } from '@/components/Dock';
 import { Window } from '@/components/Window';
 import { PlaceholderApp } from '@/components/apps/PlaceholderApp';
+import { RemoteFileSystemProvider } from '@/components/RemoteFileSystemProvider';
 import { useAppContext } from '@/components/AppContext';
 import { useFileSystem, type FileSystemContextType } from '@/components/FileSystemContext';
 import { Toaster } from '@/components/ui/sonner';
@@ -15,9 +16,8 @@ import { safeParseLocal } from '@/utils/safeStorage';
 import { useWindowManager } from '@/hooks/useWindowManager';
 import { useI18n } from '@/i18n/index';
 import { AppNotificationsProvider } from '@/components/AppNotificationsContext';
-import { WindowLoading } from '@/components/ui/WindowLoading';
 import { APP_REGISTRY } from '@/config/appRegistry';
-
+import { WindowLoading } from '@/components/ui/WindowLoading';
 // Load icon positions (supports both pixel and grid formats with migration)
 function loadIconPositions(): Record<string, GridPosition> {
     try {
@@ -146,11 +146,11 @@ export default function OS() {
         }
     }, [desktopIcons, iconGridPositions]);
 
-    const openWindowRef = useRef<(type: string, data?: { path?: string; timestamp?: number }, owner?: string) => void>(() => { });
+    const openWindowRef = useRef<(type: string, data?: { path?: string; timestamp?: number }, owner?: string, remoteComputerId?: string) => void>(() => { });
     const closeWindowRef = useRef<(id: string) => void>(() => { });
 
     // Helper to generate content
-    const getAppContent = useCallback((type: string, data?: any, owner?: string): { content: React.ReactNode, title: string, windowId?: string } => {
+    const getAppContent = useCallback((type: string, data?: any, owner?: string, remoteComputerId?: string): { content: React.ReactNode, title: string, windowId?: string } => {
         // Special Case: Trash (uses Finder)
         if (type === 'trash') {
             const Finder = APP_REGISTRY.finder.component;
@@ -158,7 +158,9 @@ export default function OS() {
                 title: 'Trash',
                 content: (
                     <Suspense fallback={<WindowLoading />}>
-                        <Finder id="template" owner={owner} initialPath="~/.Trash" onOpenApp={(type: string, data?: any, owner?: string) => openWindowRef.current(type, data, owner)} />
+                        <RemoteFileSystemProvider ip={remoteComputerId ?? null}>
+                            <Finder id="template" owner={owner} initialPath="~/.Trash" onOpenApp={(type: string, data?: any, owner?: string, remoteId?: string) => openWindowRef.current(type, data, owner, remoteId)} />
+                        </RemoteFileSystemProvider>
                     </Suspense>
                 )
             };
@@ -191,7 +193,8 @@ export default function OS() {
 
         // Open App Handlers
         if (['finder', 'photos', 'music', 'appstore'].includes(type)) {
-            props.onOpenApp = (type: string, data?: any, owner?: string) => openWindowRef.current(type, data, owner);
+            props.onOpenApp = (type: string, data?: any, owner?: string, remoteId?: string) =>
+                openWindowRef.current(type, data, owner, remoteId ?? remoteComputerId);
         }
 
         // Terminal Special Handler: pre-compute the window ID so we can wire onClose
@@ -199,15 +202,17 @@ export default function OS() {
         if (type === 'terminal') {
             const preId = data?.overrideId ?? `terminal-${Date.now()}`;
             props.id = 'template';
-            props.onLaunchApp = (id: string, args: any[], owner: string) =>
-                openWindowRef.current(id, { path: args?.[0], timestamp: Date.now() }, owner);
+            props.onLaunchApp = (id: string, args: any[], owner: string, remoteId?: string) =>
+                openWindowRef.current(id, { path: args?.[0], timestamp: Date.now() }, owner, remoteId);
             props.onClose = () => closeWindowRef.current(preId);
             return {
                 title,
                 windowId: preId,
                 content: (
                     <Suspense fallback={<WindowLoading />}>
-                        <Component {...props} />
+                        <RemoteFileSystemProvider ip={remoteComputerId ?? null}>
+                            <Component {...props} />
+                        </RemoteFileSystemProvider>
                     </Suspense>
                 )
             };
@@ -217,7 +222,9 @@ export default function OS() {
             title,
             content: (
                 <Suspense fallback={<WindowLoading />}>
-                    <Component {...props} />
+                    <RemoteFileSystemProvider ip={remoteComputerId ?? null}>
+                        <Component {...props} />
+                    </RemoteFileSystemProvider>
                 </Suspense>
             )
         };

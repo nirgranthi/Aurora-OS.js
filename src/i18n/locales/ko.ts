@@ -515,6 +515,11 @@ export const ko: TranslationDict = {
         "description": "터미널 명령 기록 표시",
         "usage": "history [-c] [n]"
       }
+    },
+    "errors": {
+      "connect": {
+        "offline": "connect: network is unreachable"
+      }
     }
   },
   "placeholderApp": {

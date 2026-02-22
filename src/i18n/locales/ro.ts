@@ -515,6 +515,11 @@ export const ro: TranslationDict = {
         "description": "Afișează istoricul comenzilor din terminal",
         "usage": "history [-c] [n]"
       }
+    },
+    "errors": {
+      "connect": {
+        "offline": "connect: network is unreachable"
+      }
     }
   },
   "placeholderApp": {

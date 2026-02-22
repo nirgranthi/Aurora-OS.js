@@ -2,7 +2,10 @@
 
 ### Added
 
-- **Tiered Storage Architecture:** Implemented a new 3-tier storage model (`memory.ts`) separating **BIOS** (System Config), **HDD** (Files/Users), and **RAM** (Session State).
+- **NPC computers**: The first NPC computer has been added to the game as `soupik` reachable at `10.0.4.22`. The NPC has a password `654321` and a special file in its /root directory. This is the first implementation of the NPC system and should act exactly as the player's computer, without the Desktop interface. APP's can be installed, launched, and used on NPC computers using the same mechanism as on the player's computer. The NPC's memory is isolated from the player's memory.
+- **Contextual Command Unification**: Terminal and applications now seamlessly switch context between local and remote (NPC) filesystems based on the active connection. Remote session states are persisted correctly.
+- **Command Execution Realism**: "Files-First" philosophy rigorously enforced. Terminal commands (like `cd`, `exit`, `help`, `connect`) now require physical binaries in `/bin`. Deleting a binary removes the command functionality globally, both on player and NPC machines.
+- **Tiered Storage Architecture**: Implemented a new 3-tier storage model (`memory.ts`) separating **BIOS** (System Config), **HDD** (Files/Users), and **RAM** (Session State).
 - **Universal Snapshotting**: Refactored `SnapshotEngine` to dynamically capture all application state (Notepad tabs, Finder navigation) without hardcoded key lists.
 - **Emergency Protection**: Added a synchronous `emergencySave` buffer (localStorage) triggered on `beforeunload` to prevent data loss during refreshes and crashes.
 - **Physical I/O Indicators**: Redesigned the "Hard Drive" indicator to reflect actual disk/IndexedDB activity instead of in-memory access.

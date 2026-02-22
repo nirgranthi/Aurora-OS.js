@@ -4,6 +4,7 @@ import { MainMenu } from '@/components/Game/MainMenu';
 import { BootSequence } from '@/components/Game/BootSequence';
 import { useFileSystem } from '@/components/FileSystemContext';
 import { useAppContext } from '@/components/AppContext';
+import { useWorldContext } from '@/components/WorldContext';
 
 
 import { STORAGE_KEYS, memory, hardReset, saveGame } from '@/utils/memory';
@@ -72,10 +73,20 @@ export function GameRoot({ children }: GameRootProps) {
         setGameState('BOOT');
     };
 
-    const handleOnboardingAbort = () => {
+    const handleOnboardingAbort = async () => {
+        // Wipe the partial/empty state written by handleNewGame → saveGame().
+        // Without this, the FILESYSTEM key exists but onboardingComplete is false,
+        // which is already enough to hide "Continue" (hasSave requires both).
+        // But hardReset here makes the invariant bulletproof: no orphaned data.
+        await hardReset();
+        resetFileSystem(true);
         setGameState('MENU');
     };
 
+    const { spawnNpcs } = useWorldContext();
+
+    // Called by Onboarding after spawnNpcs() + forceSaveGame() have both committed.
+    // NPC state is already persisted — this is a clean transition handler only.
     const handleOnboardingComplete = () => {
         setIsLocked(true);
         setGameState('GAMEPLAY');
@@ -103,7 +114,8 @@ export function GameRoot({ children }: GameRootProps) {
                         );
 
                     case 'BOOT':
-                        return <BootSequence onComplete={() => setGameState('GAMEPLAY')} />;
+                        // Hydrate already-persisted NPCs from storage (idempotent)
+                        return <BootSequence onComplete={() => { spawnNpcs(); setGameState('GAMEPLAY'); }} />;
 
                     case 'FIRST_BOOT':
                         return <BootSequence onComplete={() => setGameState('ONBOARDING')} />;

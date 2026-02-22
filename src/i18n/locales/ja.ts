@@ -515,6 +515,11 @@ export const ja: TranslationDict = {
         "description": "ターミナルのコマンド履歴を表示",
         "usage": "history [-c] [n]"
       }
+    },
+    "errors": {
+      "connect": {
+        "offline": "connect: network is unreachable"
+      }
     }
   },
   "placeholderApp": {

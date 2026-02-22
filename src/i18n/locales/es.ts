@@ -515,6 +515,11 @@ export const es: TranslationDict = {
         "description": "Mostrar historial de comandos del terminal",
         "usage": "history [-c] [n]"
       }
+    },
+    "errors": {
+      "connect": {
+        "offline": "connect: network is unreachable"
+      }
     }
   },
   "placeholderApp": {

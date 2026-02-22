@@ -95,6 +95,7 @@ export const STORAGE_KEYS = {
     MAIL_DB: 'os_mail_db',                  
     MESSAGES_DB: 'os_messages_db',          
     KNOWN_NETWORKS: 'os_networks_db',       
+    NPC_STATE_PREFIX: 'os_npc_',            // NPC computer state (VFS, runtime). Wiped on hardReset().
 
     // TIER 3: RAM / Session State (Prefix: session_)
     WINDOWS_PREFIX: 'session_windows_',     

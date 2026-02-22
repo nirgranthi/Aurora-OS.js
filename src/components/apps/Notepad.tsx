@@ -537,7 +537,18 @@ export function Notepad({ id, owner, initialPath }: NotepadProps) {
           const newId = node.id;
 
           // Read content with user context
-          const content = readFile(path, activeUser) || "";
+          const content = readFile(path, activeUser);
+          
+          if (content === null) {
+              notify.system(
+                  "error",
+                  "Notepad",
+                  t("notepad.toasts.failedToReadFile"),
+                  t("notifications.subtitles.error")
+              );
+              return;
+          }
+
           const extension = name.split(".").pop()?.toLowerCase() || "";
           const context = extensionToLanguage(extension);
 
@@ -570,7 +581,7 @@ export function Notepad({ id, owner, initialPath }: NotepadProps) {
         }
       }
     }
-  }, [windowContext?.data, initialPath, activeUser, readFile, getNodeAtPath, setActiveTabId, setTabs]);
+  }, [windowContext?.data, initialPath, activeUser, readFile, getNodeAtPath, setActiveTabId, setTabs, t]);
 
   // -- Tab Management --
   const handleNewTab = useCallback(() => {

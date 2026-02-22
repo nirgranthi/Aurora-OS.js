@@ -14,20 +14,20 @@ import {
   formatPasswd,
   type Group,
   formatGroup,
-} from "../utils/fileSystemUtils";
+} from "@/utils/fileSystemUtils";
 
-import { validateIntegrity } from "../utils/integrity";
+import { validateIntegrity } from "@/utils/integrity";
 export { validateIntegrity };
 
-export type { FileNode, User, Group } from "../utils/fileSystemUtils";
+export type { FileNode, User, Group } from "@/utils/fileSystemUtils";
 
-import { useFileSystemState } from "../hooks/fileSystem/useFileSystemState";
-import { useAuth } from "../hooks/fileSystem/useAuth";
-import { useFileSystemQueries } from "../hooks/fileSystem/useFileSystemQueries";
-import { useFileSystemMutations } from "../hooks/fileSystem/useFileSystemMutations";
-import { notify } from "../services/notifications";
-import { CORE_APP_IDS } from "../config/appConstants";
-import { STORAGE_KEYS, memory } from "../utils/memory";
+import { useFileSystemState } from "@/hooks/fileSystem/useFileSystemState";
+import { useAuth } from "@/hooks/fileSystem/useAuth";
+import { useFileSystemQueries } from "@/hooks/fileSystem/useFileSystemQueries";
+import { useFileSystemMutations } from "@/hooks/fileSystem/useFileSystemMutations";
+import { notify } from "@/services/notifications";
+import { CORE_APP_IDS } from "@/config/appConstants";
+import { STORAGE_KEYS, memory } from "@/utils/memory";
 
 export interface ClipboardItem {
   id: string; // FileNode ID
@@ -114,13 +114,13 @@ export interface FileSystemContextType {
   copyNodeById: (id: string, destParentPath: string, asUser?: string, sourceUserContext?: string) => boolean;
 }
 
-const FileSystemContext = createContext<FileSystemContextType | undefined>(
+export const FileSystemContext = createContext<FileSystemContextType | undefined>(
   undefined
 );
 
 export function FileSystemProvider({ children }: { children: ReactNode }) {
   // 1. State & Persistence
-  const { fileSystem, setFileSystem, isSafeMode, resetFileSystemState, saveNow } =
+  const { fileSystem, setFileSystem, getFileSystem, isSafeMode, resetFileSystemState, saveNow } =
     useFileSystemState();
 
   // 2. Auth & User Management
@@ -214,7 +214,7 @@ export function FileSystemProvider({ children }: { children: ReactNode }) {
     chown,
     copyNodeById,
   } = useFileSystemMutations({
-    fileSystem,
+    getFileSystem,
     setFileSystem,
     users,
     setUsers,

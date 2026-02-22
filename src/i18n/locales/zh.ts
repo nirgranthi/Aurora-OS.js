@@ -515,6 +515,11 @@ export const zh: TranslationDict = {
         "description": "显示终端命令历史",
         "usage": "history [-c] [n]"
       }
+    },
+    "errors": {
+      "connect": {
+        "offline": "connect: network is unreachable"
+      }
     }
   },
   "placeholderApp": {
