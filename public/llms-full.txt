@@ -202,7 +202,7 @@ trigger: always_on
 - **I18n Sync**: Maintain strict sync across all 13 locales (`en`, `de`, `es`, `fr`, `pt`, `ro`, `zh`, `ru`, `ja`, `pl`, 'ko', 'tr', 'hi'). Run `/update-translations` and `.scripts/sync-i18n.js` after changes.
 - **Accessibility**: All `Dialog` or `AlertDialog` components MUST include a `Title` and `Description`. Use `sr-only` class to hide them if they clash with visual design but are required for A11y.
 - **Standards**: All imports should user the @ alias for the /src folder and ALL FEATURES added should have a matching debug way in Dev Center.
-- **Docs Sync**: On architecture changes, update `.agent/rules/context.md` & `public/llms-full.txt`.
+- **Docs Sync**: On architecture changes, update `.agents/rules/context.md` & `public/llms-full.txt`.
 - **URL Security**: User-provided URLs (images, media) MUST be sanitized via `getSafeImageUrl(url)` to prevent XSS and satisfy CodeQL taint tracking.
 - **Window Management**: `isElectron` detection MUST use the robust multi-check pattern (`window.electron` + userAgent + process.versions) found in `useFullscreen.ts` to prevent race conditions.
 - **Asset Optimization**: Use modern formats (AVIF) for large assets like wallpapers. Ensure 4:2:0 subsampling and aggressive compression (Quality 45-60) for complex images to minimize build size.
@@ -216,7 +216,7 @@ trigger: always_on
 | :------------------------------------- | :---------------- | :------------------------------------------------------- |
 | `src/components/FileSystemContext.tsx` | **VFS Core**      | Context for all FS operations.                           |
 | `src/utils/fileSystemUtils.ts`         | **VFS Utils**     | `FileNode` types, `initialFileSystem`, permission logic. |
-| `src/components/AppContext.tsx"        | **Session**       | Theme, Wallpapers, Physical User session.                |
+| `src/components/AppContext.tsx`        | **Session**       | Theme, Wallpapers, Physical User session.                |
 | `src/components/DisplaySettings.tsx`   | **Display**       | Cross-platform display management UI.                    |
 | `src/config/appRegistry.ts`            | **Registry**      | Installed Apps configuration.                            |
 | `src/services/notifications.tsx`       | **Notifications** | Central service for rich system toasts.                  |
@@ -229,9 +229,9 @@ trigger: always_on
 | `src/components/apps/*` | **Apps** | Individual App components (Notepad, Terminal, etc). |
 | `src/hooks/useAppInstaller.ts` | **Installer** | Hook for app install/uninstall/restore logic. |
 | `src/components/apps/AppStore/` | **App Store** | App Store components (AppCard, etc). |
-| `src/hooks/useWindowManager.ts" | **Window Manager** | Handles window state and memory usage gates. |
+| `src/hooks/useWindowManager.ts` | **Window Manager** | Handles window state and memory usage gates. |
 | `src/components/NetworkContext.tsx` | **Network** | Global network state and simulation logic. |
-| `src/hooks/useFullscreen.ts" | **Display Utils** | Shared hook for Electron/Browser fullscreen logic. |
+| `src/hooks/useFullscreen.ts` | **Display Utils** | Shared hook for Electron/Browser fullscreen logic. |
 | `electron/main.ts` | **Electron Main** | Native window management, splash screen, and backend logic. |
 | `electron/splash.html` | **Splash Screen** | Electron-only splash with real progress milestones. |
 | `src/test/` | **Tests** | Unit tests for utilities and logic. |
