@@ -52,7 +52,7 @@ describe("safeParseLocal", () => {
   });
 
   it("returns null on malformed JSON", () => {
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     // invalid JSON
     memory.setItem("bad", "{ invalid: , }");
     const res = safeParseLocal("bad");
