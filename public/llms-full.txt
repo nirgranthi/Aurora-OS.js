@@ -207,6 +207,7 @@ trigger: always_on
 - **Window Management**: `isElectron` detection MUST use the robust multi-check pattern (`window.electron` + userAgent + process.versions) found in `useFullscreen.ts` to prevent race conditions.
 - **Asset Optimization**: Use modern formats (AVIF) for large assets like wallpapers. Ensure 4:2:0 subsampling and aggressive compression (Quality 45-60) for complex images to minimize build size.
 - **Import Standards**: ALWAYS use the `@` alias for `src` directory imports (e.g., `import { foo } from '@/components/bar'`) to ensure path stability.
+- **Time/Dates**: Calendar uses `react-day-picker` v9. The app relies on a custom `toDisplayDate` offset simulation to visually manipulate faked UTC time. Ensure all navigation props in `react-day-picker` correctly wrap and unwrap native dates with `toDisplayDate()` and `fromDisplayDate()`.
 
 </critical_rules>
 
@@ -225,16 +226,16 @@ trigger: always_on
 | `src/services/resourceMonitor.ts`      | **Resource Mon**  | logic for RAM calculation & Task Manager.                |
 
 | `src/services/sound.ts` | **Sound Manager** | Global audio state and Howler integration. |
-| `src/utils/id3Parser.ts` | **ID3 Parser** | Binary metadata extractor for MP3 files. |
-| `src/components/apps/*` | **Apps** | Individual App components (Notepad, Terminal, etc). |
-| `src/hooks/useAppInstaller.ts` | **Installer** | Hook for app install/uninstall/restore logic. |
-| `src/components/apps/AppStore/` | **App Store** | App Store components (AppCard, etc). |
-| `src/hooks/useWindowManager.ts` | **Window Manager** | Handles window state and memory usage gates. |
-| `src/components/NetworkContext.tsx` | **Network** | Global network state and simulation logic. |
-| `src/hooks/useFullscreen.ts` | **Display Utils** | Shared hook for Electron/Browser fullscreen logic. |
-| `electron/main.ts` | **Electron Main** | Native window management, splash screen, and backend logic. |
-| `electron/splash.html` | **Splash Screen** | Electron-only splash with real progress milestones. |
-| `src/test/` | **Tests** | Unit tests for utilities and logic. |
+| `src/utils/id3Parser.ts" | **ID3 Parser** | Binary metadata extractor for MP3 files. |
+| `src/components/apps/\*`| **Apps** | Individual App components (Notepad, Terminal, etc). |
+|`src/hooks/useAppInstaller.ts`| **Installer** | Hook for app install/uninstall/restore logic. |
+|`src/components/apps/AppStore/`| **App Store** | App Store components (AppCard, etc). |
+|`src/hooks/useWindowManager.ts`| **Window Manager** | Handles window state and memory usage gates. |
+|`src/components/NetworkContext.tsx`| **Network** | Global network state and simulation logic. |
+|`src/hooks/useFullscreen.ts`| **Display Utils** | Shared hook for Electron/Browser fullscreen logic. |
+|`electron/main.ts`| **Electron Main** | Native window management, splash screen, and backend logic. |
+|`electron/splash.html`| **Splash Screen** | Electron-only splash with real progress milestones. |
+|`src/test/` | **Tests** | Unit tests for utilities and logic. |
 
 </codebase_map>
 

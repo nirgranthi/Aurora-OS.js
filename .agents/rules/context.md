@@ -207,6 +207,7 @@ trigger: always_on
 - **Window Management**: `isElectron` detection MUST use the robust multi-check pattern (`window.electron` + userAgent + process.versions) found in `useFullscreen.ts` to prevent race conditions.
 - **Asset Optimization**: Use modern formats (AVIF) for large assets like wallpapers. Ensure 4:2:0 subsampling and aggressive compression (Quality 45-60) for complex images to minimize build size.
 - **Import Standards**: ALWAYS use the `@` alias for `src` directory imports (e.g., `import { foo } from '@/components/bar'`) to ensure path stability.
+- **Time/Dates**: Calendar uses `react-day-picker` v9. The app relies on a custom `toDisplayDate` offset simulation to visually manipulate faked UTC time. Ensure all navigation props in `react-day-picker` correctly wrap and unwrap native dates with `toDisplayDate()` and `fromDisplayDate()`.
 
 </critical_rules>
 
