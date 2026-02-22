@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { memory, STORAGE_KEYS, partialReset, softReset, hardReset, factoryReset, initMemory, forceSaveGame, loadGame } from '../utils/memory';
 import { saveManager } from '@/utils/save/SaveManager';
 import { restoreSnapshot } from '@/utils/save/SnapshotEngine';
@@ -125,8 +125,10 @@ describe('Storage Architecture Verification', () => {
     });
 
     it('should protect against invalid snapshots', () => {
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
         const invalidSnapshot = null;
         const result = restoreSnapshot(invalidSnapshot as any, {});
         expect(result).toEqual({});
+        consoleSpy.mockRestore();
     });
 });
