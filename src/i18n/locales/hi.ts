@@ -332,7 +332,8 @@ export const hi: TranslationDict = {
     "restoreSuccess": "{{app}} सफलतापूर्वक पुनर्स्थापित किया गया",
     "restoreError": "{{app}} पुनर्स्थापित करने में विफल",
     "restorePermissionDenied": "ऐप्स पुनर्स्थापित करने के लिए व्यवस्थापक विशेषाधिकार आवश्यक हैं",
-    "installingWarning": "कृपया प्रतीक्षा करें जब तक एप्लिकेशन इंस्टॉल हो रहा है।"
+    "installingWarning": "कृपया प्रतीक्षा करें जब तक एप्लिकेशन इंस्टॉल हो रहा है।",
+    "installing": "Installing"
   },
   "browser": {
     "menu": {

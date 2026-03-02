@@ -332,7 +332,8 @@ export const ja: TranslationDict = {
     "restoreSuccess": "{{app}} を正常に復元しました",
     "restoreError": "{{app}} の復元に失敗しました",
     "restorePermissionDenied": "アプリの復元には管理者権限が必要です",
-    "installingWarning": "アプリケーションをインストールしています。しばらくお待ちください。"
+    "installingWarning": "アプリケーションをインストールしています。しばらくお待ちください。",
+    "installing": "Installing"
   },
   "browser": {
     "menu": {

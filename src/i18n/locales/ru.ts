@@ -332,7 +332,8 @@ export const ru: TranslationDict = {
     "restoreSuccess": "{{app}} успешно восстановлено",
     "restoreError": "Не удалось восстановить {{app}}",
     "restorePermissionDenied": "Требуются права администратора для восстановления приложений",
-    "installingWarning": "Пожалуйста, подождите, пока приложение устанавливается."
+    "installingWarning": "Пожалуйста, подождите, пока приложение устанавливается.",
+    "installing": "Installing"
   },
   "browser": {
     "menu": {

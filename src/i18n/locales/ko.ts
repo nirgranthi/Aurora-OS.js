@@ -332,7 +332,8 @@ export const ko: TranslationDict = {
     "restoreSuccess": "{{app}} 복원 성공",
     "restoreError": "{{app}} 복원 실패",
     "restorePermissionDenied": "앱을 복원하려면 관리자 권한이 필요합니다",
-    "installingWarning": "애플리케이션을 설치하는 동안 기다려 주십시오."
+    "installingWarning": "애플리케이션을 설치하는 동안 기다려 주십시오.",
+    "installing": "Installing"
   },
   "browser": {
     "menu": {

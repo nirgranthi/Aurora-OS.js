@@ -332,7 +332,8 @@ export const pl: TranslationDict = {
     "restoreSuccess": "Pomyślnie przywrócono {{app}}",
     "restoreError": "Nie udało się przywrócić {{app}}",
     "restorePermissionDenied": "Wymagane uprawnienia administratora do przywracania aplikacji",
-    "installingWarning": "Proszę czekać, trwa instalacja aplikacji."
+    "installingWarning": "Proszę czekać, trwa instalacja aplikacji.",
+    "installing": "Installing"
   },
   "browser": {
     "menu": {

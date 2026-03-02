@@ -332,7 +332,8 @@ export const zh: TranslationDict = {
     "restoreSuccess": "{{app}} restored successfully",
     "restoreError": "Failed to restore {{app}}",
     "restorePermissionDenied": "Admin privileges required to restore apps",
-    "installingWarning": "正在安装应用程序，请稍候。"
+    "installingWarning": "正在安装应用程序，请稍候。",
+    "installing": "Installing"
   },
   "browser": {
     "menu": {

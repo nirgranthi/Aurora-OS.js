@@ -332,7 +332,8 @@ export const tr: TranslationDict = {
     "restoreSuccess": "{{app}} başarıyla geri yüklendi",
     "restoreError": "{{app}} geri yüklenemedi",
     "restorePermissionDenied": "Uygulamaları geri yüklemek için yönetici izinleri gereklidir",
-    "installingWarning": "Uygulama yüklenirken lütfen bekleyin."
+    "installingWarning": "Uygulama yüklenirken lütfen bekleyin.",
+    "installing": "Installing"
   },
   "browser": {
     "menu": {

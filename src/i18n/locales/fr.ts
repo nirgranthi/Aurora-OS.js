@@ -332,7 +332,8 @@ export const fr: TranslationDict = {
     "restoreSuccess": "{{app}} restored successfully",
     "restoreError": "Failed to restore {{app}}",
     "restorePermissionDenied": "Admin privileges required to restore apps",
-    "installingWarning": "Veuillez patienter pendant l'installation de l'application."
+    "installingWarning": "Veuillez patienter pendant l'installation de l'application.",
+    "installing": "Installing"
   },
   "browser": {
     "menu": {
