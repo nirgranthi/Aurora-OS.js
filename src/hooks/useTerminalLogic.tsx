@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, ReactNode, useMemo } from "react";
+import React, { useState, useRef, useEffect, useCallback, ReactNode, useMemo } from "react";
 import { validateIntegrity } from "@/utils/integrity";
 import { useFileSystem } from "@/components/FileSystemContext";
 import { useAppContext } from "@/components/AppContext";
@@ -208,8 +208,8 @@ export function useTerminalLogic(
 
   const activeTerminalUser = useMemo(() => {
     if (connectedTo) {
-      return remoteSessionStack.length > 0 
-        ? remoteSessionStack[remoteSessionStack.length - 1] 
+      return remoteSessionStack.length > 0
+        ? remoteSessionStack[remoteSessionStack.length - 1]
         : 'guest'; // Fallback for remote
     }
     return sessionStack.length > 0
@@ -244,12 +244,12 @@ export function useTerminalLogic(
     });
 
     const localFs = createScopedFileSystem(activeTerminalUser);
-    
+
     if (connectedTo) {
       const npcApi = worldContext.getNpcApi(connectedTo);
       if (npcApi) return npcApi.as(activeTerminalUser);
     }
-    
+
     return localFs;
   }, [connectedTo, activeTerminalUser, worldContext, users, groups, homePath, resetFileSystem, login, logout, contextResolvePath, listDirectory, getNodeAtPath, createFile, createDirectory, moveToTrash, readFile, moveNode, writeFile, chmod, chown, verifyPassword]);
 
@@ -278,11 +278,33 @@ export function useTerminalLogic(
   const historyKey = `${STORAGE_KEYS.TERM_HISTORY_PREFIX}${activeTerminalUser}`;
   const inputKey = `${STORAGE_KEYS.TERM_INPUT_PREFIX}${activeTerminalUser}`;
 
+  // Recursive Deserialization
+  const deserializeOutput = (o: any): any => {
+    if (o === null || o === undefined) return o;
+    if (typeof o === 'string' || typeof o === 'number') return o;
+    if (Array.isArray(o)) return o.map(deserializeOutput);
+
+    if (o && typeof o === 'object' && o.__vnode) {
+      const { type, props } = o;
+      const cleanProps = { ...props };
+      if (cleanProps.children) {
+        cleanProps.children = deserializeOutput(cleanProps.children);
+      }
+      return React.createElement(type, cleanProps);
+    }
+    return o; // Fallback
+  };
+
   // Helper to load history
   const loadHistory = (key: string): CommandHistory[] => {
     try {
       const saved = memory.getItem(key);
-      return saved ? JSON.parse(saved) : [];
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      return parsed.map((h: any) => ({
+        ...h,
+        output: h.output.map(deserializeOutput)
+      }));
     } catch {
       return [];
     }
@@ -321,22 +343,32 @@ export function useTerminalLogic(
   // Persistence Effects
   useEffect(() => {
     try {
-      const serializeOutput = (o: any): string => {
-        if (o === null || o === undefined) return '';
-        if (typeof o === 'string') return o;
-        if (typeof o === 'number') return String(o);
-        if (Array.isArray(o)) return o.map(serializeOutput).join('\n');
+      const serializeOutput = (o: any): any => {
+        if (o === null || o === undefined) return o;
+        if (typeof o === 'string' || typeof o === 'number') return o;
+        if (Array.isArray(o)) return o.map(serializeOutput);
 
-        // React Element / Object handling
-        if (typeof o === 'object') {
-          const children = o.props?.children;
-          if (children) {
-            if (Array.isArray(children)) {
-              return children.map(serializeOutput).join('');
-            }
-            return serializeOutput(children);
+        // Check if it's a React element
+        if (o.$$typeof === Symbol.for('react.element') || (o && typeof o === 'object' && o.type && o.props)) {
+          const { type, props } = o;
+
+          // Handle fragment or complex types by simplifying to a div if needed, 
+          // or just store the string if it's a function component (though ideally we just use primitives in terminal output)
+          if (typeof type === 'function' || typeof type === 'symbol') {
+            // We can't easily serialize custom components, fallback to strings
+            return serializeOutput(props?.children || '[Complex Component]');
           }
-          if (o.textContent) return o.textContent;
+
+          const serializedProps = { ...props };
+          if (props.children) {
+            serializedProps.children = serializeOutput(props.children);
+          }
+
+          return {
+            __vnode: true,
+            type,
+            props: serializedProps
+          };
         }
 
         return "[Complex Output]";
@@ -849,7 +881,7 @@ export function useTerminalLogic(
         if (redirectOp && redirectPath) {
           const fullOutputPath = activeFs.resolvePath(redirectPath);
           const outputString = result.output.map(o => typeof o === 'string' ? o : '[React Component]').join('\n');
-          
+
           if (redirectOp === '>') {
             activeFs.writeFile(fullOutputPath, outputString);
           } else if (redirectOp === '>>') {
